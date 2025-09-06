@@ -12,7 +12,8 @@ export default function HomePage() {
       <HeroSection />
       <div className="container mx-auto px-4 py-8 space-y-12">
         <NextSessionCard />
-        {/* <SeasonsSummary /> */}
+        {/* <SeasonsSu
+        mmary /> */}
         <PlayerSpotlight />
         <HomepageWatchSection />
         <NewsFeed />
