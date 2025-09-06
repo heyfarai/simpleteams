@@ -1,46 +1,75 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Award, Play, Mail, Instagram, Twitter, ExternalLink, Trophy, Target, BarChart3, Video } from "lucide-react"
-import { samplePlayers, getTeamById } from "@/lib/sample-data"
-import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Award,
+  Play,
+  Mail,
+  Instagram,
+  Twitter,
+  ExternalLink,
+  Trophy,
+  Target,
+  BarChart3,
+  Video,
+} from "lucide-react";
+import { samplePlayers, getTeamById } from "@/lib/sample-data";
+import { useState } from "react";
 
 interface PlayerProfileProps {
-  playerId: string
+  playerId: string;
 }
 
 export function PlayerProfile({ playerId }: PlayerProfileProps) {
-  const player = samplePlayers.find((p) => p.id === playerId)
-  const [selectedYear, setSelectedYear] = useState<string>("2024")
+  const player = samplePlayers.find((p) => p.id === playerId);
+  const [selectedYear, setSelectedYear] = useState<string>("2024");
 
   if (!player) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Player Not Found</h1>
-          <p className="text-muted-foreground">The requested player profile could not be found.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Player Not Found
+          </h1>
+          <p className="text-muted-foreground">
+            The requested player profile could not be found.
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
-  const team = getTeamById(player.teamId)
-  const [firstName, ...lastNameParts] = player.name.split(" ")
-  const lastName = lastNameParts.join(" ")
+  const team = getTeamById(player.teamId);
+  const [firstName, ...lastNameParts] = player.name.split(" ");
+  const lastName = lastNameParts.join(" ");
 
   const availableYears = player.yearlyStats
     ? [...new Set(player.yearlyStats.map((stat) => stat.year.toString()))]
-    : ["2024"]
-  const filteredStats = player.yearlyStats?.filter((stat) => stat.year.toString() === selectedYear) || []
+    : ["2024"];
+  const filteredStats =
+    player.yearlyStats?.filter(
+      (stat) => stat.year.toString() === selectedYear
+    ) || [];
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="mb-18 mt-48 text-center">
+        <h1 className="pageTitle mt-16 lg:mt-24 text-6xl font-bold text-foreground mb-2 text-center">
+          {`${player.name}`}
+        </h1>
+      </div>
       {/* Player Header */}
-      <div className="mb-8">
+      <div className="mb-8 mt-12">
         <div className="grid lg:grid-cols-3 gap-8 mb-6">
           {/* Player Image & Basic Info */}
           <div className="lg:col-span-1">
@@ -60,24 +89,36 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
 
                 <div className="p-6 space-y-4">
                   <div className="text-center">
-                    <h1 className="text-3xl font-bold text-foreground mb-1">{firstName}</h1>
-                    <h2 className="text-3xl font-bold text-primary mb-2">{lastName}</h2>
-                    <p className="text-lg font-semibold text-foreground">{team?.name}</p>
+                    <h1 className="text-3xl font-bold text-foreground mb-1">
+                      {firstName}
+                    </h1>
+                    <h2 className="text-3xl font-bold text-primary mb-2">
+                      {lastName}
+                    </h2>
+                    <p className="text-lg font-semibold text-foreground">
+                      {team?.name}
+                    </p>
                     <p className="text-muted-foreground">{player.position}</p>
                   </div>
 
                   {/* Quick Stats */}
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <div className="text-xl font-bold text-primary">{player.stats.points}</div>
+                      <div className="text-xl font-bold text-primary">
+                        {player.stats.points}
+                      </div>
                       <div className="text-xs text-muted-foreground">PPG</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-primary">{player.stats.rebounds}</div>
+                      <div className="text-xl font-bold text-primary">
+                        {player.stats.rebounds}
+                      </div>
                       <div className="text-xs text-muted-foreground">RPG</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-primary">{player.stats.assists}</div>
+                      <div className="text-xl font-bold text-primary">
+                        {player.stats.assists}
+                      </div>
                       <div className="text-xs text-muted-foreground">APG</div>
                     </div>
                   </div>
@@ -121,7 +162,9 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Division:</span>
-                      <span className="font-medium">{player.division || team?.division}</span>
+                      <span className="font-medium">
+                        {player.division || team?.division}
+                      </span>
                     </div>
                     {player.hometown && (
                       <div className="flex justify-between">
@@ -136,8 +179,12 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Games Played:</span>
-                      <span className="font-medium">{player.stats.gamesPlayed}</span>
+                      <span className="text-muted-foreground">
+                        Games Played:
+                      </span>
+                      <span className="font-medium">
+                        {player.stats.gamesPlayed}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -166,7 +213,11 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                 <CardContent>
                   <div className="flex flex-wrap gap-3">
                     {player.awards.map((award, index) => (
-                      <Badge key={index} variant="secondary" className="text-sm py-2 px-4">
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="text-sm py-2 px-4"
+                      >
                         <Trophy className="h-4 w-4 mr-2" />
                         {award}
                       </Badge>
@@ -190,14 +241,22 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                 Season Statistics
               </CardTitle>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Filter by Year:</span>
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <span className="text-sm text-muted-foreground">
+                  Filter by Year:
+                </span>
+                <Select
+                  value={selectedYear}
+                  onValueChange={setSelectedYear}
+                >
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {availableYears.map((year) => (
-                      <SelectItem key={year} value={year}>
+                      <SelectItem
+                        key={year}
+                        value={year}
+                      >
                         {year}
                       </SelectItem>
                     ))}
@@ -211,30 +270,69 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="border-b border-muted">
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Season</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">GP</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">PPG</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">RPG</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">APG</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">SPG</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">BPG</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">MPG</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">FG%</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">
+                          Season
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          GP
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          PPG
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          RPG
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          APG
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          SPG
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          BPG
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          MPG
+                        </th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">
+                          FG%
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredStats.map((stat, index) => (
-                        <tr key={index} className="border-b border-muted/50 hover:bg-muted/30">
-                          <td className="py-3 px-2 font-medium">{stat.season}</td>
-                          <td className="py-3 px-2 text-center">{stat.gamesPlayed}</td>
-                          <td className="py-3 px-2 text-center font-semibold text-primary">{stat.points}</td>
-                          <td className="py-3 px-2 text-center font-semibold text-primary">{stat.rebounds}</td>
-                          <td className="py-3 px-2 text-center font-semibold text-primary">{stat.assists}</td>
-                          <td className="py-3 px-2 text-center">{stat.steals || "—"}</td>
-                          <td className="py-3 px-2 text-center">{stat.blocks || "—"}</td>
-                          <td className="py-3 px-2 text-center">{stat.minutes || "—"}</td>
+                        <tr
+                          key={index}
+                          className="border-b border-muted/50 hover:bg-muted/30"
+                        >
+                          <td className="py-3 px-2 font-medium">
+                            {stat.season}
+                          </td>
                           <td className="py-3 px-2 text-center">
-                            {stat.fieldGoalPercentage ? `${stat.fieldGoalPercentage}%` : "—"}
+                            {stat.gamesPlayed}
+                          </td>
+                          <td className="py-3 px-2 text-center font-semibold text-primary">
+                            {stat.points}
+                          </td>
+                          <td className="py-3 px-2 text-center font-semibold text-primary">
+                            {stat.rebounds}
+                          </td>
+                          <td className="py-3 px-2 text-center font-semibold text-primary">
+                            {stat.assists}
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            {stat.steals || "—"}
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            {stat.blocks || "—"}
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            {stat.minutes || "—"}
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            {stat.fieldGoalPercentage
+                              ? `${stat.fieldGoalPercentage}%`
+                              : "—"}
                           </td>
                         </tr>
                       ))}
@@ -242,7 +340,9 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">No statistics available for {selectedYear}</div>
+                <div className="text-center py-8 text-muted-foreground">
+                  No statistics available for {selectedYear}
+                </div>
               )}
 
               {/* Session Highs */}
@@ -250,30 +350,48 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                 <>
                   <Separator className="my-6" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-4">Session/Tournament Highs</h4>
+                    <h4 className="font-semibold text-foreground mb-4">
+                      Session/Tournament Highs
+                    </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {player.sessionHighs.points && (
                         <div className="text-center p-3 bg-primary/10 rounded-lg">
-                          <div className="text-lg font-bold text-primary">{player.sessionHighs.points}</div>
-                          <div className="text-xs text-muted-foreground">Points</div>
+                          <div className="text-lg font-bold text-primary">
+                            {player.sessionHighs.points}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Points
+                          </div>
                         </div>
                       )}
                       {player.sessionHighs.rebounds && (
                         <div className="text-center p-3 bg-primary/10 rounded-lg">
-                          <div className="text-lg font-bold text-primary">{player.sessionHighs.rebounds}</div>
-                          <div className="text-xs text-muted-foreground">Rebounds</div>
+                          <div className="text-lg font-bold text-primary">
+                            {player.sessionHighs.rebounds}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Rebounds
+                          </div>
                         </div>
                       )}
                       {player.sessionHighs.assists && (
                         <div className="text-center p-3 bg-primary/10 rounded-lg">
-                          <div className="text-lg font-bold text-primary">{player.sessionHighs.assists}</div>
-                          <div className="text-xs text-muted-foreground">Assists</div>
+                          <div className="text-lg font-bold text-primary">
+                            {player.sessionHighs.assists}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Assists
+                          </div>
                         </div>
                       )}
                       {player.sessionHighs.steals && (
                         <div className="text-center p-3 bg-primary/10 rounded-lg">
-                          <div className="text-lg font-bold text-primary">{player.sessionHighs.steals}</div>
-                          <div className="text-xs text-muted-foreground">Steals</div>
+                          <div className="text-lg font-bold text-primary">
+                            {player.sessionHighs.steals}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Steals
+                          </div>
                         </div>
                       )}
                     </div>
@@ -295,11 +413,15 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
                   {player.highlightVideos.map((video, index) => (
-                    <div key={index} className="group cursor-pointer">
+                    <div
+                      key={index}
+                      className="group cursor-pointer"
+                    >
                       <div className="relative overflow-hidden rounded-lg bg-muted/30 aspect-video mb-2">
                         <img
                           src={
-                            video.thumbnail || "/placeholder.svg?height=200&width=300&query=basketball highlight video"
+                            video.thumbnail ||
+                            "/placeholder.svg?height=200&width=300&query=basketball highlight video"
                           }
                           alt={video.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -334,7 +456,9 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-foreground leading-relaxed italic">{player.scoutingNotes}</p>
+                <p className="text-foreground leading-relaxed italic">
+                  {player.scoutingNotes}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -349,7 +473,11 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               {player.contactEmail && (
-                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  asChild
+                >
                   <a href={`mailto:${player.contactEmail}`}>
                     <Mail className="h-4 w-4 mr-2" />
                     Contact
@@ -358,9 +486,16 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
               )}
 
               {player.social?.instagram && (
-                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  asChild
+                >
                   <a
-                    href={`https://instagram.com/${player.social.instagram.replace("@", "")}`}
+                    href={`https://instagram.com/${player.social.instagram.replace(
+                      "@",
+                      ""
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -371,9 +506,16 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
               )}
 
               {player.social?.twitter && (
-                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  asChild
+                >
                   <a
-                    href={`https://twitter.com/${player.social.twitter.replace("@", "")}`}
+                    href={`https://twitter.com/${player.social.twitter.replace(
+                      "@",
+                      ""
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -384,8 +526,16 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
               )}
 
               {player.social?.hudl && (
-                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
-                  <a href={player.social.hudl} target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  asChild
+                >
+                  <a
+                    href={player.social.hudl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Hudl Profile
                   </a>
@@ -407,8 +557,12 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div>
-                  <div className="font-medium text-foreground">{team?.name}</div>
-                  <div className="text-sm text-muted-foreground">{team?.division}</div>
+                  <div className="font-medium text-foreground">
+                    {team?.name}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {team?.division}
+                  </div>
                 </div>
               </div>
 
@@ -425,7 +579,9 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
                 </div>
               </div>
 
-              <Button className="w-full bg-primary hover:bg-primary/90 mt-4">View Team Profile</Button>
+              <Button className="w-full bg-primary hover:bg-primary/90 mt-4">
+                View Team Profile
+              </Button>
             </CardContent>
           </Card>
 
@@ -438,7 +594,10 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
               <p className="text-sm text-muted-foreground mb-3">
                 Share this player profile for recruiting and scouting purposes.
               </p>
-              <Button variant="outline" className="w-full bg-transparent">
+              <Button
+                variant="outline"
+                className="w-full bg-transparent"
+              >
                 Copy Profile Link
               </Button>
             </CardContent>
@@ -446,5 +605,5 @@ export function PlayerProfile({ playerId }: PlayerProfileProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

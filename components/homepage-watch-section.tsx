@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Play } from "lucide-react"
-import Link from "next/link"
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Play } from "lucide-react";
+import Link from "next/link";
 
 export function HomepageWatchSection() {
   const popularHighlights = [
     {
       id: 1,
       title: "Championship Finals Highlights",
-      thumbnail: "/basketball-championship-finals-game-thumbnail.jpg",
+      thumbnail: null,
       duration: "8:45",
       date: "2025-01-15",
-      teams: "Thunder Bolts vs Fire Hawks",
+      teams: "ONL-X Senior vs Kingmo Elite",
       views: 5200,
       type: "highlight",
     },
     {
       id: 2,
       title: "Season's Best Dunks",
-      thumbnail: "/basketball-top-dunks-highlight-reel-thumbnail.jpg",
+      thumbnail: null,
       duration: "6:30",
       date: "2025-01-20",
       teams: "All Teams",
@@ -30,7 +30,7 @@ export function HomepageWatchSection() {
     {
       id: 9,
       title: "Top 10 Plays This Week",
-      thumbnail: "/basketball-clutch-game-winners-highlight-thumbnail.jpg",
+      thumbnail: null,
       duration: "6:20",
       date: "2025-01-21",
       teams: "All Teams",
@@ -40,21 +40,24 @@ export function HomepageWatchSection() {
     {
       id: 4,
       title: "Marcus Thompson Career High",
-      thumbnail: "/basketball-player-portrait-action-shot.png",
+      thumbnail: null,
       duration: "4:20",
       date: "2025-01-18",
-      teams: "Thunder Bolts",
+      teams: "ONL-X Senior",
       views: 3200,
       type: "highlight",
     },
-  ]
+  ];
 
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-foreground">Watch</h2>
         <Link href="/watch">
-          <Button variant="outline" className="hover:bg-primary hover:text-primary-foreground bg-transparent">
+          <Button
+            variant="outline"
+            className="hover:bg-primary hover:text-primary-foreground bg-transparent"
+          >
             View All Videos
           </Button>
         </Link>
@@ -62,24 +65,27 @@ export function HomepageWatchSection() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {popularHighlights.map((video) => (
-          <VideoCard key={video.id} video={video} />
+          <VideoCard
+            key={video.id}
+            video={video}
+          />
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 interface VideoCardProps {
   video: {
-    id: number
-    title: string
-    thumbnail: string
-    duration: string
-    date: string
-    teams: string
-    views: number
-    type: string
-  }
+    id: number;
+    title: string;
+    thumbnail: string | null;
+    duration: string;
+    date: string;
+    teams: string;
+    views: number;
+    type: string;
+  };
 }
 
 function VideoCard({ video }: VideoCardProps) {
@@ -89,7 +95,7 @@ function VideoCard({ video }: VideoCardProps) {
         <div className="relative overflow-hidden">
           <div className="aspect-[9/16] relative">
             <img
-              src={video.thumbnail || "/placeholder.svg"}
+              src={video.thumbnail || "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='600'><defs><pattern id='static' patternUnits='userSpaceOnUse' width='10' height='10'><circle cx='5' cy='5' r='1' fill='white' opacity='0.5'/></pattern></defs><rect width='100%' height='100%' fill='black'/><rect width='100%' height='100%' fill='url(%23static)'/></svg>"}
               alt={video.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -97,7 +103,10 @@ function VideoCard({ video }: VideoCardProps) {
 
           {/* Play Button Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+            >
               <Play className="h-4 w-4" />
             </Button>
           </div>
@@ -112,12 +121,14 @@ function VideoCard({ video }: VideoCardProps) {
           <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2">
             {video.title}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-1">{video.teams}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1">
+            {video.teams}
+          </p>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{video.views.toLocaleString()} views</span>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

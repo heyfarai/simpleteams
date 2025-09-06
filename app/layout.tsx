@@ -1,17 +1,12 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
-import { Analytics } from "@vercel/analytics/next"
-import { Navigation } from "@/components/navigation"
-import { Suspense } from "react"
-import "./globals.css"
+"use client";
 
-export const metadata: Metadata = {
-  title: "National Capital Hoops Circuit",
-  description: "Where champions are made and legends are born",
-  generator: "v0.app",
-}
+import type React from "react";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+import { Analytics } from "@vercel/analytics/next";
+import { Navigation } from "@/components/navigation";
+import { Suspense } from "react";
+import "./globals.css";
 
 export default function RootLayout({
   children,

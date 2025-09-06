@@ -1,34 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Play, Menu, X } from "lucide-react"
-import { sampleData } from "@/lib/sample-data"
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Play, Menu, X } from "lucide-react";
+import { sampleData } from "@/lib/sample-data";
 
 export function MediaWatchSection() {
-  const [selectedYear, setSelectedYear] = useState("all")
-  const [selectedDivision, setSelectedDivision] = useState("all")
-  const [selectedTeam, setSelectedTeam] = useState("all")
-  const [selectedType, setSelectedType] = useState("all")
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedDivision, setSelectedDivision] = useState("all");
+  const [selectedTeam, setSelectedTeam] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const popularVideos = [
     {
       id: 1,
       title: "Championship Finals Highlights",
-      thumbnail: "/basketball-championship-finals-game-thumbnail.jpg",
+      thumbnail: null,
       duration: "8:45",
       date: "2025-01-15",
-      teams: "Thunder Bolts vs Fire Hawks",
+      teams: "ONL-X Senior vs Kingmo Elite",
       views: 5200,
       type: "highlight",
     },
     {
       id: 2,
       title: "Season's Best Dunks",
-      thumbnail: "/basketball-top-dunks-highlight-reel-thumbnail.jpg",
+      thumbnail: null,
       duration: "6:30",
       date: "2025-01-20",
       teams: "All Teams",
@@ -38,40 +44,40 @@ export function MediaWatchSection() {
     {
       id: 3,
       title: "Playoff Semifinals Full Game",
-      thumbnail: "/womens-basketball-semifinals-game-thumbnail.jpg",
+      thumbnail: null,
       duration: "1:58:45",
       date: "2025-01-12",
-      teams: "Lightning Strikes vs Phoenix Rising",
+      teams: "Helisis vs Phoenix Rising",
       views: 3900,
       type: "full_game",
     },
     {
       id: 4,
       title: "Marcus Thompson Career High",
-      thumbnail: "/basketball-player-portrait-action-shot.png",
+      thumbnail: null,
       duration: "4:20",
       date: "2025-01-18",
-      teams: "Thunder Bolts",
+      teams: "ONL-X Senior",
       views: 3200,
       type: "highlight",
     },
-  ]
+  ];
 
   const recentVideos = [
     {
       id: 5,
       title: "Last Night's Game Recap",
-      thumbnail: "/thunder-bolts-championship-game-recap-thumbnail.jpg",
+      thumbnail: null,
       duration: "5:20",
       date: "2025-01-22",
-      teams: "Storm Riders vs Young Guns",
+      teams: "Brockville Blazers vs Young Guns",
       views: 1200,
       type: "recap",
     },
     {
       id: 6,
       title: "Weekly Division Roundup",
-      thumbnail: "/basketball-season-hype-montage-thumbnail.jpg",
+      thumbnail: null,
       duration: "12:15",
       date: "2025-01-21",
       teams: "All Teams",
@@ -81,7 +87,7 @@ export function MediaWatchSection() {
     {
       id: 7,
       title: "Player Interview: Maya Anderson",
-      thumbnail: "/maya-anderson-rookie-sensation-recap-thumbnail.jpg",
+      thumbnail: null,
       duration: "7:30",
       date: "2025-01-20",
       teams: "Phoenix Rising",
@@ -91,20 +97,20 @@ export function MediaWatchSection() {
     {
       id: 8,
       title: "Practice Session Behind Scenes",
-      thumbnail: "/basketball-best-assists-teamwork-thumbnail.jpg",
+      thumbnail: null,
       duration: "9:45",
       date: "2025-01-19",
-      teams: "Fire Hawks",
+      teams: "Kingmo Elite",
       views: 650,
       type: "recap",
     },
-  ]
+  ];
 
   const highlightVideos = [
     {
       id: 9,
       title: "Top 10 Plays This Week",
-      thumbnail: "/basketball-clutch-game-winners-highlight-thumbnail.jpg",
+      thumbnail: null,
       duration: "6:20",
       date: "2025-01-21",
       teams: "All Teams",
@@ -114,7 +120,7 @@ export function MediaWatchSection() {
     {
       id: 10,
       title: "Clutch Shots Compilation",
-      thumbnail: "/youth-basketball-championship-highlights-thumbnail.jpg",
+      thumbnail: null,
       duration: "4:15",
       date: "2025-01-20",
       teams: "All Teams",
@@ -124,7 +130,7 @@ export function MediaWatchSection() {
     {
       id: 11,
       title: "Best Defensive Plays",
-      thumbnail: "/basketball-best-assists-teamwork-thumbnail.jpg",
+      thumbnail: null,
       duration: "5:45",
       date: "2025-01-18",
       teams: "All Teams",
@@ -134,31 +140,44 @@ export function MediaWatchSection() {
     {
       id: 12,
       title: "Rookie Highlights Reel",
-      thumbnail: "/basketball-season-hype-montage-thumbnail.jpg",
+      thumbnail: null,
       duration: "8:30",
       date: "2025-01-16",
       teams: "All Teams",
       views: 1600,
       type: "highlight",
     },
-  ]
+  ];
 
   const filterVideos = (videos: any[]) => {
     return videos.filter((video) => {
-      const matchesYear = selectedYear === "all" || video.date.includes(selectedYear)
-      const matchesDivision = selectedDivision === "all" || true // Would need division data
-      const matchesTeam = selectedTeam === "all" || video.teams.includes(selectedTeam) || video.teams === "All Teams"
-      const matchesType = selectedType === "all" || video.type === selectedType
-      return matchesYear && matchesDivision && matchesTeam && matchesType
-    })
-  }
+      const matchesYear =
+        selectedYear === "all" || video.date.includes(selectedYear);
+      const matchesDivision = selectedDivision === "all" || true; // Would need division data
+      const matchesTeam =
+        selectedTeam === "all" ||
+        video.teams.includes(selectedTeam) ||
+        video.teams === "All Teams";
+      const matchesType = selectedType === "all" || video.type === selectedType;
+      return matchesYear && matchesDivision && matchesTeam && matchesType;
+    });
+  };
 
   return (
     <div className="flex gap-6">
       {/* Mobile Filter Toggle */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Button variant="outline" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)} className="bg-background">
-          {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="bg-background"
+        >
+          {sidebarOpen ? (
+            <X className="h-4 w-4" />
+          ) : (
+            <Menu className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
@@ -176,7 +195,10 @@ export function MediaWatchSection() {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium mb-2 block">YEAR</label>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <Select
+                value={selectedYear}
+                onValueChange={setSelectedYear}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -190,14 +212,20 @@ export function MediaWatchSection() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">DIVISION</label>
-              <Select value={selectedDivision} onValueChange={setSelectedDivision}>
+              <Select
+                value={selectedDivision}
+                onValueChange={setSelectedDivision}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Divisions</SelectItem>
                   {sampleData.divisions.map((division) => (
-                    <SelectItem key={division.id} value={division.name}>
+                    <SelectItem
+                      key={division.id}
+                      value={division.name}
+                    >
                       {division.name}
                     </SelectItem>
                   ))}
@@ -207,14 +235,20 @@ export function MediaWatchSection() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">TEAM</label>
-              <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+              <Select
+                value={selectedTeam}
+                onValueChange={setSelectedTeam}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Teams</SelectItem>
                   {sampleData.teams.map((team) => (
-                    <SelectItem key={team.id} value={team.name}>
+                    <SelectItem
+                      key={team.id}
+                      value={team.name}
+                    >
                       {team.name}
                     </SelectItem>
                   ))}
@@ -224,7 +258,10 @@ export function MediaWatchSection() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">TYPE</label>
-              <Select value={selectedType} onValueChange={setSelectedType}>
+              <Select
+                value={selectedType}
+                onValueChange={setSelectedType}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -243,47 +280,66 @@ export function MediaWatchSection() {
 
       {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       <div className="flex-1 space-y-8 lg:ml-0 ml-0">
         {/* Popular Section */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">POPULAR</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-xl font-bold mb-6">Popular</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {filterVideos(popularVideos).map((video) => (
-              <VideoCard key={video.id} video={video} />
+              <VideoCard
+                key={video.id}
+                video={video}
+              />
             ))}
           </div>
         </div>
 
         {/* Recent Section */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">RECENT</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-xl font-bold mb-6">Recent</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {filterVideos(recentVideos).map((video) => (
-              <VideoCard key={video.id} video={video} />
+              <VideoCard
+                key={video.id}
+                video={video}
+              />
             ))}
           </div>
         </div>
 
         {/* Highlights Section */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">HIGHLIGHTS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-xl font-bold mb-6">Highlights</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {filterVideos(highlightVideos).map((video) => (
-              <VideoCard key={video.id} video={video} />
+              <VideoCard
+                key={video.id}
+                video={video}
+              />
             ))}
           </div>
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold mb-6">TEAMS</h2>
-          <div className="flex flex-wrap gap-4">
+          <h2 className="text-xl font-bold mb-6">Teams</h2>
+          <div className="flex flex-wrap gap-5">
             {sampleData.teams.slice(0, 5).map((team) => (
-              <div key={team.id} className="flex flex-col items-center space-y-2 cursor-pointer group">
+              <div
+                key={team.id}
+                className="flex flex-col items-center space-y-2 cursor-pointer group"
+              >
                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-muted group-hover:border-primary transition-colors">
-                  <img src={team.logo || "/placeholder.svg"} alt={team.name} className="w-full h-full object-cover" />
+                  <img
+                    src={team.logo || "/placeholder.svg"}
+                    alt={team.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <span className="text-xs text-center font-medium group-hover:text-primary transition-colors">
                   {team.name}
@@ -294,20 +350,20 @@ export function MediaWatchSection() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 interface VideoCardProps {
   video: {
-    id: number
-    title: string
-    thumbnail: string
-    duration: string
-    date: string
-    teams: string
-    views: number
-    type: string
-  }
+    id: number;
+    title: string;
+    thumbnail: string | null;
+    duration: string;
+    date: string;
+    teams: string;
+    views: number;
+    type: string;
+  };
 }
 
 function VideoCard({ video }: VideoCardProps) {
@@ -323,7 +379,10 @@ function VideoCard({ video }: VideoCardProps) {
 
           {/* Play Button Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+            >
               <Play className="h-4 w-4" />
             </Button>
           </div>
@@ -338,7 +397,9 @@ function VideoCard({ video }: VideoCardProps) {
           <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2">
             {video.title}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-1">{video.teams}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1">
+            {video.teams}
+          </p>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{video.views.toLocaleString()} views</span>
             <span>{new Date(video.date).toLocaleDateString()}</span>
@@ -346,5 +407,5 @@ function VideoCard({ video }: VideoCardProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

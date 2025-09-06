@@ -17,10 +17,10 @@ INSERT INTO venues (name, address, city, state, zip_code, latitude, longitude) V
 
 -- Insert sample teams
 INSERT INTO teams (name, division_id, coach_name, coach_email, region, wins, losses) VALUES
-('Thunder Bolts', 1, 'Mike Johnson', 'mike@thunderbolts.com', 'North Springfield', 8, 2),
-('Fire Hawks', 1, 'Sarah Davis', 'sarah@firehawks.com', 'Downtown', 7, 3),
-('Storm Riders', 1, 'Chris Wilson', 'chris@stormriders.com', 'West Side', 6, 4),
-('Lightning Strikes', 2, 'Jennifer Brown', 'jen@lightning.com', 'East Springfield', 9, 1),
+('ONL-X Senior', 1, 'Mike Johnson', 'mike@thunderbolts.com', 'North Springfield', 8, 2),
+('Kingmo Elite', 1, 'Sarah Davis', 'sarah@firehawks.com', 'Downtown', 7, 3),
+('Brockville Blazers', 1, 'Chris Wilson', 'chris@stormriders.com', 'West Side', 6, 4),
+('Helisis', 2, 'Jennifer Brown', 'jen@lightning.com', 'East Springfield', 9, 1),
 ('Phoenix Rising', 2, 'Amanda Taylor', 'amanda@phoenix.com', 'South Side', 5, 5),
 ('Young Guns', 3, 'David Miller', 'david@youngguns.com', 'Central', 4, 2);
 
@@ -72,4 +72,4 @@ INSERT INTO sponsors (name, logo_url, website_url, description, tier, display_or
 INSERT INTO news_posts (title, content, excerpt, author_name, is_published, published_at) VALUES
 ('Season Playoffs Begin Next Week', 'The highly anticipated playoff season kicks off next Monday with four exciting matchups. Teams have been preparing intensively for what promises to be the most competitive postseason in league history...', 'Playoff season starts Monday with four exciting matchups', 'League Staff', true, '2025-01-20 10:00:00'),
 ('New Partnership with Springfield Sports Store', 'We are excited to announce our new partnership with Springfield Sports Store, who will be providing equipment discounts to all league participants...', 'New partnership brings equipment discounts to players', 'Admin Team', true, '2025-01-18 14:30:00'),
-('Player Spotlight: Marcus Thompson', 'This week we highlight Marcus Thompson, the dynamic point guard leading the Thunder Bolts to an impressive 8-2 record this season...', 'Featured player leading Thunder Bolts to success', 'Sarah Johnson', true, '2025-01-15 09:00:00');
+('Player Spotlight: Marcus Thompson', 'This week we highlight Marcus Thompson, the dynamic point guard leading the ONL-X Senior to an impressive 8-2 record this season...', 'Featured player leading ONL-X Senior to success', 'Sarah Johnson', true, '2025-01-15 09:00:00');

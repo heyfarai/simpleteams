@@ -1,216 +1,222 @@
 // Sample data structure matching the new hierarchy: Games -> Sessions -> Seasons
 
 export interface Season {
-  id: string
-  name: string
-  type: "Regular" | "Summer"
-  year: number
-  startDate: string
-  endDate: string
-  isActive: boolean
-  status: "draft" | "active" | "completed" | "archived"
-  locations: string[] // Location IDs assigned to this season
-  officials: string[] // Official IDs assigned to this season
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  type: "Regular" | "Summer";
+  year: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  status: "draft" | "active" | "completed" | "archived";
+  locations: string[]; // Location IDs assigned to this season
+  officials: string[]; // Official IDs assigned to this season
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Conference {
-  id: string
-  name: string
-  seasonId: string
-  divisions: Division[]
-  description?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  seasonId: string;
+  divisions: Division[];
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Division {
-  id: string
-  name: string
-  conferenceId: string
-  seasonId: string
-  teams: string[] // Team IDs assigned to this division
-  maxTeams?: number
-  minTeams?: number
-  description?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  conferenceId: string;
+  seasonId: string;
+  teams: string[]; // Team IDs assigned to this division
+  maxTeams?: number;
+  minTeams?: number;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Session {
-  id: string
-  name: string
-  type: "regular" | "playoff" | "Regular" | "Playoff" | "Tournament"
-  seasonId: string
-  startDate: string
-  endDate: string
-  description?: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  type: "regular" | "playoff" | "Regular" | "Playoff" | "Tournament";
+  seasonId: string;
+  startDate: string;
+  endDate: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Game {
-  id: string
-  sessionId: string
-  seasonId: string
-  divisionId?: string
-  homeTeamId: string
-  awayTeamId: string
-  locationId?: string
-  date: string
-  time: string
-  venue: string
-  venueAddress: string
-  assignedOfficials?: string[] // Official IDs
-  status: "scheduled" | "live" | "completed" | "cancelled" | "postponed" | "in-progress"
-  homeScore?: number
-  awayScore?: number
-  division: string
-  notes?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  sessionId: string;
+  seasonId: string;
+  divisionId?: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  locationId?: string;
+  date: string;
+  time: string;
+  venue: string;
+  venueAddress: string;
+  assignedOfficials?: string[]; // Official IDs
+  status:
+    | "scheduled"
+    | "live"
+    | "completed"
+    | "cancelled"
+    | "postponed"
+    | "in-progress";
+  homeScore?: number;
+  awayScore?: number;
+  division: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Team {
-  id: string
-  name: string
-  logo: string
-  city?: string
-  region?: string
-  primaryColors?: string[]
-  division: string
-  divisionId?: string
-  seasonId?: string
-  coach: string
-  coaches?: Coach[]
-  contacts?: Contact[]
-  record: string
-  description: string
-  founded: string
-  homeVenue: string
-  awards: string[]
-  sessionIds: string[]
-  status?: "active" | "inactive" | "pending"
-  registrationDate?: string
-  isPersistent?: boolean // Teams persist across seasons
+  id: string;
+  name: string;
+  logo: string;
+  city?: string;
+  region?: string;
+  primaryColors?: string[];
+  division: string;
+  divisionId?: string;
+  seasonId?: string;
+  coach: string;
+  coaches?: Coach[];
+  contacts?: Contact[];
+  record: string;
+  description: string;
+  founded: string;
+  homeVenue: string;
+  awards: string[];
+  sessionIds: string[];
+  status?: "active" | "inactive" | "pending";
+  registrationDate?: string;
+  isPersistent?: boolean; // Teams persist across seasons
   stats?: {
-    wins: number
-    losses: number
-    pointsFor: number
-    pointsAgainst: number
-    gamesPlayed: number
-    streak: Array<"W" | "L" | "T"> // Last 5 games
-  }
-  createdAt?: string
-  updatedAt?: string
+    wins: number;
+    losses: number;
+    pointsFor: number;
+    pointsAgainst: number;
+    gamesPlayed: number;
+    streak: Array<"W" | "L" | "T">; // Last 5 games
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Coach {
-  id: string
-  name: string
-  role: "head" | "assistant" | "volunteer"
-  email?: string
-  phone?: string
-  certifications?: string[]
+  id: string;
+  name: string;
+  role: "head" | "assistant" | "volunteer";
+  email?: string;
+  phone?: string;
+  certifications?: string[];
 }
 
 export interface Contact {
-  id: string
-  name: string
-  role: "manager" | "parent" | "coordinator"
-  email: string
-  phone?: string
-  isPrimary: boolean
+  id: string;
+  name: string;
+  role: "manager" | "parent" | "coordinator";
+  email: string;
+  phone?: string;
+  isPrimary: boolean;
 }
 
 export interface Location {
-  id: string
-  name: string
-  address: string
-  city: string
-  state: string
-  zipCode: string
-  capacity?: number
-  facilities: string[]
-  contactName?: string
-  contactPhone?: string
-  contactEmail?: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  capacity?: number;
+  facilities: string[];
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Official {
-  id: string
-  name: string
-  email: string
-  phone?: string
-  certificationLevel: "certified" | "trainee" | "veteran"
-  specialties: string[]
-  availability: string[]
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  certificationLevel: "certified" | "trainee" | "veteran";
+  specialties: string[];
+  availability: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Player {
-  id: string
-  name: string
-  teamId: string
-  position: string
-  jerseyNumber: number
-  gradYear: string
-  height: string
-  weight: string
-  photo: string
+  id: string;
+  name: string;
+  teamId: string;
+  position: string;
+  jerseyNumber: number;
+  gradYear: string;
+  height: string;
+  weight: string;
+  photo: string;
   stats: {
-    points: number
-    rebounds: number
-    assists: number
-    steals: number
-    blocks: number
-    minutes: number
-    fieldGoalPercentage: number
-    gamesPlayed: number
-  }
+    points: number;
+    rebounds: number;
+    assists: number;
+    steals: number;
+    blocks: number;
+    minutes: number;
+    fieldGoalPercentage: number;
+    gamesPlayed: number;
+  };
   yearlyStats: {
-    year: number
-    season: string
-    points: number
-    rebounds: number
-    assists: number
-    steals: number
-    blocks: number
-    minutes: number
-    fieldGoalPercentage: number
-    gamesPlayed: number
-  }[]
+    year: number;
+    season: string;
+    points: number;
+    rebounds: number;
+    assists: number;
+    steals: number;
+    blocks: number;
+    minutes: number;
+    fieldGoalPercentage: number;
+    gamesPlayed: number;
+  }[];
   sessionHighs: {
-    points: number
-    rebounds: number
-    assists: number
-    steals: number
-  }
-  awards: string[]
-  bio: string
-  highlightVideo?: string
+    points: number;
+    rebounds: number;
+    assists: number;
+    steals: number;
+  };
+  awards: string[];
+  bio: string;
+  highlightVideo?: string;
   highlightVideos: {
-    title: string
-    url: string
-    thumbnail: string
-  }[]
-  region: string
-  hometown: string
-  division: string
-  scoutingNotes?: string
+    title: string;
+    url: string;
+    thumbnail: string;
+  }[];
+  region: string;
+  hometown: string;
+  division: string;
+  scoutingNotes?: string;
   social: {
-    instagram?: string
-    twitter?: string
-    hudl?: string
-  }
-  contactEmail?: string
+    instagram?: string;
+    twitter?: string;
+    hudl?: string;
+  };
+  contactEmail?: string;
 }
 
 // Sample Seasons
@@ -243,7 +249,7 @@ export const sampleSeasons: Season[] = [
     createdAt: "2024-04-15T00:00:00Z",
     updatedAt: "2024-08-31T00:00:00Z",
   },
-]
+];
 
 // Sample Conferences
 export const sampleConferences: Conference[] = [
@@ -254,7 +260,7 @@ export const sampleConferences: Conference[] = [
     divisions: [
       {
         id: "div-1",
-        name: "Elite Division",
+        name: "Diamond Division",
         conferenceId: "conf-1",
         seasonId: "1",
         teams: ["1", "2", "5", "7"],
@@ -303,7 +309,7 @@ export const sampleConferences: Conference[] = [
     createdAt: "2024-09-01T00:00:00Z",
     updatedAt: "2024-09-15T00:00:00Z",
   },
-]
+];
 
 // Sample Sessions
 export const sampleSessions: Session[] = [
@@ -355,18 +361,18 @@ export const sampleSessions: Session[] = [
     createdAt: "2024-06-01T00:00:00Z",
     updatedAt: "2024-07-31T00:00:00Z",
   },
-]
+];
 
 // Sample Teams
 export const sampleTeams: Team[] = [
   {
     id: "1",
-    name: "Thunder Bolts",
-    logo: "/thunder-bolts-basketball-team-logo.png",
+    name: "ONL-X Senior",
+    logo: null,
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#1e40af", "#fbbf24"],
-    division: "Elite Division",
+    division: "Diamond Division",
     divisionId: "div-1",
     seasonId: "1",
     coach: "Coach Martinez",
@@ -391,10 +397,15 @@ export const sampleTeams: Team[] = [
       },
     ],
     record: "12-3",
-    description: "Dominant force in the Elite Division with explosive offensive plays.",
+    description:
+      "Dominant force in the Diamond Division with explosive offensive plays.",
     founded: "2019",
     homeVenue: "Thunder Arena",
-    awards: ["Division Champion 2024", "Tournament Winner 2023", "Best Record 2024"],
+    awards: [
+      "Division Champion 2024",
+      "Tournament Winner 2023",
+      "Best Record 2024",
+    ],
     sessionIds: ["1", "2", "3"],
     status: "active",
     registrationDate: "2024-08-15T00:00:00Z",
@@ -412,12 +423,12 @@ export const sampleTeams: Team[] = [
   },
   {
     id: "2",
-    name: "Fire Hawks",
-    logo: "/fire-hawks-basketball-team-logo.png",
+    name: "Kingmo Elite",
+    logo: null,
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#ef4444", "#eab308"],
-    division: "Elite Division",
+    division: "Diamond Division",
     divisionId: "div-1",
     seasonId: "1",
     coach: "Coach Johnson",
@@ -463,8 +474,8 @@ export const sampleTeams: Team[] = [
   },
   {
     id: "3",
-    name: "Storm Riders",
-    logo: "/storm-riders-basketball-team-logo.png",
+    name: "Brockville Blazers",
+    logo: null,
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#3b82f6", "#ec4899"],
@@ -514,8 +525,8 @@ export const sampleTeams: Team[] = [
   },
   {
     id: "4",
-    name: "Lightning Strikes",
-    logo: "/lightning-strikes-basketball-team-logo.png",
+    name: "Helisis",
+    logo: null,
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#fbbf24", "#1e40af"],
@@ -547,7 +558,11 @@ export const sampleTeams: Team[] = [
     description: "Fast-paced team that excels in transition basketball.",
     founded: "2018",
     homeVenue: "Lightning Court",
-    awards: ["Division Champion 2023", "Fast Break Award 2024", "Coach of Year 2023"],
+    awards: [
+      "Division Champion 2023",
+      "Fast Break Award 2024",
+      "Coach of Year 2023",
+    ],
     sessionIds: ["1", "2", "3", "4"],
     status: "active",
     registrationDate: "2024-08-15T00:00:00Z",
@@ -565,12 +580,12 @@ export const sampleTeams: Team[] = [
   },
   {
     id: "5",
-    name: "Blazing Comets",
+    name: "Montreal Wildcats",
     logo: "/placeholder.svg?height=64&width=64",
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#fbbf24", "#1e40af"],
-    division: "Elite Division",
+    division: "Diamond Division",
     divisionId: "div-1",
     seasonId: "1",
     coach: "Coach Thompson",
@@ -616,7 +631,7 @@ export const sampleTeams: Team[] = [
   },
   {
     id: "6",
-    name: "Steel Wolves",
+    name: "BGC Regional",
     logo: "/placeholder.svg?height=64&width=64",
     city: "Springfield",
     region: "Central Illinois",
@@ -672,7 +687,7 @@ export const sampleTeams: Team[] = [
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#fbbf24", "#1e40af"],
-    division: "Elite Division",
+    division: "Diamond Division",
     divisionId: "div-1",
     seasonId: "1",
     coach: "Coach Rodriguez",
@@ -767,7 +782,7 @@ export const sampleTeams: Team[] = [
     createdAt: "2024-08-15T00:00:00Z",
     updatedAt: "2024-09-20T00:00:00Z",
   },
-]
+];
 
 // Sample Players
 export const samplePlayers: Player[] = [
@@ -840,12 +855,12 @@ export const samplePlayers: Player[] = [
     highlightVideo: "https://example.com/marcus-highlights",
     highlightVideos: [
       {
-        title: "32pt Game vs Fire Hawks",
+        title: "32pt Game vs Kingmo Elite",
         url: "https://example.com/marcus-32pt-game",
         thumbnail: "/basketball-highlight-thumbnail-1.jpg",
       },
       {
-        title: "12 Assists vs Storm Riders",
+        title: "12 Assists vs Brockville Blazers",
         url: "https://example.com/marcus-assists",
         thumbnail: "/basketball-highlight-thumbnail-2.jpg",
       },
@@ -857,7 +872,7 @@ export const samplePlayers: Player[] = [
     ],
     region: "North Springfield",
     hometown: "Springfield, IL",
-    division: "Elite Division",
+    division: "Diamond Division",
     scoutingNotes:
       "High motor combo guard with natural court vision. D1 potential if outside shooting continues to improve. Excellent leadership qualities and basketball IQ.",
     social: {
@@ -931,7 +946,7 @@ export const samplePlayers: Player[] = [
       assists: 5,
       blocks: 6,
     },
-    awards: ["Defensive Player 2024", "All-Tournament 2023"],
+    awards: ["Defensive Player 2024"],
     bio: "Dominant center who controls the paint on both ends of the floor. Exceptional shot blocker with soft touch around the rim.",
     highlightVideos: [
       {
@@ -947,7 +962,7 @@ export const samplePlayers: Player[] = [
     ],
     region: "North Springfield",
     hometown: "Chicago, IL",
-    division: "Elite Division",
+    division: "Diamond Division",
     scoutingNotes:
       "Elite rim protector with developing offensive skills. Strong fundamentals and excellent work ethic. College-ready size and athleticism.",
     social: {
@@ -1035,7 +1050,7 @@ export const samplePlayers: Player[] = [
     ],
     region: "South Metro",
     hometown: "Phoenix, AZ",
-    division: "Elite Division",
+    division: "Diamond Division",
     scoutingNotes:
       "Pure scorer with deep range and fearless mentality. Needs to improve defensive consistency but has all the tools to play at next level.",
     social: {
@@ -1068,7 +1083,7 @@ export const samplePlayers: Player[] = [
     bio: "Versatile forward with strong rebounding instincts and developing offensive game.",
     region: "South Metro",
     hometown: "Atlanta, GA",
-    division: "Elite Division",
+    division: "Diamond Division",
   },
   {
     id: "5",
@@ -1198,7 +1213,7 @@ export const samplePlayers: Player[] = [
     bio: "Quick point guard with excellent ball-handling skills and court awareness.",
     region: "North Springfield",
     hometown: "Milwaukee, WI",
-    division: "Elite Division",
+    division: "Diamond Division",
   },
   {
     id: "10",
@@ -1224,9 +1239,9 @@ export const samplePlayers: Player[] = [
     bio: "Hard-working forward with strong rebounding and interior presence.",
     region: "North Springfield",
     hometown: "San Antonio, TX",
-    division: "Elite Division",
+    division: "Diamond Division",
   },
-]
+];
 
 // Sample Games
 export const sampleGames: Game[] = [
@@ -1244,7 +1259,7 @@ export const sampleGames: Game[] = [
     venueAddress: "123 Sports Complex Dr, City, State 12345",
     assignedOfficials: ["off-1", "off-2"],
     status: "scheduled",
-    division: "Elite Division",
+    division: "Diamond Division",
     createdAt: "2024-12-01T00:00:00Z",
     updatedAt: "2024-12-15T00:00:00Z",
   },
@@ -1266,7 +1281,7 @@ export const sampleGames: Game[] = [
     createdAt: "2024-12-01T00:00:00Z",
     updatedAt: "2024-12-15T00:00:00Z",
   },
-]
+];
 
 // Sample Locations
 export const sampleLocations: Location[] = [
@@ -1302,7 +1317,7 @@ export const sampleLocations: Location[] = [
     createdAt: "2024-02-01T00:00:00Z",
     updatedAt: "2024-08-15T00:00:00Z",
   },
-]
+];
 
 // Sample Officials
 export const sampleOfficials: Official[] = [
@@ -1330,52 +1345,54 @@ export const sampleOfficials: Official[] = [
     createdAt: "2024-01-15T00:00:00Z",
     updatedAt: "2024-08-20T00:00:00Z",
   },
-]
+];
 
 // Helper functions
 export function getTeamById(id: string): Team | undefined {
-  return sampleTeams.find((team) => team.id === id)
+  return sampleTeams.find((team) => team.id === id);
 }
 
 export function getPlayersByTeam(teamId: string): Player[] {
-  return samplePlayers.filter((player) => player.teamId === teamId)
+  return samplePlayers.filter((player) => player.teamId === teamId);
 }
 
 export function getSessionById(id: string): Session | undefined {
-  return sampleSessions.find((session) => session.id === id)
+  return sampleSessions.find((session) => session.id === id);
 }
 
 export function getSeasonById(id: string): Season | undefined {
-  return sampleSeasons.find((season) => season.id === id)
+  return sampleSeasons.find((season) => season.id === id);
 }
 
 export function getGamesBySession(sessionId: string): Game[] {
-  return sampleGames.filter((game) => game.sessionId === sessionId)
+  return sampleGames.filter((game) => game.sessionId === sessionId);
 }
 
 export function getSessionsBySeason(seasonId: string): Session[] {
-  return sampleSessions.filter((session) => session.seasonId === seasonId)
+  return sampleSessions.filter((session) => session.seasonId === seasonId);
 }
 
 export function getTeamsBySession(sessionId: string): Team[] {
-  return sampleTeams.filter((team) => team.sessionIds.includes(sessionId))
+  return sampleTeams.filter((team) => team.sessionIds.includes(sessionId));
 }
 
 export function getLocationById(id: string): Location | undefined {
-  return sampleLocations.find((location) => location.id === id)
+  return sampleLocations.find((location) => location.id === id);
 }
 
 export function getOfficialById(id: string): Official | undefined {
-  return sampleOfficials.find((official) => official.id === id)
+  return sampleOfficials.find((official) => official.id === id);
 }
 
 export function getConferencesBySeason(seasonId: string): Conference[] {
-  return sampleConferences.filter((conference) => conference.seasonId === seasonId)
+  return sampleConferences.filter(
+    (conference) => conference.seasonId === seasonId
+  );
 }
 
 export function getDivisionsByConference(conferenceId: string): Division[] {
-  const conference = sampleConferences.find((conf) => conf.id === conferenceId)
-  return conference?.divisions || []
+  const conference = sampleConferences.find((conf) => conf.id === conferenceId);
+  return conference?.divisions || [];
 }
 
 export const sampleData = {
@@ -1388,8 +1405,8 @@ export const sampleData = {
   locations: sampleLocations,
   officials: sampleOfficials,
   divisions: [
-    { id: "div-1", name: "Elite Division" },
+    { id: "div-1", name: "Diamond Division" },
     { id: "div-2", name: "Premier Division" },
     { id: "div-3", name: "Development Division" },
   ],
-}
+};

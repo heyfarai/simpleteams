@@ -1,19 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Users, Trophy, ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Users, Trophy, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface GameDetailsProps {
-  gameId: string
+  gameId: string;
 }
 
 export function GameDetails({ gameId }: GameDetailsProps) {
   // Mock game data - in real app, fetch based on gameId
   const game = {
     id: 1,
-    homeTeam: "Thunder Bolts",
-    awayTeam: "Fire Hawks",
+    homeTeam: "ONL-X Senior",
+    awayTeam: "Kingmo Elite",
     homeScore: 78,
     awayScore: 72,
     date: "2025-01-15",
@@ -26,7 +26,7 @@ export function GameDetails({ gameId }: GameDetailsProps) {
     attendance: 245,
     referee: "John Smith",
     gameRecap:
-      "In a thrilling matchup, the Thunder Bolts edged out the Fire Hawks 78-72 in a game that went down to the wire. Marcus Thompson led the Thunder Bolts with 24 points and 9 assists, while Tyler Rodriguez added 18 points. The Fire Hawks fought valiantly with strong performances from their starting five, but couldn't quite close the gap in the final minutes.",
+      "In a thrilling matchup, the ONL-X Senior edged out the Kingmo Elite 78-72 in a game that went down to the wire. Marcus Thompson led the ONL-X Senior with 24 points and 9 assists, while Tyler Rodriguez added 18 points. The Kingmo Elite fought valiantly with strong performances from their starting five, but couldn't quite close the gap in the final minutes.",
     homeTeamStats: {
       fieldGoals: "28/65 (43.1%)",
       threePointers: "8/22 (36.4%)",
@@ -46,49 +46,52 @@ export function GameDetails({ gameId }: GameDetailsProps) {
     topPerformers: [
       {
         name: "Marcus Thompson",
-        team: "Thunder Bolts",
+        team: "ONL-X Senior",
         stats: "24 PTS, 4 REB, 9 AST",
       },
       {
         name: "Tyler Rodriguez",
-        team: "Thunder Bolts",
+        team: "ONL-X Senior",
         stats: "18 PTS, 6 REB, 3 AST",
       },
       {
         name: "Alex Johnson",
-        team: "Fire Hawks",
+        team: "Kingmo Elite",
         stats: "22 PTS, 8 REB, 2 AST",
       },
     ],
-  }
+  };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(":")
-    const date = new Date()
-    date.setHours(Number.parseInt(hours), Number.parseInt(minutes))
+    const [hours, minutes] = timeString.split(":");
+    const date = new Date();
+    date.setHours(Number.parseInt(hours), Number.parseInt(minutes));
     return date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    })
-  }
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Back Button */}
       <div className="mb-6">
         <Link href="/games">
-          <Button variant="ghost" className="p-0 h-auto text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            className="p-0 h-auto text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Schedule
           </Button>
@@ -101,7 +104,10 @@ export function GameDetails({ gameId }: GameDetailsProps) {
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-2 mb-2">
               <Badge variant="secondary">{game.division}</Badge>
-              <Badge variant={game.status === "completed" ? "default" : "outline"} className="capitalize">
+              <Badge
+                variant={game.status === "completed" ? "default" : "outline"}
+                className="capitalize"
+              >
                 {game.status}
               </Badge>
             </div>
@@ -113,17 +119,27 @@ export function GameDetails({ gameId }: GameDetailsProps) {
           {/* Score Display */}
           <div className="flex items-center justify-center gap-8 mb-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-2">{game.homeTeam}</div>
-              <div className="text-4xl font-bold text-primary">{game.homeScore}</div>
+              <div className="text-2xl font-bold text-foreground mb-2">
+                {game.homeTeam}
+              </div>
+              <div className="text-4xl font-bold text-primary">
+                {game.homeScore}
+              </div>
             </div>
 
             <div className="text-center px-6">
-              <div className="text-lg font-medium text-muted-foreground">FINAL</div>
+              <div className="text-lg font-medium text-muted-foreground">
+                FINAL
+              </div>
             </div>
 
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-2">{game.awayTeam}</div>
-              <div className="text-4xl font-bold text-primary">{game.awayScore}</div>
+              <div className="text-2xl font-bold text-foreground mb-2">
+                {game.awayTeam}
+              </div>
+              <div className="text-4xl font-bold text-primary">
+                {game.awayScore}
+              </div>
             </div>
           </div>
 
@@ -154,7 +170,9 @@ export function GameDetails({ gameId }: GameDetailsProps) {
               <CardTitle>Game Recap</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground leading-relaxed">{game.gameRecap}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {game.gameRecap}
+              </p>
             </CardContent>
           </Card>
 
@@ -167,62 +185,90 @@ export function GameDetails({ gameId }: GameDetailsProps) {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Home Team Stats */}
                 <div>
-                  <h3 className="font-semibold text-lg text-foreground mb-4">{game.homeTeam}</h3>
+                  <h3 className="font-semibold text-lg text-foreground mb-4">
+                    {game.homeTeam}
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Field Goals</span>
-                      <span className="font-medium">{game.homeTeamStats.fieldGoals}</span>
+                      <span className="font-medium">
+                        {game.homeTeamStats.fieldGoals}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">3-Pointers</span>
-                      <span className="font-medium">{game.homeTeamStats.threePointers}</span>
+                      <span className="font-medium">
+                        {game.homeTeamStats.threePointers}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Free Throws</span>
-                      <span className="font-medium">{game.homeTeamStats.freeThrows}</span>
+                      <span className="font-medium">
+                        {game.homeTeamStats.freeThrows}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Rebounds</span>
-                      <span className="font-medium">{game.homeTeamStats.rebounds}</span>
+                      <span className="font-medium">
+                        {game.homeTeamStats.rebounds}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Assists</span>
-                      <span className="font-medium">{game.homeTeamStats.assists}</span>
+                      <span className="font-medium">
+                        {game.homeTeamStats.assists}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Turnovers</span>
-                      <span className="font-medium">{game.homeTeamStats.turnovers}</span>
+                      <span className="font-medium">
+                        {game.homeTeamStats.turnovers}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Away Team Stats */}
                 <div>
-                  <h3 className="font-semibold text-lg text-foreground mb-4">{game.awayTeam}</h3>
+                  <h3 className="font-semibold text-lg text-foreground mb-4">
+                    {game.awayTeam}
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Field Goals</span>
-                      <span className="font-medium">{game.awayTeamStats.fieldGoals}</span>
+                      <span className="font-medium">
+                        {game.awayTeamStats.fieldGoals}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">3-Pointers</span>
-                      <span className="font-medium">{game.awayTeamStats.threePointers}</span>
+                      <span className="font-medium">
+                        {game.awayTeamStats.threePointers}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Free Throws</span>
-                      <span className="font-medium">{game.awayTeamStats.freeThrows}</span>
+                      <span className="font-medium">
+                        {game.awayTeamStats.freeThrows}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Rebounds</span>
-                      <span className="font-medium">{game.awayTeamStats.rebounds}</span>
+                      <span className="font-medium">
+                        {game.awayTeamStats.rebounds}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Assists</span>
-                      <span className="font-medium">{game.awayTeamStats.assists}</span>
+                      <span className="font-medium">
+                        {game.awayTeamStats.assists}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Turnovers</span>
-                      <span className="font-medium">{game.awayTeamStats.turnovers}</span>
+                      <span className="font-medium">
+                        {game.awayTeamStats.turnovers}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -240,15 +286,24 @@ export function GameDetails({ gameId }: GameDetailsProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               {game.topPerformers.map((player, index) => (
-                <div key={index} className="flex items-center gap-3">
+                <div
+                  key={index}
+                  className="flex items-center gap-3"
+                >
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium text-foreground">{player.name}</div>
-                    <div className="text-sm text-muted-foreground">{player.team}</div>
+                    <div className="font-medium text-foreground">
+                      {player.name}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {player.team}
+                    </div>
                   </div>
-                  <div className="text-sm font-medium text-primary">{player.stats}</div>
+                  <div className="text-sm font-medium text-primary">
+                    {player.stats}
+                  </div>
                 </div>
               ))}
             </CardContent>
@@ -269,12 +324,14 @@ export function GameDetails({ gameId }: GameDetailsProps) {
               </div>
               <div className="text-center">
                 <div className="font-medium text-foreground">{game.venue}</div>
-                <div className="text-sm text-muted-foreground">{game.venueAddress}</div>
+                <div className="text-sm text-muted-foreground">
+                  {game.venueAddress}
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }
