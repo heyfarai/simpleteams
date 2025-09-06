@@ -40,7 +40,7 @@ export function TeamsDirectory() {
   const [selectedSession, setSelectedSession] = useState("all");
   const [selectedAwards, setSelectedAwards] = useState<string[]>([]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "standings">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "standings">("standings");
   const [playoffCutoff, setPlayoffCutoff] = useState(4);
 
   const teams = sampleTeams.map((team) => {

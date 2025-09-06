@@ -145,8 +145,8 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Divisions</SelectItem>
-                <SelectItem value="div-1">Diamond Division</SelectItem>
-                <SelectItem value="div-2">Premier Division</SelectItem>
+                <SelectItem value="div-1">Diamond</SelectItem>
+                <SelectItem value="div-2">Premier</SelectItem>
                 <SelectItem value="div-3">Development Division</SelectItem>
               </SelectContent>
             </Select>

@@ -1,6 +1,6 @@
 export function SeasonsSummary() {
   return (
-    <section className="hidden py-8">
+    <section className="py-8">
       <div className="grid lg:grid-cols-2 gap-8">
         {/* NCHC Season 2 2025 */}
         <div className="border border-gray-200 rounded-lg p-6">

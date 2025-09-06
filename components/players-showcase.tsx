@@ -34,7 +34,7 @@ export function PlayersShowcase() {
 
   // Leaders tab filters
   const [selectedYear, setSelectedYear] = useState("2024");
-  const [selectedDivision, setSelectedDivision] = useState("Diamond Division");
+  const [selectedDivision, setSelectedDivision] = useState("Diamond");
   const [selectedSeason, setSelectedSeason] = useState("Regular Season");
 
   const players = samplePlayers.map((player) => {
@@ -91,11 +91,7 @@ export function PlayersShowcase() {
   )
     .sort()
     .reverse();
-  const divisions = [
-    "Diamond Division",
-    "Premier Division",
-    "Development Division",
-  ];
+  const divisions = ["Diamond", "Premier", "Development Division"];
   const seasons = sampleSeasons.map((season) => season.name);
 
   const getTopPlayersByStat = (
@@ -219,7 +215,7 @@ export function PlayersShowcase() {
       <Button
         variant="outline"
         onClick={() => {
-          setSelectedDivision("Diamond Division");
+          setSelectedDivision("Diamond");
           setSelectedSeason("Regular Season");
         }}
         className="w-full"

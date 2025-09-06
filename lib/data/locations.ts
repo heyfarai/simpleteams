@@ -1,0 +1,36 @@
+import { Location } from "../sample-data";
+
+export const sampleLocations: Location[] = [
+  {
+    id: "loc-1",
+    name: "Thunder Arena",
+    address: "123 Sports Complex Dr",
+    city: "Springfield",
+    state: "IL",
+    zipCode: "62701",
+    capacity: 2500,
+    facilities: ["Main Court", "Warm-up Area", "Concessions", "Parking"],
+    contactName: "Arena Manager",
+    contactPhone: "(555) 100-0001",
+    contactEmail: "manager@thunderarena.com",
+    isActive: true,
+    createdAt: "2024-01-15T00:00:00Z",
+    updatedAt: "2024-09-20T00:00:00Z",
+  },
+  {
+    id: "loc-2",
+    name: "Storm Center",
+    address: "456 Basketball Ave",
+    city: "Springfield",
+    state: "IL",
+    zipCode: "62702",
+    capacity: 1800,
+    facilities: ["Main Court", "Training Room", "Locker Rooms"],
+    contactName: "Facility Director",
+    contactPhone: "(555) 100-0002",
+    contactEmail: "director@stormcenter.com",
+    isActive: true,
+    createdAt: "2024-02-01T00:00:00Z",
+    updatedAt: "2024-08-15T00:00:00Z",
+  },
+];

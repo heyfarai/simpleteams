@@ -610,7 +610,7 @@ function DivisionForm({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, name: e.target.value }))
           }
-          placeholder="e.g., Diamond Division"
+          placeholder="e.g., Diamond"
           required
         />
       </div>
