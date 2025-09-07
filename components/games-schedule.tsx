@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { FilterData } from "@/lib/sanity/get-filter-data";
 import {
   Calendar,
   Clock,
@@ -26,20 +27,96 @@ import {
 import {
   sampleGames,
   sampleSessions,
-  sampleSeasons,
   getTeamById,
   getSessionById,
   getSeasonById,
 } from "@/lib/sample-data";
+import {
+  TransformedGame,
+  FilterState,
+  filterGames,
+  groupGamesBySessionAndDivision,
+  getActiveFiltersCount,
+} from "@/lib/utils/game-filters";
 
-export function GamesSchedule() {
-  const [selectedDivision, setSelectedDivision] = useState("all");
-  const [selectedVenue, setSelectedVenue] = useState("all");
-  const [selectedSession, setSelectedSession] = useState("all");
-  const [selectedSeason, setSelectedSeason] = useState("all");
+interface GamesScheduleProps {
+  filterData: FilterData;
+}
+
+interface Tournament {
+  id: string;
+  name: string;
+  division: string;
+  startDate: string;
+  endDate: string;
+  eligibility: string;
+  venue: string;
+  description: string;
+  teams: number;
+  status: "upcoming" | "registration";
+  seasonName?: string;
+}
+
+interface Tournament {
+  id: string;
+  name: string;
+  division: string;
+  startDate: string;
+  endDate: string;
+  eligibility: string;
+  venue: string;
+  description: string;
+  teams: number;
+  status: "upcoming" | "registration";
+  seasonName?: string;
+}
+
+export function GamesSchedule({ filterData }: GamesScheduleProps) {
+  // Group all useState hooks together at the top
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedDivision, setSelectedDivision] = useState<string>("all");
+  const [selectedVenue, setSelectedVenue] = useState<string>("all");
+  const [selectedConference, setSelectedConference] = useState<string>("all");
+  const [selectedSeason, setSelectedSeason] = useState<string>("all");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const transformGameData = (game: any) => {
+  // Place useEffect after all useState hooks
+  useEffect(() => {
+    if (!filterData) {
+      setError("Failed to load filter data");
+    } else if (
+      !filterData.seasons ||
+      !filterData.conferences ||
+      !filterData.divisions
+    ) {
+      setError("Incomplete filter data");
+    }
+    setIsLoading(false);
+  }, [filterData]);
+
+  if (isLoading) {
+    return <div className="text-center py-8">Loading filters...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-red-500">{error}</div>;
+  }
+
+  const transformGameData = (game: {
+    id: string;
+    homeTeamId: string;
+    awayTeamId: string;
+    homeScore?: number;
+    awayScore?: number;
+    date: string;
+    time: string;
+    venue: string;
+    venueAddress: string;
+    division: string;
+    status: string;
+    sessionId: string;
+  }): TransformedGame => {
     const session = getSessionById(game.sessionId);
     const season = session ? getSeasonById(session.seasonId) : null;
     const homeTeam = getTeamById(game.homeTeamId);
@@ -47,6 +124,7 @@ export function GamesSchedule() {
 
     return {
       id: game.id,
+      conference: "unknown", // Default since we're using sample data
       homeTeam: homeTeam?.name || "Unknown Team",
       awayTeam: awayTeam?.name || "Unknown Team",
       homeScore: game.homeScore || null,
@@ -67,14 +145,59 @@ export function GamesSchedule() {
     };
   };
 
-  const upcomingGames = sampleGames
+  const upcomingGames: TransformedGame[] = sampleGames
     .filter((game) => game.status === "scheduled")
-    .map(transformGameData);
-  const completedGames = sampleGames
-    .filter((game) => game.status === "completed")
-    .map(transformGameData);
+    .map((game) =>
+      transformGameData({
+        id: game.id,
+        homeTeamId: game.homeTeamId,
+        awayTeamId: game.awayTeamId,
+        homeScore: game.homeScore,
+        awayScore: game.awayScore,
+        date: game.date,
+        time: game.time,
+        venue: game.venue,
+        venueAddress: game.venueAddress,
+        division: game.division,
+        status: game.status,
+        sessionId: game.sessionId,
+      })
+    );
 
-  const tournaments = sampleSessions
+  const completedGames: TransformedGame[] = sampleGames
+    .filter((game) => game.status === "completed")
+    .map((game) =>
+      transformGameData({
+        id: game.id,
+        homeTeamId: game.homeTeamId,
+        awayTeamId: game.awayTeamId,
+        homeScore: game.homeScore,
+        awayScore: game.awayScore,
+        date: game.date,
+        time: game.time,
+        venue: game.venue,
+        venueAddress: game.venueAddress,
+        division: game.division,
+        status: game.status,
+        sessionId: game.sessionId,
+      })
+    );
+
+  interface Tournament {
+    id: string;
+    name: string;
+    division: string;
+    startDate: string;
+    endDate: string;
+    eligibility: string;
+    venue: string;
+    description: string;
+    teams: number;
+    status: "upcoming" | "registration";
+    seasonName?: string;
+  }
+
+  const tournaments: Tournament[] = sampleSessions
     .filter((session) => session.type === "playoff")
     .map((session) => {
       const season = getSeasonById(session.seasonId);
@@ -97,81 +220,41 @@ export function GamesSchedule() {
             ? "upcoming"
             : "registration",
         seasonName: season?.name,
-      };
+      } satisfies Tournament;
     });
 
+  // Initialize filter data with proper typing
   const divisions = [
-    "all",
-    ...Array.from(new Set(sampleGames.map((game) => game.division))),
+    { _id: "all", name: "All Divisions" },
+    ...(filterData.divisions || []),
   ];
+  const conferences = [
+    { _id: "all", name: "All Conferences" },
+    ...(filterData.conferences || []),
+  ];
+  const seasons = [
+    { _id: "all", name: "All Seasons" },
+    ...(filterData.seasons || []),
+  ];
+  // For now, keep venues from sample data until we add them to Sanity
   const venues = [
     "all",
     ...Array.from(new Set(sampleGames.map((game) => game.venue))),
   ];
-  const sessions = [
-    "all",
-    ...sampleSessions.map((session) => ({
-      id: session.id,
-      name: session.name,
-    })),
-  ];
-  const seasons = [
-    "all",
-    ...sampleSeasons.map((season) => ({ id: season.id, name: season.name })),
-  ];
-
-  const filterGames = (games: typeof upcomingGames) => {
-    return games.filter((game) => {
-      const matchesDivision =
-        selectedDivision === "all" || game.division === selectedDivision;
-      const matchesVenue =
-        selectedVenue === "all" || game.venue === selectedVenue;
-      const matchesSession =
-        selectedSession === "all" || game.sessionId === selectedSession;
-      const matchesSeason =
-        selectedSeason === "all" ||
-        (() => {
-          const session = getSessionById(game.sessionId);
-          return session?.seasonId === selectedSeason;
-        })();
-
-      return matchesDivision && matchesVenue && matchesSession && matchesSeason;
-    });
-  };
-
-  const groupGamesBySessionAndDivision = (games: typeof upcomingGames) => {
-    const filtered = filterGames(games);
-    const grouped: Record<string, Record<string, typeof games>> = {};
-
-    filtered.forEach((game) => {
-      const sessionKey = game.sessionName || "Unknown Session";
-      const divisionKey = game.division;
-
-      if (!grouped[sessionKey]) {
-        grouped[sessionKey] = {};
-      }
-      if (!grouped[sessionKey][divisionKey]) {
-        grouped[sessionKey][divisionKey] = [];
-      }
-      grouped[sessionKey][divisionKey].push(game);
-    });
-
-    return grouped;
-  };
 
   const clearAllFilters = () => {
     setSelectedDivision("all");
     setSelectedVenue("all");
-    setSelectedSession("all");
+    setSelectedConference("all");
     setSelectedSeason("all");
   };
 
-  const activeFiltersCount = [
+  const activeFiltersCount = getActiveFiltersCount({
     selectedDivision,
     selectedVenue,
-    selectedSession,
+    selectedConference,
     selectedSeason,
-  ].filter((filter) => filter !== "all").length;
+  });
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -226,36 +309,37 @@ export function GamesSchedule() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Seasons</SelectItem>
-                    {seasons.slice(1).map((season) => (
-                      <SelectItem
-                        key={season.id}
-                        value={season.id}
-                      >
-                        {season.name}
-                      </SelectItem>
-                    ))}
+                    {seasons
+                      .filter((s) => s._id !== "all")
+                      .map((season) => (
+                        <SelectItem
+                          key={season._id}
+                          value={season._id}
+                        >
+                          {season.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Session Filter */}
+              {/* Conference Filter */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Session</label>
+                <label className="text-sm font-medium">Conference</label>
                 <Select
-                  value={selectedSession}
-                  onValueChange={setSelectedSession}
+                  value={selectedConference}
+                  onValueChange={setSelectedConference}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="All Sessions" />
+                    <SelectValue placeholder="All Conferences" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sessions</SelectItem>
-                    {sessions.slice(1).map((session) => (
+                    {conferences.map((conference) => (
                       <SelectItem
-                        key={session.id}
-                        value={session.id}
+                        key={conference._id}
+                        value={conference._id}
                       >
-                        {session.name}
+                        {conference.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -273,13 +357,12 @@ export function GamesSchedule() {
                     <SelectValue placeholder="All Divisions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Divisions</SelectItem>
-                    {divisions.slice(1).map((division) => (
+                    {divisions.map((division) => (
                       <SelectItem
-                        key={division}
-                        value={division}
+                        key={division._id}
+                        value={division._id}
                       >
-                        {division}
+                        {division.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -298,7 +381,7 @@ export function GamesSchedule() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Venues</SelectItem>
-                    {venues.slice(1).map((venue) => (
+                    {venues.map((venue) => (
                       <SelectItem
                         key={venue}
                         value={venue}
@@ -378,10 +461,10 @@ export function GamesSchedule() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Seasons</SelectItem>
-                      {seasons.slice(1).map((season) => (
+                      {seasons.map((season) => (
                         <SelectItem
-                          key={season.id}
-                          value={season.id}
+                          key={season._id}
+                          value={season._id}
                         >
                           {season.name}
                         </SelectItem>
@@ -390,20 +473,20 @@ export function GamesSchedule() {
                   </Select>
 
                   <Select
-                    value={selectedSession}
-                    onValueChange={setSelectedSession}
+                    value={selectedConference}
+                    onValueChange={setSelectedConference}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Session" />
+                      <SelectValue placeholder="Conference" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Sessions</SelectItem>
-                      {sessions.slice(1).map((session) => (
+                      <SelectItem value="all">All Conferences</SelectItem>
+                      {conferences.map((conference) => (
                         <SelectItem
-                          key={session.id}
-                          value={session.id}
+                          key={conference._id}
+                          value={conference._id}
                         >
-                          {session.name}
+                          {conference.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -418,12 +501,12 @@ export function GamesSchedule() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Divisions</SelectItem>
-                      {divisions.slice(1).map((division) => (
+                      {divisions.map((division) => (
                         <SelectItem
-                          key={division}
-                          value={division}
+                          key={division._id}
+                          value={division._id}
                         >
-                          {division}
+                          {division.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -438,7 +521,7 @@ export function GamesSchedule() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Venues</SelectItem>
-                      {venues.slice(1).map((venue) => (
+                      {venues.map((venue) => (
                         <SelectItem
                           key={venue}
                           value={venue}
@@ -497,8 +580,15 @@ export function GamesSchedule() {
             className="space-y-6"
           >
             {(() => {
-              const groupedGames =
-                groupGamesBySessionAndDivision(upcomingGames);
+              const groupedGames = groupGamesBySessionAndDivision(
+                upcomingGames,
+                {
+                  selectedDivision,
+                  selectedVenue,
+                  selectedConference,
+                  selectedSeason,
+                }
+              );
               const sessionKeys = Object.keys(groupedGames);
 
               if (sessionKeys.length === 0) {
@@ -557,8 +647,15 @@ export function GamesSchedule() {
             className="space-y-6"
           >
             {(() => {
-              const groupedGames =
-                groupGamesBySessionAndDivision(completedGames);
+              const groupedGames = groupGamesBySessionAndDivision(
+                completedGames,
+                {
+                  selectedDivision,
+                  selectedVenue,
+                  selectedConference,
+                  selectedSeason,
+                }
+              );
               const sessionKeys = Object.keys(groupedGames);
 
               if (sessionKeys.length === 0) {
@@ -695,25 +792,7 @@ export function GamesSchedule() {
 }
 
 interface GameCardProps {
-  game: {
-    id: number;
-    homeTeam: string;
-    awayTeam: string;
-    homeScore: number | null;
-    awayScore: number | null;
-    date: string;
-    time: string;
-    venue: string;
-    venueAddress: string;
-    division: string;
-    status: string;
-    isTournament: boolean;
-    tournamentName?: string;
-    sessionName?: string;
-    sessionType?: string;
-    seasonName?: string;
-    seasonType?: string;
-  };
+  game: TransformedGame;
 }
 
 function GameCard({ game }: GameCardProps) {

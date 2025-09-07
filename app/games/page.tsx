@@ -1,9 +1,13 @@
 import { GamesSchedule } from "@/components/games-schedule";
+import { getFilterData } from "@/lib/sanity/get-filter-data";
 
 export const metadata = {
   title: "Games",
 };
-export default function GamesPage() {
+
+export default async function GamesPage() {
+  const filterData = await getFilterData();
+
   return (
     <main className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -15,7 +19,7 @@ export default function GamesPage() {
             Stay up to date with all league games and tournaments
           </p>
         </div>
-        <GamesSchedule />
+        <GamesSchedule filterData={filterData} />
       </div>
     </main>
   );

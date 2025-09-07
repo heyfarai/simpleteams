@@ -1,9 +1,11 @@
 [build]
-  command = "npm run build"
+  command = "pnpm run build"
   publish = ".next"
+  edge_functions = "true"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
 
 [[redirects]]
   from = "/*"
@@ -11,6 +13,6 @@
   status = 200
 
 [dev]
-  command = "npm run dev"
+  command = "pnpm run dev"
   port = 3000
   publish = ".next"
