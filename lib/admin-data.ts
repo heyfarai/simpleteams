@@ -8,16 +8,20 @@ import {
   type Official,
   type Session,
   type Game,
+  type Conference,
+  type Division,
   sampleSeasons,
   sampleTeams,
   sampleLocations,
   sampleOfficials,
   sampleSessions,
   sampleGames,
+  sampleConferences,
   getTeamById,
   getSessionById,
   getLocationById,
   getOfficialById,
+  getConferencesBySeason,
 } from "./sample-data";
 
 export interface TeamAdminUser {
@@ -97,7 +101,17 @@ export interface TeamPayment {
   updatedAt: string;
 }
 
-export const adminSeasons = sampleSeasons;
+// Admin Season interface that includes conferences structure
+export interface AdminSeason extends Season {
+  conferences: Conference[];
+}
+
+// Transform regular seasons into admin seasons with conferences
+export const adminSeasons: AdminSeason[] = sampleSeasons.map(season => ({
+  ...season,
+  conferences: getConferencesBySeason(season.id)
+}));
+
 export const adminTeams = sampleTeams;
 export const adminLocations = sampleLocations;
 export const adminOfficials = sampleOfficials;
@@ -237,7 +251,7 @@ export const adminSampleData = {
 };
 
 // Helper functions for admin data
-export function getAdminSeasonById(id: string): Season | undefined {
+export function getAdminSeasonById(id: string): AdminSeason | undefined {
   return adminSeasons.find((season) => season.id === id);
 }
 
@@ -358,7 +372,7 @@ export function getAdminTeamsByRegistrationStatus(status: string): Team[] {
 }
 
 export function getTeamPermissionsByRole(role: string): string[] {
-  const rolePermissions = {
+  const rolePermissions: Record<string, string[]> = {
     head_coach: ["perm-1", "perm-2", "perm-3", "perm-4"],
     team_manager: ["perm-3", "perm-4", "perm-5", "perm-6"],
     assistant_coach: ["perm-3"],
