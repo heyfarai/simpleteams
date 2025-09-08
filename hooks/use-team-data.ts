@@ -31,16 +31,20 @@ function transformTeam(team: any): Team {
     id: team._id,
     name: team.name,
     logo: team.logo,
-    division: team.division ? {
-      _id: team.division._id,
-      name: team.division.name
-    } : undefined,
-    season: team.season ? {
-      _id: team.season._id,
-      name: team.season.name,
-      year: team.season.year
-    } : undefined,
-    coach: team.coach || 'TBA',
+    division: team.division
+      ? {
+          _id: team.division._id,
+          name: team.division.name,
+        }
+      : undefined,
+    season: team.season
+      ? {
+          _id: team.season._id,
+          name: team.season.name,
+          year: team.season.year,
+        }
+      : undefined,
+    coach: team.coach || "TBA",
     region: team.region || "Unknown Region",
     description: team.description,
     homeVenue: team.homeVenue,
@@ -50,13 +54,13 @@ function transformTeam(team: any): Team {
       losses: 0,
       pointsFor: 0,
       pointsAgainst: 0,
-      gamesPlayed: 0
+      gamesPlayed: 0,
     },
     record: team.record,
   };
 }
 
-export function useTeamData() {
+export function useTeamData(seasonId?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -72,28 +76,33 @@ export function useTeamData() {
       try {
         setIsLoading(true);
         const [teamsData, filtersData] = await Promise.all([
-          fetchTeams(),
+          fetchTeams(seasonId),
           fetchTeamFilters(),
         ]);
-        const transformedTeams = (teamsData.length > 0 ? teamsData : sampleTeams)
-          .map(transformTeam);
+        const transformedTeams = (
+          teamsData.length > 0 ? teamsData : sampleTeams
+        ).map(transformTeam);
         setTeams(transformedTeams);
         setFilterOptions({
           divisions: filtersData.divisions || [],
           seasons: filtersData.seasons || [],
-          years: Array.from(new Set(filtersData.seasons?.map((s: Season) => s.year.toString()) || [])),
+          years: Array.from(
+            new Set(
+              filtersData.seasons?.map((s: Season) => s.year.toString()) || []
+            )
+          ),
           awards: Array.from(new Set((filtersData.awards || []) as string[])),
         });
       } catch (err) {
-        console.error('Error loading teams:', err);
-        setError('Failed to load teams data');
+        console.error("Error loading teams:", err);
+        setError("Failed to load teams data");
         setTeams(sampleTeams.map(transformTeam));
       } finally {
         setIsLoading(false);
       }
     }
     loadData();
-  }, []);
+  }, [seasonId]);
 
   return {
     teams,

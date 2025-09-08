@@ -59,8 +59,21 @@ export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsVie
     };
   });
 
-  // Group teams by division
-  const groupedTeams = teamsWithStats.reduce((acc, team) => {
+  interface DivisionGroup {
+    division: { _id: string; name: string };
+    teams: typeof teamsWithStats;
+  }
+
+  // Create a map to track unique teams by ID
+  const uniqueTeams = new Map<string, typeof teamsWithStats[0]>();
+  teamsWithStats.forEach(team => {
+    if (!uniqueTeams.has(team.id)) {
+      uniqueTeams.set(team.id, team);
+    }
+  });
+
+  // Group unique teams by division
+  const groupedTeams = Array.from(uniqueTeams.values()).reduce<DivisionGroup[]>((acc, team) => {
     if (!team.division?._id) {
       // Handle teams without division
       const unassignedGroup = acc.find(g => g.division._id === 'unassigned');
@@ -90,10 +103,7 @@ export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsVie
       });
     }
     return acc;
-  }, [] as Array<{
-    division: { _id: string; name: string };
-    teams: typeof teamsWithStats;
-  }>);
+  }, []);
 
   // Sort teams within each division by win percentage
   groupedTeams.forEach(group => {
@@ -109,7 +119,7 @@ export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsVie
 
   return (
     <div className="space-y-8">
-      {groupedTeams.map(({ division, teams }) => (
+      {groupedTeams.map(({ division, teams }: DivisionGroup) => (
         <div key={division._id}>
           <h3 className="text-xl font-bold text-foreground mb-4">{division.name}</h3>
           <Card>
@@ -130,9 +140,9 @@ export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsVie
                     </tr>
                   </thead>
                   <tbody key={`${division._id}-tbody`}>
-                    {teams.map((team, index) => (
+                    {teams.map((team: typeof teamsWithStats[0], index: number) => (
                       <tr
-                        key={`${division._id}-${team.id}`}
+                        key={team.id}
                         className={`border-b hover:bg-muted/30 transition-colors ${
                           index < playoffCutoff
                             ? "bg-green-50 dark:bg-green-950/20"

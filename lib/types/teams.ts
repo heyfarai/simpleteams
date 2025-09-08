@@ -43,11 +43,10 @@ export interface Team {
   record?: string;
 }
 
-
 export interface TeamFilterState {
   searchTerm: string;
-  year: string;  // Required
-  seasonId: string;  // Required
+  year: string; // Required
+  seasonId: string; // Required
   divisionId?: string;
   awards: string[];
 }
@@ -60,4 +59,4 @@ export interface TeamViewProps {
   error?: string | null;
 }
 
-export type ViewMode = 'grid' | 'standings';
+export type ViewMode = "grid" | "standings";

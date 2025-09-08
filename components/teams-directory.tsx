@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { TeamFilters } from "@/components/teams/team-filters";
 import { TeamGridView } from "@/components/teams/team-grid-view";
@@ -11,14 +11,20 @@ import { ViewMode } from "@/lib/types/teams";
 import { useTeamData } from "@/hooks/use-team-data";
 import { useTeamFilters } from "@/hooks/use-team-filters";
 
-
 export function TeamsDirectory() {
-  const { teams, filterOptions, isLoading, error } = useTeamData();
+  const [currentSeasonId, setCurrentSeasonId] = useState<string>("");
+  const { teams, filterOptions, isLoading, error } = useTeamData(currentSeasonId);
   const { filters, filteredTeams, handleFilterChange, getStandingsData } = useTeamFilters(teams, filterOptions);
+
+  // Update season when filter changes
+  useEffect(() => {
+    if (filters.seasonId !== currentSeasonId) {
+      setCurrentSeasonId(filters.seasonId);
+    }
+  }, [filters.seasonId, currentSeasonId]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("standings");
   const [playoffCutoff] = useState(4);
-
 
   if (isLoading) {
     return <div className="text-center py-8">Loading teams...</div>;
@@ -35,9 +41,8 @@ export function TeamsDirectory() {
         <TeamFilters
           filters={filters}
           onFilterChange={handleFilterChange}
-          divisions={filterOptions.divisions}
           years={filterOptions.years}
-          seasons={filterOptions.seasons}
+          seasons={filterOptions.seasons as any}
           awards={filterOptions.awards}
         />
       </div>
@@ -60,9 +65,8 @@ export function TeamsDirectory() {
           <TeamFilters
             filters={filters}
             onFilterChange={handleFilterChange}
-            divisions={filterOptions.divisions}
             years={filterOptions.years}
-            seasons={filterOptions.seasons}
+            seasons={filterOptions.seasons as any}
             awards={filterOptions.awards}
             isMobile
             onClose={() => setShowMobileFilters(false)}
@@ -70,14 +74,14 @@ export function TeamsDirectory() {
         )}
 
         {/* View Mode Toggle */}
-        <ViewModeToggle 
-          viewMode={viewMode} 
-          onViewModeChange={setViewMode} 
+        <ViewModeToggle
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
 
         {/* Active Filters */}
-        <ActiveFilterBadges 
-          filters={filters} 
+        <ActiveFilterBadges
+          filters={filters}
           onFilterChange={handleFilterChange}
           seasons={filterOptions.seasons}
           divisions={filterOptions.divisions}
