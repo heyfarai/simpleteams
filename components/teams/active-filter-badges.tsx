@@ -5,13 +5,21 @@ import { TeamFilterState } from "@/lib/types/teams";
 interface ActiveFilterBadgesProps {
   filters: TeamFilterState;
   onFilterChange: (newFilters: Partial<TeamFilterState>) => void;
+  seasons?: Array<{
+    _id: string;
+    name: string;
+  }>;
+  divisions?: Array<{
+    _id: string;
+    name: string;
+  }>;
 }
 
-export function ActiveFilterBadges({ filters, onFilterChange }: ActiveFilterBadgesProps) {
+export function ActiveFilterBadges({ filters, onFilterChange, seasons = [], divisions = [] }: ActiveFilterBadgesProps) {
   const hasActiveFilters = 
-    filters.division !== "all" ||
-    filters.year !== "all" ||
-    filters.session !== "all" ||
+    filters.divisionId ||
+    filters.year ||
+    filters.seasonId ||
     filters.awards.length > 0 ||
     filters.searchTerm;
 
@@ -31,32 +39,42 @@ export function ActiveFilterBadges({ filters, onFilterChange }: ActiveFilterBadg
         </Badge>
       )}
       
-      {filters.division !== "all" && (
-        <Badge variant="secondary" className="gap-1">
-          Division: {filters.division}
-          <X
-            className="h-3 w-3 cursor-pointer"
-            onClick={() => onFilterChange({ division: "all" })}
-          />
-        </Badge>
-      )}
-      
-      {filters.year !== "all" && (
+      {filters.year && (
         <Badge variant="secondary" className="gap-1">
           Year: {filters.year}
           <X
             className="h-3 w-3 cursor-pointer"
-            onClick={() => onFilterChange({ year: "all" })}
+            onClick={() => onFilterChange({ 
+              year: "",
+              seasonId: "",
+              divisionId: undefined,
+              awards: [],
+              searchTerm: ""
+            })}
           />
         </Badge>
       )}
       
-      {filters.session !== "all" && (
+      {filters.seasonId && (
         <Badge variant="secondary" className="gap-1">
-          Session: {filters.session}
+          Season: {seasons.find(s => s._id === filters.seasonId)?.name || filters.seasonId}
           <X
             className="h-3 w-3 cursor-pointer"
-            onClick={() => onFilterChange({ session: "all" })}
+            onClick={() => onFilterChange({ 
+              year: "",
+              seasonId: "",
+              divisionId: undefined
+            })}
+          />
+        </Badge>
+      )}
+      
+      {filters.divisionId && (
+        <Badge variant="secondary" className="gap-1">
+          Division: {divisions.find(d => d._id === filters.divisionId)?.name || filters.divisionId}
+          <X
+            className="h-3 w-3 cursor-pointer"
+            onClick={() => onFilterChange({ divisionId: undefined })}
           />
         </Badge>
       )}

@@ -1,5 +1,5 @@
 import { client } from "@/lib/sanity/client";
-import { teamsQuery } from "@/lib/sanity/team-queries";
+import { teamsQuery, teamDetailsQuery } from "@/lib/sanity/team-queries";
 import { Team } from "@/lib/types/teams";
 
 async function fetchWithRetry<T>(query: string, retries = 3, delay = 1000): Promise<T> {
@@ -20,30 +20,61 @@ async function fetchWithRetry<T>(query: string, retries = 3, delay = 1000): Prom
 
 export async function fetchTeams(): Promise<Team[]> {
   try {
-    const teams = await fetchWithRetry(teamsQuery);
-    if (!teams || !Array.isArray(teams)) {
+    // Fetch seasons with divisions and team references
+    const [seasons, teamDetails] = await Promise.all([
+      fetchWithRetry(teamsQuery),
+      fetchWithRetry(teamDetailsQuery)
+    ]);
+
+    if (!seasons || !Array.isArray(seasons) || !teamDetails || !Array.isArray(teamDetails)) {
       throw new Error('Invalid response format from Sanity');
     }
-    return teams.map((team: any) => ({
-      id: team._id,
-      name: team.name,
-      logo: team.logo,
-      division: team.division?.name || "Unassigned",
-      coach: team.coach || "TBA",
-      region: team.region || "Unknown",
-      description: team.description,
-      homeVenue: team.homeVenue || "TBA",
-      awards: team.awards || [],
-      sessionIds: team.sessionIds || [],
-      stats: {
-        wins: team.stats?.wins || 0,
-        losses: team.stats?.losses || 0,
-        pointsFor: team.stats?.pointsFor || 0,
-        pointsAgainst: team.stats?.pointsAgainst || 0,
-        gamesPlayed: team.stats?.gamesPlayed || 0,
-        streak: team.stats?.streak || [],
-      },
-    }));
+
+    // Create a map of team details for quick lookup
+    const teamDetailsMap = new Map(teamDetails.map((team: any) => [team._id, team]));
+
+    // Transform seasons data into teams with division info
+    const teams: Team[] = [];
+
+    seasons.forEach((season: any) => {
+      season.activeDivisions?.forEach((activeDivision: any) => {
+        if (activeDivision.status === 'active' && activeDivision.teams) {
+          activeDivision.teams.forEach((teamRef: any) => {
+            const teamDetail = teamDetailsMap.get(teamRef._ref);
+            if (teamDetail) {
+              teams.push({
+                id: teamDetail._id,
+                name: teamDetail.name,
+                logo: teamDetail.logo,
+                division: activeDivision.division ? {
+                  _id: activeDivision.division._id,
+                  name: activeDivision.division.name
+                } : undefined,
+                season: {
+                  _id: season._id,
+                  name: season.name,
+                  year: season.year
+                },
+                coach: teamDetail.coach || "TBA",
+                region: teamDetail.region || "Unknown",
+                description: teamDetail.description,
+                homeVenue: teamDetail.homeVenue || "TBA",
+                awards: teamDetail.awards || [],
+                stats: {
+                  wins: teamDetail.stats?.wins || 0,
+                  losses: teamDetail.stats?.losses || 0,
+                  pointsFor: teamDetail.stats?.pointsFor || 0,
+                  pointsAgainst: teamDetail.stats?.pointsAgainst || 0,
+                  gamesPlayed: teamDetail.stats?.gamesPlayed || 0
+                },
+              });
+            }
+          });
+        }
+      });
+    });
+
+    return teams;
   } catch (error) {
     console.error("Error fetching teams:", error);
     throw error;
@@ -52,21 +83,56 @@ export async function fetchTeams(): Promise<Team[]> {
 
 export async function fetchTeamFilters() {
   try {
-    const [divisions, years, sessions, awards] = await Promise.all([
-      fetchWithRetry<string[]>('*[_type == "division"].name'),
-      fetchWithRetry<string[]>('*[_type == "season"].year'),
-      fetchWithRetry<string[]>('*[_type == "session"].name'),
-      fetchWithRetry<string[]>('*[_type == "team"].awards[]'),
+    const [seasons, awards] = await Promise.all([
+      // Fetch seasons with their active divisions
+      client.fetch(`*[_type == "season"] | order(year desc) {
+        _id,
+        name,
+        year,
+        activeDivisions[] {
+          division-> {
+            _id,
+            name
+          },
+          status,
+          teamLimits
+        }
+      }`),
+      // Fetch all unique awards
+      client.fetch('*[_type == "team"].awards[]'),
     ]);
 
-    if (!divisions || !years || !sessions || !awards) {
-      throw new Error('Invalid response format from Sanity');
+    // Extract divisions from active divisions in seasons
+    interface Season {
+      _id: string;
+      activeDivisions: Array<{
+        division: {
+          _id: string;
+          name: string;
+        };
+        status: string;
+        teamLimits?: {
+          min: number;
+          max: number;
+        };
+      }>;
     }
 
+    const divisions = (seasons || []).flatMap((season: Season) => 
+      (season.activeDivisions || [])
+        .filter(div => div?.status === 'active' && div?.division)
+        .map(div => ({
+          _id: div.division._id,
+          name: div.division.name,
+          season: {
+            _ref: season._id
+          }
+        }))
+    );
+
     return {
-      divisions: Array.from(new Set(divisions)),
-      years: Array.from(new Set(years)),
-      sessions: Array.from(new Set(sessions)),
+      seasons,
+      divisions,
       awards: Array.from(new Set(awards.flat())),
     };
   } catch (error) {

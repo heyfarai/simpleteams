@@ -588,12 +588,7 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
                     Last 5 Games
                   </label>
                   <div className="flex items-center gap-2">
-                    {team.stats?.streak.map((result, i) => (
-                      <StreakBadge
-                        key={i}
-                        result={result}
-                      />
-                    ))}
+                    <span className="text-sm text-muted-foreground">Streak data coming soon</span>
                   </div>
                 </div>
                 <div className="pt-4 border-t">

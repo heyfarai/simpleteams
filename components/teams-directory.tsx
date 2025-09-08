@@ -14,7 +14,7 @@ import { useTeamFilters } from "@/hooks/use-team-filters";
 
 export function TeamsDirectory() {
   const { teams, filterOptions, isLoading, error } = useTeamData();
-  const { filters, filteredTeams, handleFilterChange, getStandingsData } = useTeamFilters(teams);
+  const { filters, filteredTeams, handleFilterChange, getStandingsData } = useTeamFilters(teams, filterOptions);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("standings");
   const [playoffCutoff] = useState(4);
@@ -37,7 +37,7 @@ export function TeamsDirectory() {
           onFilterChange={handleFilterChange}
           divisions={filterOptions.divisions}
           years={filterOptions.years}
-          sessions={filterOptions.sessions}
+          seasons={filterOptions.seasons}
           awards={filterOptions.awards}
         />
       </div>
@@ -62,7 +62,7 @@ export function TeamsDirectory() {
             onFilterChange={handleFilterChange}
             divisions={filterOptions.divisions}
             years={filterOptions.years}
-            sessions={filterOptions.sessions}
+            seasons={filterOptions.seasons}
             awards={filterOptions.awards}
             isMobile
             onClose={() => setShowMobileFilters(false)}
@@ -78,7 +78,9 @@ export function TeamsDirectory() {
         {/* Active Filters */}
         <ActiveFilterBadges 
           filters={filters} 
-          onFilterChange={handleFilterChange} 
+          onFilterChange={handleFilterChange}
+          seasons={filterOptions.seasons}
+          divisions={filterOptions.divisions}
         />
 
         {/* Main Content */}

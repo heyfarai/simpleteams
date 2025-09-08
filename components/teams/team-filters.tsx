@@ -17,9 +17,21 @@ import { TeamFilterState } from "@/lib/types/teams";
 interface TeamFiltersProps {
   filters: TeamFilterState;
   onFilterChange: (filters: Partial<TeamFilterState>) => void;
-  divisions: string[];
   years: string[];
-  sessions: string[];
+  seasons: Array<{
+    _id: string;
+    name: string;
+    year: number;
+    activeDivisions: Array<{
+      division: { _ref: string };
+      status: string;
+    }>;
+  }>;
+  divisions: Array<{
+    _id: string;
+    name: string;
+    season: { _ref: string };
+  }>;
   awards: string[];
   isMobile?: boolean;
   onClose?: () => void;
@@ -30,7 +42,7 @@ export function TeamFilters({
   onFilterChange,
   divisions,
   years,
-  sessions,
+  seasons,
   awards,
   isMobile,
   onClose,
@@ -45,10 +57,10 @@ export function TeamFilters({
   const clearFilters = () => {
     onFilterChange({
       searchTerm: "",
-      division: "all",
-      year: "all",
-      session: "all",
-      awards: [],
+      year: "",
+      seasonId: "",
+      divisionId: undefined,
+      awards: []
     });
   };
 
@@ -68,65 +80,80 @@ export function TeamFilters({
         </div>
       </div>
 
+      {/* Year Filter */}
+      <div>
+        <label className="text-sm font-medium text-foreground mb-2 block">Year *</label>
+        <Select
+          value={filters.year}
+          onValueChange={(value) => {
+            // Clear season when year changes
+            onFilterChange({ 
+              year: value,
+              seasonId: "",
+              divisionId: undefined
+            });
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Year" />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map((year) => (
+              <SelectItem key={year} value={year}>{year}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Season Filter */}
+      <div>
+        <label className="text-sm font-medium text-foreground mb-2 block">Season *</label>
+        <Select
+          value={filters.seasonId}
+          onValueChange={(value) => {
+            // Clear division when season changes
+            onFilterChange({ 
+              seasonId: value,
+              divisionId: undefined
+            });
+          }}
+          disabled={!filters.year}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Season" />
+          </SelectTrigger>
+          <SelectContent>
+            {seasons
+              .filter((season: { year: number }) => season.year.toString() === filters.year)
+              .map((season: { _id: string, name: string }) => (
+                <SelectItem key={season._id} value={season._id}>
+                  {season.name}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Division Filter */}
       <div>
         <label className="text-sm font-medium text-foreground mb-2 block">Division</label>
         <Select
-          value={filters.division}
-          onValueChange={(value) => onFilterChange({ division: value })}
+          value={filters.divisionId || "all"}
+          onValueChange={(value) => onFilterChange({ divisionId: value === "all" ? undefined : value })}
+          disabled={!filters.seasonId}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Division" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Divisions</SelectItem>
-            {divisions.map((division) => (
-              <SelectItem key={division} value={division}>
-                {division}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Year Filter */}
-      <div>
-        <label className="text-sm font-medium text-foreground mb-2 block">Year</label>
-        <Select
-          value={filters.year}
-          onValueChange={(value) => onFilterChange({ year: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Year" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Years</SelectItem>
-            {years.map((year) => (
-              <SelectItem key={year} value={year}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Session Filter */}
-      <div>
-        <label className="text-sm font-medium text-foreground mb-2 block">Session</label>
-        <Select
-          value={filters.session}
-          onValueChange={(value) => onFilterChange({ session: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Session" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Sessions</SelectItem>
-            {sessions.map((session) => (
-              <SelectItem key={session} value={session}>
-                {session}
-              </SelectItem>
-            ))}
+            {divisions
+              .filter(division => division.season._ref === filters.seasonId)
+              .map((division) => (
+                <SelectItem key={division._id} value={division._id}>
+                  {division.name}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>

@@ -31,9 +31,11 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                   <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
                     {team.name}
                   </h3>
-                  <Badge variant="secondary" className="mb-2">
-                    {team.division}
-                  </Badge>
+                  {team.division && (
+                    <Badge variant="secondary" className="mb-2">
+                      {team.division.name}
+                    </Badge>
+                  )}
                   <p className="text-sm text-muted-foreground">{team.region}</p>
                 </div>
               </div>

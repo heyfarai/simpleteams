@@ -1,47 +1,91 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Team, TeamFilterState } from "@/lib/types/teams";
 
-export function useTeamFilters(teams: Team[]) {
+interface FilterOptions {
+  seasons: Array<{
+    _id: string;
+    name: string;
+    year: number;
+  }>;
+  years: string[];
+}
+
+export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
   const [filters, setFilters] = useState<TeamFilterState>({
     searchTerm: "",
-    division: "all",
-    year: "all",
-    session: "all",
+    year: "",  // Required
+    seasonId: "",  // Required
+    divisionId: undefined,
     awards: [],
   });
 
+  // Set default filters when filterOptions are available
+  useEffect(() => {
+    if (filterOptions && filterOptions.seasons.length > 0) {
+      // Only set defaults if no filters are set at all
+      if (!filters.year && !filters.seasonId && !filters.divisionId && !filters.searchTerm && filters.awards.length === 0) {
+        // Find the latest year and season
+        const latestYear = Math.max(...filterOptions.seasons.map(s => s.year)).toString();
+        const latestSeason = filterOptions.seasons
+          .filter(s => s.year.toString() === latestYear)
+          .sort((a, b) => b.name.localeCompare(a.name))[0]; // Sort by name descending to get latest
+        
+        setFilters(prev => ({
+          ...prev,
+          year: latestYear,
+          seasonId: latestSeason._id
+        }));
+      }
+    }
+  }, [filterOptions]);
+
   const handleFilterChange = (newFilters: Partial<TeamFilterState>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setFilters((prev) => {
+      const updated = { ...prev, ...newFilters };
+      
+      // If year changed, auto-select the latest season for that year
+      if (newFilters.year && newFilters.year !== prev.year && filterOptions) {
+        const seasonsForYear = filterOptions.seasons.filter(s => s.year.toString() === newFilters.year);
+        if (seasonsForYear.length > 0) {
+          const latestSeason = seasonsForYear.sort((a, b) => b.name.localeCompare(a.name))[0];
+          updated.seasonId = latestSeason._id;
+          updated.divisionId = undefined; // Clear division when season changes
+        }
+      }
+      
+      return updated;
+    });
   };
 
   const filteredTeams = useMemo(() => {
     return teams.filter((team) => {
-      const matchesSearch = filters.searchTerm
-        ? team.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-          (team.region?.toLowerCase() || "").includes(filters.searchTerm.toLowerCase()) ||
-          team.coach.toLowerCase().includes(filters.searchTerm.toLowerCase())
-        : true;
+      // Match by search term
+      const matchesSearch = !filters.searchTerm || [
+        team.name,
+        team.region || '',
+        team.coach || ''
+      ].some(field => 
+        field.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      );
       
-      const matchesDivision =
-        filters.division === "all" || team.division === filters.division;
+      // Match by division if selected
+      const matchesDivision = !filters.divisionId || 
+        (team.division && team.division._id === filters.divisionId);
       
-      const matchesYear =
-        filters.year === "all" ||
-        team.sessionIds.some(() => true); // Temporary pass-through until we have session data
+      // Match by season - only filter if seasonId is set
+      const matchesSeason = !filters.seasonId || 
+        (team.season && team.season._id === filters.seasonId);
       
-      const matchesSession =
-        filters.session === "all" ||
-        team.sessionIds.some(() => true); // Temporary pass-through until we have session data
-      
-      const matchesAwards =
-        filters.awards.length === 0 ||
-        filters.awards.some((award) => team.awards.includes(award));
+      // Match by awards
+      const matchesAwards = filters.awards.length === 0 ||
+        filters.awards.some((award) => 
+          Array.isArray(team.awards) && team.awards.includes(award)
+        );
 
       return (
         matchesSearch &&
         matchesDivision &&
-        matchesYear &&
-        matchesSession &&
+        matchesSeason &&
         matchesAwards
       );
     });
@@ -78,14 +122,21 @@ export function useTeamFilters(teams: Team[]) {
 
     // Group by division and sort by win percentage
     const divisions = Array.from(
-      new Set(teamStats.map((team) => team.division))
-    );
-    return divisions.map((division) => ({
-      division,
-      teams: teamStats
-        .filter((team) => team.division === division)
-        .sort((a, b) => b.winPercentage - a.winPercentage),
-    }));
+      new Set(teamStats.map((team) => team.division?._id))
+    ).filter((id): id is string => id !== undefined);
+
+    return divisions.map((divisionId) => {
+      const divisionTeams = teamStats.filter((team) => team.division?._id === divisionId);
+      const divisionName = divisionTeams[0]?.division?.name || 'Unknown Division';
+      
+      return {
+        division: {
+          _id: divisionId,
+          name: divisionName
+        },
+        teams: divisionTeams.sort((a, b) => b.winPercentage - a.winPercentage),
+      };
+    });
   }, [filteredTeams]);
 
   return {

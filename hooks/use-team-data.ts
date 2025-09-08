@@ -3,32 +3,54 @@ import { fetchTeams, fetchTeamFilters } from "@/lib/data/fetch-teams";
 import { Team } from "@/lib/types/teams";
 import { sampleTeams } from "@/lib/data/teams";
 
+interface Season {
+  _id: string;
+  name: string;
+  year: number;
+  activeDivisions: Array<{
+    division: { _ref: string };
+    status: string;
+  }>;
+}
+
+interface Division {
+  _id: string;
+  name: string;
+  season: { _ref: string };
+}
+
 type FilterOptions = {
-  divisions: string[];
+  divisions: Division[];
+  seasons: Season[];
   years: string[];
-  sessions: string[];
   awards: string[];
 };
 
 function transformTeam(team: any): Team {
   return {
-    id: team.id,
+    id: team._id,
     name: team.name,
     logo: team.logo,
-    division: team.division,
-    coach: team.coach,
+    division: team.division ? {
+      _id: team.division._id,
+      name: team.division.name
+    } : undefined,
+    season: team.season ? {
+      _id: team.season._id,
+      name: team.season.name,
+      year: team.season.year
+    } : undefined,
+    coach: team.coach || 'TBA',
     region: team.region || "Unknown Region",
     description: team.description,
     homeVenue: team.homeVenue,
     awards: team.awards || [],
-    sessionIds: team.sessionIds || [],
     stats: team.stats || {
       wins: 0,
       losses: 0,
       pointsFor: 0,
       pointsAgainst: 0,
-      gamesPlayed: 0,
-      streak: [],
+      gamesPlayed: 0
     },
     record: team.record,
   };
@@ -40,8 +62,8 @@ export function useTeamData() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     divisions: [],
+    seasons: [],
     years: [],
-    sessions: [],
     awards: [],
   });
 
@@ -57,10 +79,10 @@ export function useTeamData() {
           .map(transformTeam);
         setTeams(transformedTeams);
         setFilterOptions({
-          divisions: (filtersData.divisions || []) as string[],
-          years: (filtersData.years || []) as string[],
-          sessions: (filtersData.sessions || []) as string[],
-          awards: (filtersData.awards || []) as string[],
+          divisions: filtersData.divisions || [],
+          seasons: filtersData.seasons || [],
+          years: Array.from(new Set(filtersData.seasons?.map((s: Season) => s.year.toString()) || [])),
+          awards: Array.from(new Set((filtersData.awards || []) as string[])),
         });
       } catch (err) {
         console.error('Error loading teams:', err);

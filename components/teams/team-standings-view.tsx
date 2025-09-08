@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X as XIcon, Minus } from "lucide-react";
-import { Team, TeamWithStats } from "@/lib/types/teams";
+import { Team } from "@/lib/types/teams";
 
 interface TeamStandingsViewProps {
   teams: Team[];
@@ -35,7 +35,7 @@ function StreakBadge({ result }: StreakBadgeProps) {
 
 export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsViewProps) {
   // Calculate additional stats for each team
-  const teamsWithStats: TeamWithStats[] = teams.map((team) => {
+  const teamsWithStats = teams.map((team) => {
     const winPercentage =
       team.stats.gamesPlayed > 0
         ? (team.stats.wins / team.stats.gamesPlayed) * 100
@@ -60,24 +60,63 @@ export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsVie
   });
 
   // Group teams by division
-  const divisions = Array.from(new Set(teamsWithStats.map((team) => team.division)));
-  const groupedTeams = divisions.map((division) => ({
-    division,
-    teams: teamsWithStats
-      .filter((team) => team.division === division)
-      .sort((a, b) => b.winPercentage - a.winPercentage),
-  }));
+  const groupedTeams = teamsWithStats.reduce((acc, team) => {
+    if (!team.division?._id) {
+      // Handle teams without division
+      const unassignedGroup = acc.find(g => g.division._id === 'unassigned');
+      if (unassignedGroup) {
+        unassignedGroup.teams.push(team);
+      } else {
+        acc.push({
+          division: { _id: 'unassigned', name: 'Unassigned' },
+          teams: [team]
+        });
+      }
+      return acc;
+    }
+
+    // At this point we know team.division exists due to the earlier check
+    const division = team.division!;
+    const existingGroup = acc.find(g => g.division._id === division._id);
+    if (existingGroup) {
+      existingGroup.teams.push(team);
+    } else {
+      acc.push({
+        division: {
+          _id: division._id,
+          name: division.name
+        },
+        teams: [team]
+      });
+    }
+    return acc;
+  }, [] as Array<{
+    division: { _id: string; name: string };
+    teams: typeof teamsWithStats;
+  }>);
+
+  // Sort teams within each division by win percentage
+  groupedTeams.forEach(group => {
+    group.teams.sort((a, b) => b.winPercentage - a.winPercentage);
+  });
+
+  // Sort divisions to put unassigned last
+  groupedTeams.sort((a, b) => {
+    if (a.division._id === 'unassigned') return 1;
+    if (b.division._id === 'unassigned') return -1;
+    return a.division.name.localeCompare(b.division.name);
+  });
 
   return (
     <div className="space-y-8">
       {groupedTeams.map(({ division, teams }) => (
-        <div key={division}>
-          <h3 className="text-xl font-bold text-foreground mb-4">{division}</h3>
+        <div key={division._id}>
+          <h3 className="text-xl font-bold text-foreground mb-4">{division.name}</h3>
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
+                <table key={`${division._id}-table`} className="w-full">
+                  <thead key={`${division._id}-thead`}>
                     <tr className="border-b bg-muted/50">
                       <th className="text-left p-4 font-semibold">Rank</th>
                       <th className="text-left p-4 font-semibold">Team</th>
@@ -90,10 +129,10 @@ export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsVie
                       <th className="text-center p-4 font-semibold">Streak</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody key={`${division._id}-tbody`}>
                     {teams.map((team, index) => (
                       <tr
-                        key={team.id}
+                        key={`${division._id}-${team.id}`}
                         className={`border-b hover:bg-muted/30 transition-colors ${
                           index < playoffCutoff
                             ? "bg-green-50 dark:bg-green-950/20"
@@ -158,9 +197,11 @@ export function TeamStandingsView({ teams, playoffCutoff = 4 }: TeamStandingsVie
                         </td>
                         <td className="p-4">
                           <div className="flex items-center justify-center gap-1">
-                            {team.stats.streak.map((result, i) => (
+                            {/* Streak functionality temporarily disabled for development */}
+                            {/* {team.stats.streak?.map((result, i) => (
                               <StreakBadge key={i} result={result} />
-                            ))}
+                            ))} */}
+                            <span className="text-xs text-muted-foreground">-</span>
                           </div>
                         </td>
                       </tr>

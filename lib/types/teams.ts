@@ -6,17 +6,39 @@ export interface TeamStats {
   gamesPlayed: number;
 }
 
+export interface Division {
+  _id: string;
+  name: string;
+  season?: {
+    _ref: string;
+  };
+}
+
+export interface Season {
+  _id: string;
+  name: string;
+  year: number;
+  activeDivisions?: Array<{
+    division: Division;
+    status: string;
+    teamLimits?: {
+      min: number;
+      max: number;
+    };
+  }>;
+}
+
 export interface Team {
   id: string;
   name: string;
   logo?: string;
-  division: string;
+  division?: Division;
+  season?: Season;
   coach: string;
   region?: string;
   description?: string;
   homeVenue?: string;
   awards: string[];
-  sessionIds: string[];
   stats: TeamStats;
   record?: string;
 }
@@ -24,9 +46,9 @@ export interface Team {
 
 export interface TeamFilterState {
   searchTerm: string;
-  division: string;
-  year: string;
-  session: string;
+  year: string;  // Required
+  seasonId: string;  // Required
+  divisionId?: string;
   awards: string[];
 }
 
