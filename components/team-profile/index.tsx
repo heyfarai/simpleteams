@@ -16,22 +16,19 @@ interface TeamProfileProps {
 
 export function TeamProfile({ teamId }: TeamProfileProps) {
   const { isFollowing, toggleFollow } = useFavoriteTeam(teamId);
-  
-  const { data: team, isLoading, error } = useQuery({
+
+  const {
+    data: team,
+    isLoading,
+    error,
+  } = useQuery({
     enabled: !!teamId,
     queryKey: ["team", teamId],
     queryFn: () => fetchTeamDetails(teamId),
   });
 
-  const {
-    selectedYear,
-    selectedSeason,
-    availableYears,
-    filteredSeasons,
-    currentRoster,
-    setSelectedYear,
-    setSelectedSeason,
-  } = useTeamSeasonFilters(team);
+  const { selectedSeason, availableSeasons, currentRoster, setSelectedSeason } =
+    useTeamSeasonFilters(team);
 
   if (isLoading) {
     return (
@@ -52,8 +49,8 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
   }
 
   const hasRosters = team.rosters?.length > 0;
-  const totalPlayers = team.rosters?.reduce((total, roster) => total + roster.players.length, 0) || 0;
-  const currentSeasonName = filteredSeasons.find(s => s.id === selectedSeason)?.name || "";
+  const currentSeasonName =
+    availableSeasons.find((s) => s.id === selectedSeason)?.name || "";
 
   return (
     <div className="container mx-auto px-4 py-8 mt-48">
@@ -67,25 +64,19 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
               onToggleFollow={toggleFollow}
             />
           </div>
-          
+
           {/* Season Filters - only show if team has rosters */}
           {hasRosters && (
             <SeasonFilters
-              selectedYear={selectedYear}
               selectedSeason={selectedSeason}
-              availableYears={availableYears}
-              filteredSeasons={filteredSeasons}
-              onYearChange={setSelectedYear}
+              availableSeasons={availableSeasons}
               onSeasonChange={setSelectedSeason}
             />
           )}
         </div>
 
         {/* Team Stats Overview */}
-        <TeamStatsOverview
-          stats={team.stats}
-          totalPlayers={totalPlayers}
-        />
+        <TeamStatsOverview seasonStats={currentRoster?.seasonStats} />
       </div>
 
       <div className="space-y-8">
@@ -94,7 +85,7 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
           <TeamRoster
             players={currentRoster.players}
             seasonName={currentSeasonName}
-            year={selectedYear}
+            year={currentRoster.season.year.toString()}
           />
         )}
 
@@ -102,7 +93,9 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
         {!hasRosters && (
           <div className="text-center py-12 bg-muted/30 rounded-lg">
             <h3 className="text-lg font-semibold mb-2">No Roster Data</h3>
-            <p className="text-muted-foreground">This team doesn't have any roster information yet.</p>
+            <p className="text-muted-foreground">
+              This team doesn't have any roster information yet.
+            </p>
           </div>
         )}
 

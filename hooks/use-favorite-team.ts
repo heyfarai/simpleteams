@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 
-export function useFavoriteTeam() {
-  const [favoriteTeam, setFavoriteTeam] = useState<any>(null)
+export function useFavoriteTeam(teamId: string) {
+  const [favoriteTeam, setFavoriteTeam] = useState<string | null>(null)
 
   useEffect(() => {
     // Load favorite team from localStorage on mount
@@ -17,17 +17,18 @@ export function useFavoriteTeam() {
     }
   }, [])
 
-  const updateFavoriteTeam = (team: any) => {
-    setFavoriteTeam(team)
-    if (team) {
-      localStorage.setItem("favoriteTeam", JSON.stringify(team))
+  const toggleFollow = () => {
+    const newValue = favoriteTeam === teamId ? null : teamId
+    setFavoriteTeam(newValue)
+    if (newValue) {
+      localStorage.setItem("favoriteTeam", JSON.stringify(newValue))
     } else {
       localStorage.removeItem("favoriteTeam")
     }
   }
 
   return {
-    favoriteTeam,
-    setFavoriteTeam: updateFavoriteTeam,
+    isFollowing: favoriteTeam === teamId,
+    toggleFollow,
   }
 }

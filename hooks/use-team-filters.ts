@@ -70,7 +70,16 @@ export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
   };
 
   const filteredTeams = useMemo(() => {
-    return teams.filter((team) => {
+    // Debug incoming teams
+    const targetTeam = teams.find(t => t.id === '13111760-ab34-4d1e-a512-cfe0c830312e');
+    if (targetTeam) {
+      console.log('useTeamFilters - incoming teams:', {
+        team: targetTeam,
+        filters
+      });
+    }
+
+    const filtered = teams.filter((team) => {
       // Match by search term
       const matchesSearch =
         !filters.searchTerm ||
@@ -88,6 +97,17 @@ export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
         !filters.seasonId ||
         (team.season && team.season._id === filters.seasonId);
 
+      // Debug season matching
+      if (team.id === '13111760-ab34-4d1e-a512-cfe0c830312e') {
+        console.log('Season match debug:', {
+          filterSeasonId: filters.seasonId,
+          teamSeason: team.season,
+          teamRosters: team.rosters,
+          hasActiveSeason: Boolean(team.season),
+          seasonMatches: team.season?._id === filters.seasonId
+        });
+      }
+
       // Match by awards
       const matchesAwards =
         filters.awards.length === 0 ||
@@ -95,12 +115,39 @@ export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
           (award) => Array.isArray(team.awards) && team.awards.includes(award)
         );
 
-      return matchesSearch && matchesDivision && matchesSeason && matchesAwards;
+      const matches = matchesSearch && matchesDivision && matchesSeason && matchesAwards;
+      
+      // Debug why team might be filtered out
+      if (team.id === '13111760-ab34-4d1e-a512-cfe0c830312e') {
+        console.log('useTeamFilters - filter matches:', {
+          matchesSearch,
+          matchesDivision,
+          matchesSeason,
+          matchesAwards,
+          seasonId: filters.seasonId,
+          teamSeasonId: team.season?._id
+        });
+      }
+      
+      return matches;
     });
+
+    // Debug filtered results
+    const targetFiltered = filtered.find(t => t.id === '13111760-ab34-4d1e-a512-cfe0c830312e');
+    if (targetFiltered || targetTeam) {
+      console.log('useTeamFilters - after filtering:', {
+        found: Boolean(targetFiltered),
+        team: targetFiltered
+      });
+    }
+
+    return filtered;
   }, [teams, filters]);
 
   const getStandingsData = useMemo(() => {
-    const teamStats = filteredTeams.map((team) => {
+    if (!filteredTeams) return [];
+    
+    const teamStats = filteredTeams.map((team: Team) => {
       const stats = team.stats || {
         wins: 0,
         losses: 0,
@@ -110,12 +157,10 @@ export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
         streak: [],
       };
 
-      const winPercentage =
-        stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed) * 100 : 0;
-      const ppg =
-        stats.gamesPlayed > 0 ? stats.pointsFor / stats.gamesPlayed : 0;
-      const oppPpg =
-        stats.gamesPlayed > 0 ? stats.pointsAgainst / stats.gamesPlayed : 0;
+      const gamesPlayed = stats.gamesPlayed ?? 0;
+      const winPercentage = gamesPlayed > 0 ? (stats.wins / gamesPlayed) * 100 : 0;
+      const ppg = gamesPlayed > 0 ? stats.pointsFor / gamesPlayed : 0;
+      const oppPpg = gamesPlayed > 0 ? stats.pointsAgainst / gamesPlayed : 0;
       const pointsDiff = ppg - oppPpg;
 
       return {
@@ -135,7 +180,7 @@ export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
 
     return divisions.map((divisionId) => {
       const divisionTeams = teamStats.filter(
-        (team) => team.division?._id === divisionId
+        (team: Team) => team.division?._id === divisionId
       );
       const divisionName =
         divisionTeams[0]?.division?.name || "Unknown Division";
@@ -145,7 +190,7 @@ export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
           _id: divisionId,
           name: divisionName,
         },
-        teams: divisionTeams.sort((a, b) => b.winPercentage - a.winPercentage),
+        teams: divisionTeams.sort((a: any, b: any) => b.winPercentage - a.winPercentage),
       };
     });
   }, [filteredTeams]);

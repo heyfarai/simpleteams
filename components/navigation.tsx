@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const { favoriteTeam } = useFavoriteTeam();
+  const { isFollowing } = useFavoriteTeam(""); // Empty string as no specific team is being followed in navigation
   const pathname = usePathname();
 
   const navItems = [

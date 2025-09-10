@@ -26,7 +26,17 @@ type FilterOptions = {
   awards: string[];
 };
 
-function transformTeam(team: any): Team {
+function transformTeam(team: any, seasonId?: string): Team {
+  // Debug team data transformation
+  if (team._id === '13111760-ab34-4d1e-a512-cfe0c830312e') {
+    const activeRoster = team.rosters?.find((r: any) => seasonId ? r.season._id === seasonId : true);
+    console.log('transformTeam debug:', {
+      teamId: team._id,
+      seasonId,
+      activeRoster,
+      foundSeason: activeRoster?.season
+    });
+  }
   return {
     id: team._id,
     name: team.name,
@@ -37,13 +47,7 @@ function transformTeam(team: any): Team {
           name: team.division.name,
         }
       : undefined,
-    season: team.season
-      ? {
-          _id: team.season._id,
-          name: team.season.name,
-          year: team.season.year,
-        }
-      : undefined,
+    season: team.rosters?.find((r: { season: { _id: string } }) => seasonId ? r.season._id === seasonId : true)?.season ?? undefined,
     coach: team.coach || "TBA",
     region: team.region || "Unknown Region",
     description: team.description,
@@ -57,6 +61,8 @@ function transformTeam(team: any): Team {
       gamesPlayed: 0,
     },
     record: team.record,
+    rosters: team.rosters || [], // Preserve rosters
+    showStats: team.showStats || false, // Preserve showStats
   };
 }
 
@@ -79,9 +85,31 @@ export function useTeamData(seasonId?: string) {
           fetchTeams(seasonId),
           fetchTeamFilters(),
         ]);
+        // Debug raw data
+        const targetTeam = teamsData.find((t) => t.id === '13111760-ab34-4d1e-a512-cfe0c830312e');
+        if (targetTeam) {
+          console.log('useTeamData - before transform:', {
+            team: targetTeam
+          });
+        }
+
+        // Debug seasonId
+        console.log('useTeamData - seasonId:', { seasonId });
+        
         const transformedTeams = (
           teamsData.length > 0 ? teamsData : sampleTeams
-        ).map(transformTeam);
+        ).map((team: any) => {
+          const transformed = transformTeam(team, seasonId);
+          if (team._id === '13111760-ab34-4d1e-a512-cfe0c830312e') {
+            console.log('useTeamData - after transform:', {
+              teamId: team._id,
+              seasonId,
+              transformed
+            });
+          }
+          return transformed;
+        });
+        // Remove duplicate debug logging since we have it in the map above
         setTeams(transformedTeams);
         setFilterOptions({
           divisions: filtersData.divisions || [],
@@ -96,7 +124,7 @@ export function useTeamData(seasonId?: string) {
       } catch (err) {
         console.error("Error loading teams:", err);
         setError("Failed to load teams data");
-        setTeams(sampleTeams.map(transformTeam));
+        setTeams(sampleTeams.map((team: any) => transformTeam(team, seasonId)));
       } finally {
         setIsLoading(false);
       }

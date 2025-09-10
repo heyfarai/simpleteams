@@ -1,9 +1,14 @@
 export interface TeamStats {
+  streak?: ("W" | "L" | "T")[];
   wins: number;
   losses: number;
+  ties?: number;
   pointsFor: number;
   pointsAgainst: number;
-  gamesPlayed: number;
+  gamesPlayed?: number;
+  homeRecord?: string;
+  awayRecord?: string;
+  conferenceRecord?: string;
 }
 
 export interface Division {
@@ -28,9 +33,19 @@ export interface Season {
   }>;
 }
 
+export interface TeamRoster {
+  season: {
+    _id: string;
+    name: string;
+    year: number;
+  };
+  seasonStats?: TeamStats;
+}
+
 export interface Team {
   id: string;
   name: string;
+  shortName?: string;
   logo?: string;
   division?: Division;
   season?: Season;
@@ -40,7 +55,9 @@ export interface Team {
   homeVenue?: string;
   awards: string[];
   stats: TeamStats;
+  rosters?: TeamRoster[];
   record?: string;
+  showStats?: boolean;
 }
 
 export interface TeamFilterState {

@@ -4,13 +4,31 @@ export const teamsQuery = groq`{
   "teams": *[_type == "team"] {
     _id,
     name,
+    shortName,
     "logo": logo.asset._ref,
     coach,
     region,
     description,
     homeVenue,
     awards,
-    stats
+    stats,
+    rosters[] {
+      "season": season->{
+        _id,
+        name,
+        year
+      },
+      seasonStats {
+        wins,
+        losses,
+        ties,
+        pointsFor,
+        pointsAgainst,
+        homeRecord,
+        awayRecord,
+        conferenceRecord
+      }
+    }
   },
   "seasons": *[_type == "season" && defined(activeDivisions)] | order(year desc) {
     _id,

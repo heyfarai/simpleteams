@@ -18,35 +18,33 @@ const client = createClient({
 
 async function debugQuery() {
   try {
-    // Create a test team
-    console.log('Creating test team...')
-    const testTeam = await client.create({
-      _type: 'team',
-      name: 'Test Team',
-      stats: {
-        wins: 0,
-        losses: 0,
-        pointsFor: 0,
-        pointsAgainst: 0,
-        gamesPlayed: 0
-      }
-    })
-    console.log('Created team:', testTeam)
-
-    // Query the team
-    const query = `*[_type == "team" && _id == $id][0] {
+    const teamId = '13111760-ab34-4d1e-a512-cfe0c830312e';
+    
+    // Query the team with roster data
+    const query = `*[_type == "team" && _id == $teamId][0] {
       _id,
       name,
-      stats
+      rosters[] {
+        "season": season->{
+          _id,
+          name,
+          year
+        },
+        seasonStats {
+          wins,
+          losses,
+          ties,
+          pointsFor,
+          pointsAgainst,
+          homeRecord,
+          awayRecord,
+          conferenceRecord
+        }
+      }
     }`
     console.log('\nQuerying team...')
-    const result = await client.fetch(query, { id: testTeam._id })
+    const result = await client.fetch(query, { teamId })
     console.log('Query result:', JSON.stringify(result, null, 2))
-
-    // Clean up
-    console.log('\nCleaning up...')
-    await client.delete(testTeam._id)
-    console.log('Test team deleted')
   } catch (error) {
     console.error('Error:', error)
   }
