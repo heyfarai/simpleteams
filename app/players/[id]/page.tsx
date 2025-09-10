@@ -1,15 +1,17 @@
 import { PlayerProfile } from "@/components/player-profile"
 
 interface PlayerPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default function PlayerPage({ params }: PlayerPageProps) {
+export default async function PlayerPage({ params }: PlayerPageProps) {
+  const { id } = await params
+
   return (
     <main className="min-h-screen bg-background">
-      <PlayerProfile playerId={params.id} />
+      <PlayerProfile playerId={id} />
     </main>
   )
 }

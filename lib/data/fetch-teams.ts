@@ -150,6 +150,58 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
   }
 }
 
+export async function fetchTeamDetails(teamId: string) {
+  try {
+    const team = await client.fetch(`*[_type == "team" && _id == $teamId][0] {
+      _id,
+      name,
+      "logo": logo.asset._ref,
+      coach,
+      region,
+      description,
+      homeVenue,
+      awards,
+      stats,
+      rosters[] {
+        "season": season->{
+          _id,
+          name,
+          year
+        },
+        players[] {
+          "player": player->{
+            _id,
+            name
+          },
+          jerseyNumber,
+          position,
+          status
+        }
+      }
+    }`, { teamId });
+
+    if (!team) {
+      throw new Error(`Team not found: ${teamId}`);
+    }
+
+    return {
+      ...team,
+      id: team._id,
+      rosters: team.rosters || [],
+      stats: {
+        wins: team.stats?.wins || 0,
+        losses: team.stats?.losses || 0,
+        pointsFor: team.stats?.pointsFor || 0,
+        pointsAgainst: team.stats?.pointsAgainst || 0,
+        gamesPlayed: team.stats?.gamesPlayed || 0,
+      }
+    };
+  } catch (error) {
+    console.error("Error fetching team details:", error);
+    throw error;
+  }
+}
+
 export async function fetchTeamFilters() {
   try {
     const [seasonsData, awards] = await Promise.all([

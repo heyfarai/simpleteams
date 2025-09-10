@@ -26,7 +26,7 @@ export const teamsQuery = groq`{
   }
 }`;
 
-export const teamDetailsQuery = groq`*[_type == "team"] {
+export const teamDetailsQuery = groq`*[_type == "team" && _id == $teamId][0] {
   _id,
   name,
   "logo": logo.asset._ref,
@@ -35,5 +35,21 @@ export const teamDetailsQuery = groq`*[_type == "team"] {
   description,
   homeVenue,
   awards,
-  stats
+  stats,
+  rosters[] {
+    "season": season->{
+      _id,
+      name,
+      year
+    },
+    players[] {
+      "player": player->{
+        _id,
+        name
+      },
+      jerseyNumber,
+      position,
+      status
+    }
+  }
 }`;

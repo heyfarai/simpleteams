@@ -1,12 +1,15 @@
-import { GamesSchedule } from "@/components/games-schedule";
-import { getFilterData } from "@/lib/sanity/get-filter-data";
+import { Suspense } from "react";
+import { GamesList } from "@/components/games/games-list";
+import { GamesLoading } from "@/components/games/games-loading";
+import { fetchFilterData } from "@/lib/data/fetch-filters";
 
 export const metadata = {
-  title: "Games",
+  title: "Games | NCHC League",
+  description: "View all league games and tournaments",
 };
 
 export default async function GamesPage() {
-  const filterData = await getFilterData();
+  const filterData = await fetchFilterData();
 
   return (
     <main className="min-h-screen bg-background">
@@ -19,7 +22,9 @@ export default async function GamesPage() {
             Stay up to date with all league games and tournaments
           </p>
         </div>
-        <GamesSchedule filterData={filterData} />
+        <Suspense fallback={<GamesLoading />}>
+          <GamesList filterData={filterData} />
+        </Suspense>
       </div>
     </main>
   );

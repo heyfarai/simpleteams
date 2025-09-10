@@ -6,22 +6,27 @@ import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { Navigation } from "@/components/navigation";
 import { Suspense } from "react";
-import "./globals.css";
+import { Providers } from '@/lib/providers'
+import { Toaster } from '@/components/ui/toaster'
+import './globals.css'
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Navigation />
-        </Suspense>
-        {children}
-        <Analytics />
+        <Providers>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Navigation />
+          </Suspense>
+          {children}
+          <Analytics />
+          <Toaster />
+        </Providers>
       </body>
     </html>
-  )
+  );
 }

@@ -41,6 +41,8 @@
     "@sanity/client": "^7.11.0",
     "@sanity/image-url": "^1.2.0",
     "@sveltejs/kit": "latest",
+    "@tanstack/react-query": "^5.87.1",
+    "@tanstack/react-query-devtools": "^5.87.4",
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",

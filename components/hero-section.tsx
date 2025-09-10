@@ -83,7 +83,7 @@ export function HeroSection() {
         </div>
 
         {/* Video Controls Overlay */}
-        <div className="hidden top-6 right-6 flex gap-2 z-20">
+        <div className="hidden top-6 right-6  gap-2 z-20">
           <Button
             variant="secondary"
             size="icon"

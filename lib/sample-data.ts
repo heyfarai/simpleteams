@@ -58,6 +58,7 @@ export interface Player {
     hudl?: string;
   };
   contactEmail: string;
+  seasons?: string[]; // Season IDs this player is active in
 }
 
 export interface Season {
@@ -139,6 +140,24 @@ export interface Game {
   updatedAt: string;
 }
 
+export interface TeamRosterPlayer {
+  player: {
+    _ref: string;
+    name: string;
+  };
+  jerseyNumber: number;
+  position: string;
+  status: 'active' | 'inactive' | 'injured';
+}
+
+export interface TeamRoster {
+  season: {
+    _ref: string;
+    name: string;
+  };
+  players: TeamRosterPlayer[];
+}
+
 export interface Team {
   id: string;
   name: string;
@@ -161,6 +180,7 @@ export interface Team {
   status?: "active" | "inactive" | "pending";
   registrationDate?: string;
   isPersistent?: boolean; // Teams persist across seasons
+  rosters?: TeamRoster[];
   stats?: {
     wins: number;
     losses: number;

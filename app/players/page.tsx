@@ -1,4 +1,4 @@
-import { PlayersShowcase } from "@/components/players-showcase";
+import PlayersShowcase from "@/components/players-showcase";
 
 export default function PlayersPage() {
   return (

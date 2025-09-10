@@ -1,15 +1,17 @@
 import { TeamProfile } from "@/components/team-profile"
 
 interface TeamPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default function TeamPage({ params }: TeamPageProps) {
+export default async function TeamPage({ params }: TeamPageProps) {
+  const { id } = await params
+
   return (
     <main className="min-h-screen bg-background">
-      <TeamProfile teamId={params.id} />
+      <TeamProfile teamId={id} />
     </main>
   )
 }

@@ -24,21 +24,6 @@ import {
   getConferencesBySeason,
 } from "./sample-data";
 
-export interface TeamAdminUser {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: "head_coach" | "team_manager" | "assistant_coach";
-  teamId: string;
-  permissions: string[];
-  isActive: boolean;
-  invitedBy?: string;
-  invitedAt?: string;
-  acceptedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export interface TeamPermission {
   id: string;
@@ -159,7 +144,7 @@ export const sampleTeamInvoices: TeamInvoice[] = [
     status: "paid",
     invoiceNumber: "INV-2024-001",
     paidAt: "2024-08-25",
-    paidBy: "team-admin-1",
+    paidBy: "admin-1",
     createdBy: "admin-1",
     createdAt: "2024-08-20",
     updatedAt: "2024-08-25",
@@ -188,7 +173,7 @@ export const sampleTeamPayments: TeamPayment[] = [
     amount: 500,
     paymentMethod: "bank_transfer",
     paymentProof: "/uploads/payment-proof-1.pdf",
-    uploadedBy: "team-admin-1",
+    uploadedBy: "admin-1",
     uploadedAt: "2024-08-25",
     verifiedBy: "admin-1",
     verifiedAt: "2024-08-26",
@@ -336,11 +321,6 @@ export function getAdminOfficialsBySeason(seasonId: string): Official[] {
   return season.officials.map(getOfficialById).filter(Boolean) as Official[];
 }
 
-// Helper functions for team admin functionality
-export function getTeamAdminsByTeamId(teamId: string): any[] {
-  // Placeholder for team admin users data
-  return [];
-}
 
 export function getTeamRegistrationsByTeamId(
   teamId: string

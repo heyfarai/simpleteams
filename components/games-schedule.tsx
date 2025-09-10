@@ -5,25 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Calendar, Clock, MapPin, Plus, Trophy, Users } from "lucide-react";
 import type { FilterData } from "@/lib/sanity/get-filter-data";
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Download,
-  Plus,
-  Trophy,
-  Users,
-  Filter,
-  X,
-} from "lucide-react";
+import { GameFilters } from "./games/game-filters";
+import { GamesList } from "./games/games-list";
+import { fetchAllGames, type Game } from "@/lib/data/fetch-games";
+import { useQuery } from "@tanstack/react-query";
 import {
   sampleGames,
   sampleSessions,
@@ -33,9 +20,6 @@ import {
 } from "@/lib/sample-data";
 import {
   TransformedGame,
-  FilterState,
-  filterGames,
-  groupGamesBySessionAndDivision,
   getActiveFiltersCount,
 } from "@/lib/utils/game-filters";
 
@@ -72,116 +56,79 @@ interface Tournament {
 }
 
 export function GamesSchedule({ filterData }: GamesScheduleProps) {
-  // Group all useState hooks together at the top
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedDivision, setSelectedDivision] = useState<string>("all");
-  const [selectedVenue, setSelectedVenue] = useState<string>("all");
-  const [selectedConference, setSelectedConference] = useState<string>("all");
+  const [selectedSession, setSelectedSession] = useState<string>("all");
   const [selectedSeason, setSelectedSeason] = useState<string>("all");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Place useEffect after all useState hooks
-  useEffect(() => {
-    if (!filterData) {
-      setError("Failed to load filter data");
-    } else if (
-      !filterData.seasons ||
-      !filterData.conferences ||
-      !filterData.divisions
-    ) {
-      setError("Incomplete filter data");
-    }
-    setIsLoading(false);
-  }, [filterData]);
+  // Fetch games using the same pattern as players/teams
+  const {
+    data = { games: [], sessions: [] },
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["games"],
+    queryFn: fetchAllGames,
+  });
+
+  const { games, sessions } = data;
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading filters...</div>;
+    return <div className="text-center py-8">Loading games...</div>;
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
+    return (
+      <div className="text-center py-8 text-red-500">Error loading games</div>
+    );
   }
 
-  const transformGameData = (game: {
-    id: string;
-    homeTeamId: string;
-    awayTeamId: string;
-    homeScore?: number;
-    awayScore?: number;
-    date: string;
-    time: string;
-    venue: string;
-    venueAddress: string;
-    division: string;
-    status: string;
-    sessionId: string;
-  }): TransformedGame => {
-    const session = getSessionById(game.sessionId);
-    const season = session ? getSeasonById(session.seasonId) : null;
-    const homeTeam = getTeamById(game.homeTeamId);
-    const awayTeam = getTeamById(game.awayTeamId);
+  // Transform Sanity games to component format
+  const transformedGames = games.map((game) => ({
+    id: game._id,
+    sessionId: game.session?._id, // For filtering
+    sessionName: game.session?.name || "Unknown Session", // For display
+    season: game.season, // Keep original season reference for filtering
+    homeTeam: game.homeTeam?.name || "Unknown Team",
+    awayTeam: game.awayTeam?.name || "Unknown Team",
+    homeScore: game.score?.homeScore || null,
+    awayScore: game.score?.awayScore || null,
+    date: game.gameDate,
+    time: game.gameTime,
+    venue: "TBD", // TODO: Add venue from location reference
+    venueAddress: "",
+    division: "TBD", // TODO: Add division from game reference
+    status: game.status,
+    isTournament: game.session?.type === "playoff",
+    tournamentName:
+      game.session?.type === "playoff" ? game.session.name : undefined,
+  }));
 
-    return {
-      id: game.id,
-      conference: "unknown", // Default since we're using sample data
-      homeTeam: homeTeam?.name || "Unknown Team",
-      awayTeam: awayTeam?.name || "Unknown Team",
-      homeScore: game.homeScore || null,
-      awayScore: game.awayScore || null,
-      date: game.date,
-      time: game.time,
-      venue: game.venue,
-      venueAddress: game.venueAddress,
-      division: game.division,
-      status: game.status,
-      isTournament: session?.type === "playoff",
-      tournamentName: session?.type === "playoff" ? session.name : undefined,
-      sessionName: session?.name,
-      sessionType: session?.type,
-      seasonName: season?.name,
-      seasonType: season?.type,
-      sessionId: game.sessionId,
-    };
-  };
+  // Apply filters to games
+  const filteredGames = transformedGames.filter((game) => {
+    if (
+      selectedSeason !== "all" &&
+      game.season?.year.toString() !== selectedSeason
+    ) {
+      return false;
+    }
+    if (selectedSession !== "all" && game.sessionId !== selectedSession) {
+      console.log("Filtering out game:", game.id, "session:", game.sessionId);
+      return false;
+    }
+    if (selectedDivision !== "all" && game.division !== selectedDivision) {
+      return false;
+    }
+    return true;
+  });
 
-  const upcomingGames: TransformedGame[] = sampleGames
-    .filter((game) => game.status === "scheduled")
-    .map((game) =>
-      transformGameData({
-        id: game.id,
-        homeTeamId: game.homeTeamId,
-        awayTeamId: game.awayTeamId,
-        homeScore: game.homeScore,
-        awayScore: game.awayScore,
-        date: game.date,
-        time: game.time,
-        venue: game.venue,
-        venueAddress: game.venueAddress,
-        division: game.division,
-        status: game.status,
-        sessionId: game.sessionId,
-      })
-    );
+  const upcomingGames = filteredGames.filter(
+    (game) => game.status === "scheduled" || game.status === "in-progress"
+  );
 
-  const completedGames: TransformedGame[] = sampleGames
-    .filter((game) => game.status === "completed")
-    .map((game) =>
-      transformGameData({
-        id: game.id,
-        homeTeamId: game.homeTeamId,
-        awayTeamId: game.awayTeamId,
-        homeScore: game.homeScore,
-        awayScore: game.awayScore,
-        date: game.date,
-        time: game.time,
-        venue: game.venue,
-        venueAddress: game.venueAddress,
-        division: game.division,
-        status: game.status,
-        sessionId: game.sessionId,
-      })
-    );
+  const completedGames = filteredGames.filter(
+    (game) => game.status === "final"
+  );
 
   interface Tournament {
     id: string;
@@ -223,38 +170,27 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
       } satisfies Tournament;
     });
 
-  // Initialize filter data with proper typing
-  const divisions = [
-    { _id: "all", name: "All Divisions" },
-    ...(filterData.divisions || []),
-  ];
-  const conferences = [
-    { _id: "all", name: "All Conferences" },
-    ...(filterData.conferences || []),
-  ];
-  const seasons = [
-    { _id: "all", name: "All Seasons" },
-    ...(filterData.seasons || []),
-  ];
-  // For now, keep venues from sample data until we add them to Sanity
-  const venues = [
-    "all",
-    ...Array.from(new Set(sampleGames.map((game) => game.venue))),
-  ];
+  console.log("Sessions from query:", sessions);
+  console.log("Selected session:", selectedSession);
+
+  // Create extended filter data with sessions from the query
+  const extendedFilterData = {
+    ...filterData,
+    sessions: [{ _id: "all", name: "All Sessions" }, ...sessions],
+  };
 
   const clearAllFilters = () => {
     setSelectedDivision("all");
-    setSelectedVenue("all");
-    setSelectedConference("all");
+    setSelectedSession("all");
     setSelectedSeason("all");
   };
 
-  const activeFiltersCount = getActiveFiltersCount({
-    selectedDivision,
-    selectedVenue,
-    selectedConference,
-    selectedSeason,
-  });
+  // Count active filters manually
+  const activeFiltersCount = [
+    selectedDivision !== "all",
+    selectedSession !== "all",
+    selectedSeason !== "all",
+  ].filter(Boolean).length;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -278,435 +214,49 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
 
   return (
     <div className="flex gap-6">
-      <div className="hidden lg:block w-80 flex-shrink-0">
-        <div className="sticky top-6">
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Filters</CardTitle>
-                {activeFiltersCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearAllFilters}
-                    className="text-xs"
-                  >
-                    Clear All
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Season Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Season</label>
-                <Select
-                  value={selectedSeason}
-                  onValueChange={setSelectedSeason}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Seasons" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Seasons</SelectItem>
-                    {seasons
-                      .filter((s) => s._id !== "all")
-                      .map((season) => (
-                        <SelectItem
-                          key={season._id}
-                          value={season._id}
-                        >
-                          {season.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Conference Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Conference</label>
-                <Select
-                  value={selectedConference}
-                  onValueChange={setSelectedConference}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Conferences" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {conferences.map((conference) => (
-                      <SelectItem
-                        key={conference._id}
-                        value={conference._id}
-                      >
-                        {conference.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Division Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Division</label>
-                <Select
-                  value={selectedDivision}
-                  onValueChange={setSelectedDivision}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Divisions" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {divisions.map((division) => (
-                      <SelectItem
-                        key={division._id}
-                        value={division._id}
-                      >
-                        {division.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Venue Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Venue</label>
-                <Select
-                  value={selectedVenue}
-                  onValueChange={setSelectedVenue}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Venues" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Venues</SelectItem>
-                    {venues.map((venue) => (
-                      <SelectItem
-                        key={venue}
-                        value={venue}
-                      >
-                        {venue}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Export Options */}
-              <div className="pt-4 border-t space-y-2">
-                <label className="text-sm font-medium">Export</label>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start bg-transparent"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Export PDF
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start bg-transparent"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Export iCal
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <GameFilters
+        filterData={extendedFilterData}
+        selectedSeason={selectedSeason}
+        selectedSession={selectedSession}
+        selectedDivision={selectedDivision}
+        onSeasonChange={setSelectedSeason}
+        onSessionChange={setSelectedSession}
+        onDivisionChange={setSelectedDivision}
+        onClearAll={clearAllFilters}
+        activeFiltersCount={activeFiltersCount}
+        showMobileFilters={showMobileFilters}
+        onToggleMobileFilters={() => setShowMobileFilters(!showMobileFilters)}
+      />
 
       {/* Main Content */}
       <div className="flex-1 min-w-0">
-        <div className="lg:hidden mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="w-full justify-between"
-          >
-            <span className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Filters
-              {activeFiltersCount > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ml-2"
-                >
-                  {activeFiltersCount}
-                </Badge>
-              )}
-            </span>
-            {showMobileFilters ? (
-              <X className="h-4 w-4" />
-            ) : (
-              <Filter className="h-4 w-4" />
-            )}
-          </Button>
-
-          {/* Mobile Filters */}
-          {showMobileFilters && (
-            <Card className="mt-4">
-              <CardContent className="p-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Select
-                    value={selectedSeason}
-                    onValueChange={setSelectedSeason}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Season" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Seasons</SelectItem>
-                      {seasons.map((season) => (
-                        <SelectItem
-                          key={season._id}
-                          value={season._id}
-                        >
-                          {season.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={selectedConference}
-                    onValueChange={setSelectedConference}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Conference" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Conferences</SelectItem>
-                      {conferences.map((conference) => (
-                        <SelectItem
-                          key={conference._id}
-                          value={conference._id}
-                        >
-                          {conference.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={selectedDivision}
-                    onValueChange={setSelectedDivision}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Division" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Divisions</SelectItem>
-                      {divisions.map((division) => (
-                        <SelectItem
-                          key={division._id}
-                          value={division._id}
-                        >
-                          {division.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={selectedVenue}
-                    onValueChange={setSelectedVenue}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Venue" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Venues</SelectItem>
-                      {venues.map((venue) => (
-                        <SelectItem
-                          key={venue}
-                          value={venue}
-                        >
-                          {venue}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 bg-transparent"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    PDF
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 bg-transparent"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    iCal
-                  </Button>
-                  {activeFiltersCount > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearAllFilters}
-                    >
-                      Clear
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
         <Tabs
           defaultValue="upcoming"
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upcoming">Upcoming Games</TabsTrigger>
             <TabsTrigger value="completed">Completed Games</TabsTrigger>
-            <TabsTrigger value="tournaments">Tournaments</TabsTrigger>
           </TabsList>
 
           <TabsContent
             value="upcoming"
             className="space-y-6"
           >
-            {(() => {
-              const groupedGames = groupGamesBySessionAndDivision(
-                upcomingGames,
-                {
-                  selectedDivision,
-                  selectedVenue,
-                  selectedConference,
-                  selectedSeason,
-                }
-              );
-              const sessionKeys = Object.keys(groupedGames);
-
-              if (sessionKeys.length === 0) {
-                return (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No upcoming games match your filters
-                  </div>
-                );
-              }
-
-              return sessionKeys.map((sessionName) => (
-                <div
-                  key={sessionName}
-                  className="space-y-4"
-                >
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-semibold text-foreground">
-                      {sessionName}
-                    </h3>
-                    <Badge
-                      variant="outline"
-                      className="text-xs"
-                    >
-                      {Object.values(groupedGames[sessionName]).flat().length}{" "}
-                      games
-                    </Badge>
-                  </div>
-
-                  {Object.entries(groupedGames[sessionName]).map(
-                    ([divisionName, games]) => (
-                      <div
-                        key={divisionName}
-                        className="space-y-3"
-                      >
-                        <h4 className="text-lg font-medium text-muted-foreground pb-1">
-                          {divisionName} Division
-                        </h4>
-                        <div className="space-y-3">
-                          {games.map((game) => (
-                            <GameCard
-                              key={game.id}
-                              game={game}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ));
-            })()}
+            <GamesList
+              games={upcomingGames}
+              emptyMessage="No upcoming games match your filters"
+            />
           </TabsContent>
 
           <TabsContent
             value="completed"
             className="space-y-6"
           >
-            {(() => {
-              const groupedGames = groupGamesBySessionAndDivision(
-                completedGames,
-                {
-                  selectedDivision,
-                  selectedVenue,
-                  selectedConference,
-                  selectedSeason,
-                }
-              );
-              const sessionKeys = Object.keys(groupedGames);
-
-              if (sessionKeys.length === 0) {
-                return (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No completed games match your filters
-                  </div>
-                );
-              }
-
-              return sessionKeys.map((sessionName) => (
-                <div
-                  key={sessionName}
-                  className="space-y-4"
-                >
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-semibold text-foreground">
-                      {sessionName}
-                    </h3>
-                    <Badge
-                      variant="outline"
-                      className="text-xs"
-                    >
-                      {Object.values(groupedGames[sessionName]).flat().length}{" "}
-                      games
-                    </Badge>
-                  </div>
-
-                  {Object.entries(groupedGames[sessionName]).map(
-                    ([divisionName, games]) => (
-                      <div
-                        key={divisionName}
-                        className="space-y-3"
-                      >
-                        <h4 className="text-lg font-medium text-muted-foreground  pb-1">
-                          {divisionName} Division
-                        </h4>
-                        <div className="space-y-3">
-                          {games.map((game) => (
-                            <GameCard
-                              key={game.id}
-                              game={game}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ));
-            })()}
+            <GamesList
+              games={completedGames}
+              emptyMessage="No completed games match your filters"
+            />
           </TabsContent>
 
           {/* Tournaments */}

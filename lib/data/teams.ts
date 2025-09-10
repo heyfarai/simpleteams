@@ -1,10 +1,95 @@
 import { Team } from "../sample-data";
 
 export const sampleTeams: Team[] = [
+  // Example team with roster data
+  {
+    id: "1",
+    name: "Titans",
+    logo: "/team-logos/titans.svg",
+    sessionIds: ["1", "2"],
+    division: "Diamond",
+    coach: "Marcus Thompson",
+    description: "A powerhouse team with a strong defensive focus",
+    founded: "2020",
+    homeVenue: "Capital Arena",
+    awards: ["2024 Division Champions"],
+    record: "15-5",
+    stats: {
+      wins: 15,
+      losses: 5,
+      pointsFor: 1580,
+      pointsAgainst: 1420,
+      gamesPlayed: 20,
+      streak: ["W", "W", "L", "W", "W"]
+    },
+    rosters: [
+      {
+        season: {
+          _ref: "1",
+          name: "Summer Series 2025"
+        },
+        players: [
+          {
+            player: {
+              _ref: "p1",
+              name: "John Smith"
+            },
+            jerseyNumber: 23,
+            position: "PG",
+            status: "active"
+          },
+          {
+            player: {
+              _ref: "p2",
+              name: "Mike Johnson"
+            },
+            jerseyNumber: 11,
+            position: "SG",
+            status: "active"
+          },
+          {
+            player: {
+              _ref: "p3",
+              name: "David Williams"
+            },
+            jerseyNumber: 32,
+            position: "C",
+            status: "injured"
+          }
+        ]
+      },
+      {
+        season: {
+          _ref: "2",
+          name: "2025-26 Regular Season"
+        },
+        players: [
+          {
+            player: {
+              _ref: "p1",
+              name: "John Smith"
+            },
+            jerseyNumber: 23,
+            position: "PG",
+            status: "active"
+          },
+          {
+            player: {
+              _ref: "p4",
+              name: "Chris Davis"
+            },
+            jerseyNumber: 15,
+            position: "SF",
+            status: "active"
+          }
+        ]
+      }
+    ]
+  },
   {
     id: "1",
     name: "ONL-X Senior",
-    logo: null,
+    logo: "/placeholder.svg",
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#1e40af", "#fbbf24"],
@@ -60,7 +145,7 @@ export const sampleTeams: Team[] = [
   {
     id: "2",
     name: "Kingmo Elite",
-    logo: null,
+    logo: "/placeholder.svg",
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#ef4444", "#eab308"],
@@ -111,7 +196,7 @@ export const sampleTeams: Team[] = [
   {
     id: "3",
     name: "Brockville Blazers",
-    logo: null,
+    logo: "/placeholder.svg",
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#3b82f6", "#ec4899"],
@@ -162,7 +247,7 @@ export const sampleTeams: Team[] = [
   {
     id: "4",
     name: "Helisis",
-    logo: null,
+    logo: "/placeholder.svg",
     city: "Springfield",
     region: "Central Illinois",
     primaryColors: ["#fbbf24", "#1e40af"],

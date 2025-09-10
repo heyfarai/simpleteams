@@ -1,9 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { 
+  fetchAllPlayers, 
+  fetchStatLeaders, 
+  fetchFilterOptions,
+  fetchLeadersByCategory,
+  type ShowcasePlayer 
+} from "@/lib/data/fetch-players";
+import { debugPlayerData } from '@/lib/sanity/test-queries'
+import { type StatCategory } from "@/lib/sanity/player-queries";
+import { type FilterOptions } from "@/lib/sanity/types";
+import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,24 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Award, Play, Filter, Trophy } from "lucide-react";
-import {
-  samplePlayers,
-  sampleTeams,
-  sampleSeasons,
-  getTeamById,
-} from "@/lib/sample-data";
+import { Award, Filter, Play, Trophy } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
-export function PlayersShowcase() {
-  const [activeTab, setActiveTab] = useState("leaders");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTeam, setSelectedTeam] = useState("all");
-  const [selectedGradYear, setSelectedGradYear] = useState("all");
-  const [selectedPosition, setSelectedPosition] = useState("all");
-  const [selectedAwards, setSelectedAwards] = useState<string[]>([]);
+export default function PlayersShowcase() {
+  const [activeTab, setActiveTab] = useState<'leaders' | 'all'>('leaders')
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Leaders tab filters
@@ -37,112 +35,115 @@ export function PlayersShowcase() {
   const [selectedDivision, setSelectedDivision] = useState("Diamond");
   const [selectedSeason, setSelectedSeason] = useState("Regular Season");
 
-  const players = samplePlayers.map((player) => {
-    const team = getTeamById(player.teamId);
-    const [firstName, ...lastNameParts] = player.name.split(" ");
-    const lastName = lastNameParts.join(" ");
+  // Debug function to check data availability
+  const handleDebugData = async () => {
+    const debugResult = await debugPlayerData()
+    console.log('Debug result:', debugResult)
+  };
 
-    return {
-      id: Number.parseInt(player.id),
-      firstName,
-      lastName,
-      team: team?.name || "Unknown Team",
-      teamId: Number.parseInt(player.teamId),
-      jersey: player.jerseyNumber,
-      position: player.position,
-      gradYear: Number.parseInt(player.gradYear),
-      height: player.height,
-      headshot: player.photo,
-      stats: {
-        ppg: player.stats.points,
-        rpg: player.stats.rebounds,
-        apg: player.stats.assists,
-        spg: player.stats.steals || 0,
-        bpg: player.stats.blocks || 0,
-        mpg: player.stats.minutes || 0,
-      },
-      awards: player.awards,
-      hasHighlight: !!player.highlightVideo,
-      division: player.division || team?.division || "Unknown",
-      gamesPlayed: player.stats.gamesPlayed,
-      year: player.year || "2024", // Assuming player data includes year information
-      season: player.season || "Regular Season", // Assuming player stats are from the selected season
-    };
+  // Fetch filter options
+  const { data: filterOptions, isLoading: filtersLoading } = useQuery({
+    queryKey: ["filter-options"],
+    queryFn: fetchFilterOptions,
   });
 
-  const teams = ["all", ...sampleTeams.map((team) => team.name)];
-  const gradYears = [
-    "all",
-    ...Array.from(
-      new Set(samplePlayers.map((player) => player.gradYear))
-    ).sort(),
-  ];
-  const positions = [
-    "all",
-    ...Array.from(
-      new Set(samplePlayers.map((player) => player.position))
-    ).sort(),
-  ];
-  const allAwards = Array.from(
-    new Set(samplePlayers.flatMap((player) => player.awards))
-  ).sort();
+  // Fetch all players for the "All Players" tab
+  const { data: allPlayersData, isLoading: playersLoading } = useQuery({
+    queryKey: ["all-players"],
+    queryFn: fetchAllPlayers,
+  });
+
+  // Fetch stat leaders for the "Leaders" tab (fallback for filtering)
+  const { data: statLeadersData, isLoading: leadersLoading } = useQuery({
+    queryKey: ["stat-leaders", selectedYear, selectedSeason],
+    queryFn: () => fetchStatLeaders(selectedYear, selectedSeason),
+    enabled: false, // Disable since we're using optimized queries
+  });
+
+  // Use fetched data or fallback to empty arrays
+  const players = allPlayersData || [];
+  const statLeaders = statLeadersData || [];
+
+  // Extract filter options from fetched data
   const years = Array.from(
-    new Set(sampleSeasons.map((season) => season.year.toString()))
+    new Set((filterOptions?.seasons.map((season) => season.year.toString()) || []))
   )
     .sort()
     .reverse();
-  const divisions = ["Diamond", "Premier", "Development Division"];
-  const seasons = sampleSeasons.map((season) => season.name);
+  const divisions = Array.from(
+    new Set((filterOptions?.divisions.map((division) => division.name) || []))
+  );
+  const seasons = Array.from(
+    new Set((filterOptions?.seasons.map((season) => season.name) || []))
+  );
 
-  const getTopPlayersByStat = (
-    statKey: keyof (typeof players)[0]["stats"],
-    minGames = 3
-  ) => {
-    return players
-      .filter((player) => player.gamesPlayed >= minGames)
-      .filter((player) => {
-        if (selectedDivision !== "all" && player.division !== selectedDivision)
-          return false;
-        if (player.year !== selectedYear) return false;
-        if (player.season !== selectedSeason) return false;
-        return true;
-      })
-      .sort((a, b) => b.stats[statKey] - a.stats[statKey])
-      .slice(0, 5);
-  };
+  // Cache for leaderboard data
+  const [leaderboardCache, setLeaderboardCache] = useState<Record<string, ShowcasePlayer[]>>({})
 
-  const filteredPlayers = players.filter((player) => {
-    const matchesSearch =
-      `${player.firstName} ${player.lastName}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      player.team.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      player.position.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTeam = selectedTeam === "all" || player.team === selectedTeam;
-    const matchesGradYear =
-      selectedGradYear === "all" ||
-      player.gradYear.toString() === selectedGradYear;
-    const matchesPosition =
-      selectedPosition === "all" || player.position === selectedPosition;
-    const matchesAwards =
-      selectedAwards.length === 0 ||
-      selectedAwards.some((award) => player.awards.includes(award));
-    return (
-      matchesSearch &&
-      matchesTeam &&
-      matchesGradYear &&
-      matchesPosition &&
-      matchesAwards
-    );
-  });
-
-  const handleAwardChange = (award: string, checked: boolean) => {
-    if (checked) {
-      setSelectedAwards([...selectedAwards, award]);
-    } else {
-      setSelectedAwards(selectedAwards.filter((a) => a !== award));
+  const getLeadersByCategory = (category: StatCategory) => {
+    switch (category) {
+      case 'ppg':
+        return { data: pointsLeaders, isLoading: pointsLoading }
+      case 'rpg':
+        return { data: reboundsLeaders, isLoading: reboundsLoading }
+      case 'apg':
+        return { data: assistsLeaders, isLoading: assistsLoading }
+      case 'spg':
+        return { data: stealsLeaders, isLoading: stealsLoading }
+      case 'bpg':
+        return { data: blocksLeaders, isLoading: blocksLoading }
+      case 'mpg':
+        return { data: minutesLeaders, isLoading: minutesLoading }
+      default:
+        return { data: [], isLoading: false }
     }
-  };
+  }
+
+  // Optimized leaderboard queries using React Query
+  const { data: pointsLeaders, isLoading: pointsLoading } = useQuery({
+    queryKey: ['leaders', 'ppg'],
+    queryFn: () => fetchLeadersByCategory('ppg'),
+    enabled: activeTab === 'leaders',
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  const { data: reboundsLeaders, isLoading: reboundsLoading } = useQuery({
+    queryKey: ['leaders', 'rpg'],
+    queryFn: () => fetchLeadersByCategory('rpg'),
+    enabled: activeTab === 'leaders',
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: assistsLeaders, isLoading: assistsLoading } = useQuery({
+    queryKey: ['leaders', 'apg'],
+    queryFn: () => fetchLeadersByCategory('apg'),
+    enabled: activeTab === 'leaders',
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: stealsLeaders, isLoading: stealsLoading } = useQuery({
+    queryKey: ['leaders', 'spg'],
+    queryFn: () => fetchLeadersByCategory('spg'),
+    enabled: activeTab === 'leaders',
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: blocksLeaders, isLoading: blocksLoading } = useQuery({
+    queryKey: ['leaders', 'bpg'],
+    queryFn: () => fetchLeadersByCategory('bpg'),
+    enabled: activeTab === 'leaders',
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: minutesLeaders, isLoading: minutesLoading } = useQuery({
+    queryKey: ['leaders', 'mpg'],
+    queryFn: () => fetchLeadersByCategory('mpg'),
+    enabled: activeTab === 'leaders',
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const filteredPlayers = players;
+
 
   const LeadersFilterSidebar = ({ className = "" }: { className?: string }) => (
     <div className={`space-y-6 ${className}`}>
@@ -225,132 +226,60 @@ export function PlayersShowcase() {
     </div>
   );
 
-  const AllPlayersFilterSidebar = ({
-    className = "",
-  }: {
-    className?: string;
-  }) => (
+  const AllPlayersFilterSidebar = ({ className = "" }: { className?: string }) => (
     <div className={`space-y-6 ${className}`}>
       <div>
-        <h3 className="font-semibold text-foreground mb-3">Search</h3>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search players..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Team</h3>
-        <Select
-          value={selectedTeam}
-          onValueChange={setSelectedTeam}
-        >
+        <h3 className="font-semibold text-foreground mb-3">Year</h3>
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger>
-            <SelectValue placeholder="All Teams" />
+            <SelectValue placeholder="Select Year" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Teams</SelectItem>
-            {teams.slice(1).map((team) => (
-              <SelectItem
-                key={team}
-                value={team}
-              >
-                {team}
-              </SelectItem>
+            {years.map((year) => (
+              <SelectItem key={year} value={year}>{year}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
       <div>
-        <h3 className="font-semibold text-foreground mb-3">Class of</h3>
-        <Select
-          value={selectedGradYear}
-          onValueChange={setSelectedGradYear}
-        >
+        <h3 className="font-semibold text-foreground mb-3">Division</h3>
+        <Select value={selectedDivision} onValueChange={setSelectedDivision}>
           <SelectTrigger>
-            <SelectValue placeholder="All Years" />
+            <SelectValue placeholder="Select Division" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Years</SelectItem>
-            {gradYears.slice(1).map((year) => (
-              <SelectItem
-                key={year}
-                value={year}
-              >
-                Class of {year}
-              </SelectItem>
+            {divisions.map((division) => (
+              <SelectItem key={division} value={division}>{division}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
       <div>
-        <h3 className="font-semibold text-foreground mb-3">Position</h3>
-        <Select
-          value={selectedPosition}
-          onValueChange={setSelectedPosition}
-        >
+        <h3 className="font-semibold text-foreground mb-3">Season</h3>
+        <Select value={selectedSeason} onValueChange={setSelectedSeason}>
           <SelectTrigger>
-            <SelectValue placeholder="All Positions" />
+            <SelectValue placeholder="Select Season" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Positions</SelectItem>
-            {positions.slice(1).map((position) => (
-              <SelectItem
-                key={position}
-                value={position}
-              >
-                {position}
-              </SelectItem>
+            {seasons.map((season) => (
+              <SelectItem key={season} value={season}>{season}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Awards</h3>
-        <div className="space-y-2 max-h-48 overflow-y-auto">
-          {allAwards.map((award) => (
-            <div
-              key={award}
-              className="flex items-center space-x-2"
-            >
-              <Checkbox
-                id={award}
-                checked={selectedAwards.includes(award)}
-                onCheckedChange={(checked) =>
-                  handleAwardChange(award, checked as boolean)
-                }
-              />
-              <label
-                htmlFor={award}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                {award}
-              </label>
-            </div>
-          ))}
-        </div>
       </div>
 
       <Button
         variant="outline"
         onClick={() => {
-          setSearchTerm("");
-          setSelectedTeam("all");
-          setSelectedGradYear("all");
-          setSelectedPosition("all");
-          setSelectedAwards([]);
+          setSelectedYear("2024");
+          setSelectedDivision("Diamond");
+          setSelectedSeason("Regular Season");
         }}
         className="w-full"
       >
-        Clear All Filters
+        Reset Filters
       </Button>
     </div>
   );
@@ -360,7 +289,7 @@ export function PlayersShowcase() {
     statValue,
     statLabel,
   }: {
-    player: any;
+    player: ShowcasePlayer;
     statValue: number;
     statLabel: string;
   }) => (
@@ -394,14 +323,15 @@ export function PlayersShowcase() {
 
   const StatLeaderColumn = ({
     title,
-    statKey,
+    category,
     statLabel,
   }: {
     title: string;
-    statKey: keyof (typeof players)[0]["stats"];
+    category: StatCategory;
     statLabel: string;
   }) => {
-    const topPlayers = getTopPlayersByStat(statKey);
+    const { data: leaders, isLoading } = getLeadersByCategory(category)
+    const topPlayers = leaders?.slice(0, 5) || []
 
     return (
       <Card className="h-fit">
@@ -410,14 +340,24 @@ export function PlayersShowcase() {
             <h3 className="text-lg font-bold text-foreground">{title}</h3>
           </div>
           <div className="space-y-1">
-            {topPlayers.map((player) => (
-              <StatLeaderCard
-                key={player.id}
-                player={player}
-                statValue={player.stats[statKey]}
-                statLabel={statLabel}
-              />
-            ))}
+            {isLoading ? (
+              <div className="p-4 text-center text-muted-foreground">
+                Loading leaders...
+              </div>
+            ) : topPlayers.length > 0 ? (
+              topPlayers.map((player) => (
+                <StatLeaderCard
+                  key={player.id}
+                  player={player}
+                  statValue={player.stats[category]}
+                  statLabel={statLabel}
+                />
+              ))
+            ) : (
+              <div className="p-4 text-center text-muted-foreground">
+                No data available
+              </div>
+            )}
           </div>
           <div className="p-4 border-t">
             <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white">
@@ -428,6 +368,18 @@ export function PlayersShowcase() {
       </Card>
     );
   };
+
+  // Show loading state for initial data
+  if (filtersLoading || playersLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="text-lg font-semibold mb-2">Loading players...</div>
+          <div className="text-muted-foreground">Please wait while we fetch the latest data</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Tabs
@@ -496,37 +448,38 @@ export function PlayersShowcase() {
             <div className="grid lg:grid-cols-3 gap-6">
               <StatLeaderColumn
                 title="Points Leaders"
-                statKey="ppg"
+                category="ppg"
                 statLabel="PPG"
               />
               <StatLeaderColumn
                 title="Assists Leaders"
-                statKey="apg"
+                category="apg"
                 statLabel="APG"
               />
               <StatLeaderColumn
                 title="Rebounds Leaders"
-                statKey="rpg"
+                category="rpg"
                 statLabel="RPG"
               />
             </div>
             <div className="grid lg:grid-cols-3 gap-6">
               <StatLeaderColumn
                 title="Steals Leaders"
-                statKey="spg"
+                category="spg"
                 statLabel="SPG"
               />
               <StatLeaderColumn
                 title="Blocks Leaders"
-                statKey="bpg"
+                category="bpg"
                 statLabel="BPG"
               />
               <StatLeaderColumn
                 title="Minutes Leaders"
-                statKey="mpg"
+                category="mpg"
                 statLabel="MPG"
               />
             </div>
+            
           </TabsContent>
 
           <TabsContent value="all-players">
