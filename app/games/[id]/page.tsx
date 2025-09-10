@@ -54,7 +54,7 @@ export default async function GamePage({ params }: GamePageProps) {
               variant="outline"
               className="bg-primary/10 text-primary border-primary/20"
             >
-              {game.sessionName}
+              {game.session.name}
             </Badge>
           </div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -72,14 +72,14 @@ export default async function GamePage({ params }: GamePageProps) {
                 <div className="text-center">
                   <div className="font-medium">{game.homeTeam.name}</div>
                   <div className="text-3xl font-bold text-primary">
-                    {game.homeScore ?? "-"}
+                    {game.score?.homeScore ?? "-"}
                   </div>
                 </div>
                 <div className="text-xl font-medium text-muted-foreground">VS</div>
                 <div className="text-center">
                   <div className="font-medium">{game.awayTeam.name}</div>
                   <div className="text-3xl font-bold text-primary">
-                    {game.awayScore ?? "-"}
+                    {game.score?.awayScore ?? "-"}
                   </div>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export default async function GamePage({ params }: GamePageProps) {
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Session</dt>
-                  <dd className="font-medium">{game.sessionName}</dd>
+                  <dd className="font-medium">{game.session.name}</dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Status</dt>
