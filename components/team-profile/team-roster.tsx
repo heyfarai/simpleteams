@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
+import Link from "next/link";
 
 interface Player {
   player: {
@@ -28,29 +29,31 @@ function PlayerCard({ player }: { player: Player }) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold">
-            #{player.jerseyNumber}
-          </div>
-          <div className="flex-1">
-            <div className="font-medium text-foreground">
-              {player.player.name}
+    <Link href={`/players/${player.player._id}`} legacyBehavior>
+      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold">
+              #{player.jerseyNumber}
             </div>
-            <div className="text-sm text-muted-foreground">
-              {player.position}
+            <div className="flex-1">
+              <div className="font-medium text-foreground">
+                {player.player.name}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {player.position}
+              </div>
+              <Badge 
+                className={`text-xs mt-1 ${statusColors[player.status]}`}
+                variant="secondary"
+              >
+                {player.status}
+              </Badge>
             </div>
-            <Badge 
-              className={`text-xs mt-1 ${statusColors[player.status]}`}
-              variant="secondary"
-            >
-              {player.status}
-            </Badge>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
