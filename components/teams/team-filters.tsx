@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/select";
 import { Filter, Search, X } from "lucide-react";
 import { TeamFilterState } from "@/lib/types/teams";
+import { SeasonSelect } from "@/components/filters/season-select";
+import { Season } from "@/lib/utils/season-filters";
 
-interface Season {
+interface TeamSeason {
   _id: string;
   name: string;
   year: number;
@@ -30,8 +32,7 @@ interface Season {
 interface TeamFiltersProps {
   filters: TeamFilterState;
   onFilterChange: (filters: Partial<TeamFilterState>) => void;
-  years: string[];
-  seasons: Season[];
+  seasons: TeamSeason[];
   awards: string[];
   isMobile?: boolean;
   onClose?: () => void;
@@ -40,7 +41,6 @@ interface TeamFiltersProps {
 export function TeamFilters({
   filters,
   onFilterChange,
-  years,
   seasons,
   awards,
   isMobile,
@@ -56,8 +56,7 @@ export function TeamFilters({
   const clearFilters = () => {
     onFilterChange({
       searchTerm: "",
-      year: "",
-      seasonId: "",
+      seasonId: "all",
       divisionId: undefined,
       awards: [],
     });
@@ -81,73 +80,39 @@ export function TeamFilters({
         </div>
       </div>
 
-      {/* Year Filter */}
-      <div>
-        <label className="text-sm font-medium text-foreground mb-2 block">
-          Year *
-        </label>
-        <Select
-          value={filters.year}
-          onValueChange={(value) => {
-            // Clear season when year changes
-            onFilterChange({
-              year: value,
-              seasonId: "",
-              divisionId: undefined,
-            });
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Year" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((year) => (
-              <SelectItem
-                key={year}
-                value={year}
-              >
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Season Filter */}
       <div>
         <label className="text-sm font-medium text-foreground mb-2 block">
           Season *
         </label>
-        <Select
-          value={filters.seasonId}
-          onValueChange={(value) => {
-            // Clear division when season changes
+        <SeasonSelect
+          selectedSeason={filters.seasonId}
+          seasons={[
+            {
+              id: "all",
+              name: "All Seasons",
+              year: "All",
+              startDate: new Date(),
+              endDate: new Date(),
+              isActive: true
+            },
+            ...seasons.map(season => ({
+              id: season._id,
+              name: season.name,
+              year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
+              startDate: new Date(season.year, 8, 1),
+              endDate: new Date(season.year + 1, 7, 31),
+              isActive: true
+            }))
+          ]}
+          onChange={(value) => {
             onFilterChange({
               seasonId: value,
               divisionId: undefined,
             });
           }}
-          disabled={!filters.year}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Season" />
-          </SelectTrigger>
-          <SelectContent>
-            {seasons
-              .filter(
-                (season: { year: number }) =>
-                  season.year.toString() === filters.year
-              )
-              .map((season: { _id: string; name: string }) => (
-                <SelectItem
-                  key={season._id}
-                  value={season._id}
-                >
-                  {season.name}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
+        />
       </div>
 
       {/* Division Filter */}

@@ -15,12 +15,13 @@ export function Navigation() {
     { href: "/teams", label: "Teams" },
     { href: "/players", label: "Players" },
     { href: "/games", label: "Games" },
+    { href: "/watch", label: "Watch" },
   ];
 
   return (
-    <header className=" top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full text-sm">
-      <nav className="relative max-w-2xl w-full bg-white  rounded-[24px] mx-2 flex flex-wrap md:flex-nowrap items-center justify-between px-1 py-4 sm:mx-auto dark:bg-neutral-900 ">
-        <div className="flex items-center relative">
+    <header className="flex flex-wrap lg:justify-start lg:flex-nowrap z-50 w-full py-7">
+      <nav className="relative max-w-7xl w-full flex flex-wrap lg:grid lg:grid-cols-[1fr_auto_1fr] basis-full items-center px-4 md:px-6 lg:px-8 mx-auto">
+        <div className="flex items-center">
           <Link
             href="/"
             className="flex-none text-xl inline-block font-semibold focus:outline-none focus:opacity-80 "
@@ -34,16 +35,16 @@ export function Navigation() {
               className="w-14 h-14 "
             />
           </Link>
+          <div className="ms-1 sm:ms-2"></div>
         </div>
 
-        <div className="flex items-center gap-1 md:order-4 md:ms-4">
+        <div className="flex items-center gap-x-1 lg:gap-x-2 ms-auto py-1 lg:ps-6 lg:order-3">
           <Link
             href="/register"
             className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-transparent bg-gray-800 text-white hover:bg-gray-900 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
           >
             Register
           </Link>
-
           <div className="md:hidden">
             <button
               type="button"
@@ -64,9 +65,9 @@ export function Navigation() {
         <div
           className={`${
             isOpen ? "block" : "hidden"
-          } md:block w-full basis-full md:w-auto`}
+          } md:block overflow-hidden transition-all duration-300 basis-full grow lg:block lg:w-auto lg:basis-auto lg:order-2 lg:col-start-2 lg:col-end-3`}
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-2 md:gap-3 mt-3 md:mt-0 py-2 md:py-0 md:ps-7">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-3 mt-3 md:mt-0 py-2 md:py-0 md:ps-7 lg:ps-0 lg:whitespace-nowrap">
             {navItems.map((item) => (
               <Link
                 key={item.href}

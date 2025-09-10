@@ -11,9 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Download, Calendar, Filter, X } from "lucide-react";
+import { SeasonSelect } from "@/components/filters/season-select";
+import { Season } from "@/lib/utils/season-filters";
 
 interface FilterData {
-  seasons: Array<{ _id: string; name: string }>;
+  seasons: Array<{ _id: string; name: string; year: number }>;
   sessions: Array<{ _id: string; name: string }>;
   divisions: Array<{ _id: string; name: string }>;
 }
@@ -53,9 +55,23 @@ export function GameFilters({
     { _id: "all", name: "All Sessions" },
     ...(filterData.sessions || []),
   ];
-  const seasons = [
-    { _id: "all", name: "All Seasons" },
-    ...(filterData.seasons || []),
+  const seasons: Season[] = [
+    {
+      id: "all",
+      name: "All Seasons",
+      year: "All",
+      startDate: new Date(),
+      endDate: new Date(),
+      isActive: true
+    },
+    ...(filterData.seasons || []).map(season => ({
+      id: season._id,
+      name: season.name,
+      year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
+      startDate: new Date(season.year, 8, 1),
+      endDate: new Date(season.year + 1, 7, 31),
+      isActive: true
+    }))
   ];
 
   return (
@@ -83,27 +99,11 @@ export function GameFilters({
               {/* Season Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Season</label>
-                <Select
-                  value={selectedSeason}
-                  onValueChange={onSeasonChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Seasons" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Seasons</SelectItem>
-                    {seasons
-                      .filter((s) => s._id !== "all")
-                      .map((season) => (
-                        <SelectItem
-                          key={season._id}
-                          value={season._id}
-                        >
-                          {season.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <SeasonSelect
+                  selectedSeason={selectedSeason}
+                  seasons={seasons}
+                  onChange={onSeasonChange}
+                />
               </div>
 
               {/* Session Filter */}
@@ -186,25 +186,11 @@ export function GameFilters({
           <Card className="mt-4">
             <CardContent className="p-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <Select
-                  value={selectedSeason}
-                  onValueChange={onSeasonChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Season" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Seasons</SelectItem>
-                    {seasons.map((season) => (
-                      <SelectItem
-                        key={season._id}
-                        value={season._id}
-                      >
-                        {season.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SeasonSelect
+                  selectedSeason={selectedSeason}
+                  seasons={seasons}
+                  onChange={onSeasonChange}
+                />
 
                 <Select
                   value={selectedSession}

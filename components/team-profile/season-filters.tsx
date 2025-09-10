@@ -1,20 +1,12 @@
 "use client";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SeasonSelect } from "@/components/filters/season-select";
+
+import { Season } from '@/lib/utils/season-filters';
 
 interface SeasonFiltersProps {
   selectedSeason: string;
-  availableSeasons: Array<{
-    id: string;
-    name: string;
-    year: number;
-  }>;
+  availableSeasons: Season[];
   onSeasonChange: (seasonId: string) => void;
 }
 
@@ -28,18 +20,12 @@ export function SeasonFilters({
       <label className="text-sm font-medium text-foreground">
         Season
       </label>
-      <Select value={selectedSeason} onValueChange={onSeasonChange}>
-        <SelectTrigger className="w-64">
-          <SelectValue placeholder="Select Season" />
-        </SelectTrigger>
-        <SelectContent>
-          {availableSeasons.map((season) => (
-            <SelectItem key={season.id} value={season.id}>
-              {season.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SeasonSelect
+        selectedSeason={selectedSeason}
+        seasons={availableSeasons}
+        onChange={onSeasonChange}
+        className="w-64"
+      />
     </div>
   );
 }

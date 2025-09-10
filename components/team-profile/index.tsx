@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchTeamDetails } from "@/lib/data/fetch-teams";
 import { useFavoriteTeam } from "@/hooks/use-favorite-team";
 import { useTeamSeasonFilters } from "@/hooks/use-team-season-filters";
+import { Season } from "@/lib/utils/season-filters";
 
 import { TeamHeader } from "./team-header";
 import { SeasonFilters } from "./season-filters";

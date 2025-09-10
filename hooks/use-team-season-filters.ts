@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { Season } from "@/lib/utils/season-filters";
 
 interface TeamRoster {
   season: {
@@ -49,12 +50,12 @@ export function useTeamSeasonFilters(team: Team | undefined) {
       .map(roster => ({
         id: roster.season._id,
         name: `${roster.season.name} ${roster.season.year}`,
-        year: roster.season.year
-      }))
-      .sort((a, b) => {
-        const yearDiff = b.year - a.year;
-        return yearDiff !== 0 ? yearDiff : b.name.localeCompare(a.name);
-      });
+        year: `${roster.season.year}-${(roster.season.year + 1).toString().slice(2)}`,
+        startDate: new Date(roster.season.year, 8, 1), // Season starts Sept 1
+        endDate: new Date(roster.season.year + 1, 7, 31), // Ends Aug 31
+        isActive: true // We'll assume all seasons are active for now
+      } as Season))
+      .sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
   }, [team?.rosters]);
 
   const currentRoster = useMemo(() => {

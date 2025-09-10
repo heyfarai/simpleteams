@@ -1,26 +1,40 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { BarChart3 } from "lucide-react";
 import { useState } from "react";
 import { type PlayerProfile } from "@/lib/data/fetch-player-profile";
+import { SeasonSelect } from "@/components/filters/season-select";
+import { Season } from "@/lib/utils/season-filters";
 
 interface PlayerStatsProps {
   player: PlayerProfile;
 }
 
 export function PlayerStats({ player }: PlayerStatsProps) {
-  const [selectedYear, setSelectedYear] = useState<string>("2024");
+  const availableSeasons = player.yearlyStats
+    ? [...new Set(player.yearlyStats.map((stat) => ({
+        id: stat.year.toString(),
+        name: `${stat.year}-${(stat.year + 1).toString().slice(2)} Season`,
+        year: `${stat.year}-${(stat.year + 1).toString().slice(2)}`,
+        startDate: new Date(stat.year, 8, 1),
+        endDate: new Date(stat.year + 1, 7, 31),
+        isActive: true
+      } as Season)))]
+    : [];
 
-  const availableYears = player.yearlyStats
-    ? [...new Set(player.yearlyStats.map((stat) => stat.year.toString()))]
-    : ["2024"];
+  const allSeasons = [
+    {
+      id: "all",
+      name: "All Seasons",
+      year: "All",
+      startDate: new Date(),
+      endDate: new Date(),
+      isActive: true
+    },
+    ...availableSeasons
+  ];
+
+  const [selectedSeason, setSelectedSeason] = useState<string>("all");
 
   return (
     <Card>
@@ -30,27 +44,11 @@ export function PlayerStats({ player }: PlayerStatsProps) {
           Season Statistics
         </CardTitle>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Filter by Year:
-          </span>
-          <Select
-            value={selectedYear}
-            onValueChange={setSelectedYear}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {availableYears.map((year) => (
-                <SelectItem
-                  key={year}
-                  value={year}
-                >
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SeasonSelect
+            selectedSeason={selectedSeason}
+            seasons={allSeasons}
+            onChange={setSelectedSeason}
+          />
         </div>
       </CardHeader>
       <CardContent>
@@ -90,7 +88,7 @@ export function PlayerStats({ player }: PlayerStatsProps) {
               </thead>
               <tbody>
                 {player.yearlyStats
-                  .filter(stat => stat.year.toString() === selectedYear)
+                  .filter(stat => selectedSeason === "all" || stat.year.toString() === selectedSeason)
                   .map((stat, index) => (
                     <tr
                       key={index}
@@ -132,7 +130,7 @@ export function PlayerStats({ player }: PlayerStatsProps) {
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            No statistics available for {selectedYear}
+            No statistics available for {availableSeasons.find(s => s.id === selectedSeason)?.year || "selected season"}
           </div>
         )}
 

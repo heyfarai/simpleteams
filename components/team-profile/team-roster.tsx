@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
 import Link from "next/link";
+import { Season } from "@/lib/utils/season-filters";
 
 interface Player {
   player: {
@@ -18,7 +19,7 @@ interface Player {
 interface TeamRosterProps {
   players: Player[];
   seasonName: string;
-  year: string;
+  year: string; // Format: "2024-25"
 }
 
 function PlayerCard({ player }: { player: Player }) {

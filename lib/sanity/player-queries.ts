@@ -2,7 +2,7 @@ import { groq } from 'next-sanity'
 
 // Simple query to get all players
 export const allPlayersQuery = groq`
-  *[_type == "player"] {
+  *[_type == "player"] | order(lastName asc) {
     _id,
     name,
     firstName,
@@ -42,7 +42,7 @@ export const allPlayersQuery = groq`
 
 // Simple query to get all teams with their rosters
 export const allTeamsWithRostersQuery = groq`
-  *[_type == "team" && defined(rosters)] {
+  *[_type == "team"] {
     _id,
     name,
     shortName,
@@ -132,7 +132,7 @@ export const playerDetailsQuery = groq`
 
 // Efficient leaderboard queries - pre-sorted and limited
 export const pointsLeadersQuery = groq`
-  *[_type == "player" && defined(stats)] | order(stats.points desc)[0...6] {
+  *[_type == "player" && defined(stats) && stats.points > 0] | order(stats.points desc) [0...10] {
     _id,
     name,
     firstName,
@@ -161,7 +161,7 @@ export const pointsLeadersQuery = groq`
 `
 
 export const reboundsLeadersQuery = groq`
-  *[_type == "player" && defined(stats)] | order(stats.rebounds desc)[0...6] {
+  *[_type == "player" && defined(stats) && stats.rebounds > 0] | order(stats.rebounds desc) [0...10] {
     _id,
     name,
     firstName,
@@ -190,7 +190,20 @@ export const reboundsLeadersQuery = groq`
 `
 
 export const assistsLeadersQuery = groq`
-  *[_type == "player" && defined(stats)] | order(stats.assists desc)[0...6] {
+  *[_type == "player" && defined(stats) && stats.assists > 0] | order(stats.assists desc) [0...10] {
+    _id,
+    "seasonStats": *[_type == "team" && references(^._id)].rosters[].players[player._ref == ^._id][0] {
+      "season": season->,
+      stats {
+        points,
+        rebounds,
+        assists,
+        steals,
+        blocks,
+        minutes,
+        gamesPlayed
+      }
+    },
     _id,
     name,
     firstName,
@@ -219,7 +232,20 @@ export const assistsLeadersQuery = groq`
 `
 
 export const stealsLeadersQuery = groq`
-  *[_type == "player" && defined(stats)] | order(stats.steals desc)[0...6] {
+  *[_type == "player" && defined(stats) && stats.steals > 0] | order(stats.steals desc) [0...10] {
+    _id,
+    "seasonStats": *[_type == "team" && references(^._id)].rosters[].players[player._ref == ^._id][0] {
+      "season": season->,
+      stats {
+        points,
+        rebounds,
+        assists,
+        steals,
+        blocks,
+        minutes,
+        gamesPlayed
+      }
+    },
     _id,
     name,
     firstName,
@@ -248,7 +274,20 @@ export const stealsLeadersQuery = groq`
 `
 
 export const blocksLeadersQuery = groq`
-  *[_type == "player" && defined(stats)] | order(stats.blocks desc)[0...6] {
+  *[_type == "player" && defined(stats) && stats.blocks > 0] | order(stats.blocks desc) [0...10] {
+    _id,
+    "seasonStats": *[_type == "team" && references(^._id)].rosters[].players[player._ref == ^._id][0] {
+      "season": season->,
+      stats {
+        points,
+        rebounds,
+        assists,
+        steals,
+        blocks,
+        minutes,
+        gamesPlayed
+      }
+    },
     _id,
     name,
     firstName,
@@ -277,7 +316,20 @@ export const blocksLeadersQuery = groq`
 `
 
 export const minutesLeadersQuery = groq`
-  *[_type == "player" && defined(stats)] | order(stats.minutes desc)[0...6] {
+  *[_type == "player" && defined(stats) && stats.minutes > 0] | order(stats.minutes desc) [0...10] {
+    _id,
+    "seasonStats": *[_type == "team" && references(^._id)].rosters[].players[player._ref == ^._id][0] {
+      "season": season->,
+      stats {
+        points,
+        rebounds,
+        assists,
+        steals,
+        blocks,
+        minutes,
+        gamesPlayed
+      }
+    },
     _id,
     name,
     firstName,
