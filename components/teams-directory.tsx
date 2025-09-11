@@ -2,27 +2,31 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { TeamFilters } from "@/components/teams/team-filters";
-import { TeamGridView } from "@/components/teams/team-grid-view";
-import { TeamStandingsView } from "@/components/teams/team-standings-view";
-import { ActiveFilterBadges } from "@/components/teams/active-filter-badges";
-import { ViewModeToggle } from "@/components/teams/view-mode-toggle";
+import { TeamFilters } from "./teams/team-filters";
+import { ViewModeToggle } from "./teams/view-mode-toggle";
+import { TeamGridView } from "./teams/team-grid-view";
+import { TeamStandingsView } from "./teams/team-standings-view";
+import { ActiveFilterBadges } from "./teams/active-filter-badges";
+import { SeasonTabs } from "./filters/season-tabs";
 import { ViewMode } from "@/lib/types/teams";
 import { useTeamData } from "@/hooks/use-team-data";
 import { useTeamFilters } from "@/hooks/use-team-filters";
+import { Season as UISeasonType } from "@/lib/utils/season-filters";
 
 export function TeamsDirectory() {
-  const [currentSeasonId, setCurrentSeasonId] = useState<string>("");
-  const { teams, filterOptions, isLoading, error } = useTeamData(currentSeasonId);
-  const { filters, filteredTeams, handleFilterChange, getStandingsData } = useTeamFilters(teams, filterOptions);
+  const { teams, filterOptions, isLoading, error } = useTeamData();
+  const { filters, filteredTeams, handleFilterChange, getStandingsData } =
+    useTeamFilters(teams, filterOptions);
 
-  // Update season when filter changes
+  // Update currentSeasonId when filter changes
+  const [currentSeasonId, setCurrentSeasonId] = useState<string>(
+    filters.seasonId
+  );
   useEffect(() => {
     if (filters.seasonId !== currentSeasonId) {
       setCurrentSeasonId(filters.seasonId);
     }
   }, [filters.seasonId, currentSeasonId]);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("standings");
   const [playoffCutoff] = useState(4);
 
@@ -35,78 +39,53 @@ export function TeamsDirectory() {
   }
 
   return (
-    <div className="flex gap-6">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block w-80 shrink-0 mt-14">
-        <TeamFilters
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          years={filterOptions.years}
-          seasons={filterOptions.seasons as any}
-          awards={filterOptions.awards}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <SeasonTabs
+          seasons={(filterOptions.seasons || []).map((season): UISeasonType => ({
+            id: season._id,
+            name: season.name,
+            year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
+            startDate: new Date(season.year, 8, 1),
+            endDate: new Date(season.year + 1, 7, 31),
+            isActive: Boolean(season.isActive)
+          })) || []}
+          selectedSeason={filters.seasonId || filterOptions.seasons?.find(s => s.isActive)?._id || filterOptions.seasons?.[0]?._id || ""}
+          onSeasonChange={(seasonId: string) => {
+            handleFilterChange({
+              seasonId,
+              divisionId: undefined,
+              awards: [],
+              searchTerm: "",
+            });
+          }}
         />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 space-y-6">
-        {/* Mobile Filter Toggle */}
-        <div className="lg:hidden">
-          <Button
-            variant="outline"
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="w-full"
-          >
-            {showMobileFilters ? "Hide Filters" : "Show Filters"}
-          </Button>
-        </div>
-
-        {/* Mobile Filters */}
-        {showMobileFilters && (
-          <TeamFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            years={filterOptions.years}
-            seasons={filterOptions.seasons as any}
-            awards={filterOptions.awards}
-            isMobile
-            onClose={() => setShowMobileFilters(false)}
-          />
-        )}
-
-        {/* View Mode Toggle */}
         <ViewModeToggle
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
-
-        {/* Active Filters */}
-        <ActiveFilterBadges
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          seasons={filterOptions.seasons}
-          divisions={filterOptions.divisions}
-        />
-
-        {/* Main Content */}
-        {viewMode === "grid" ? (
-          <TeamGridView teams={filteredTeams} />
-        ) : (
-          <TeamStandingsView
-            teams={filteredTeams}
-            playoffCutoff={playoffCutoff}
-          />
-        )}
-
-        {/* No Results */}
-        {filteredTeams.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-muted-foreground mb-2">No teams found</div>
-            <p className="text-sm text-muted-foreground">
-              Try adjusting your search criteria
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Main Content */}
+      {viewMode === "grid" ? (
+        <TeamGridView teams={filteredTeams} />
+      ) : (
+        <TeamStandingsView
+          teams={filteredTeams}
+          playoffCutoff={playoffCutoff}
+        />
+      )}
+
+      {/* No Results */}
+      {filteredTeams.length === 0 && (
+        <div className="text-center py-12">
+          <p>No teams found</p>
+          <div className="text-muted-foreground mb-2">No teams found</div>
+          <p className="text-sm text-muted-foreground">
+            Try adjusting your search criteria
+          </p>
+        </div>
+      )}
     </div>
   );
 }

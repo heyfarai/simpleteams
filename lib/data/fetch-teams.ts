@@ -344,6 +344,7 @@ export async function fetchTeamFilters() {
         _id,
         name,
         year,
+        isActive,
         "divisions": activeDivisions[status == "active" && defined(teams) && count(teams) > 0]{
           "division": division->{
             _id,
@@ -360,6 +361,7 @@ export async function fetchTeamFilters() {
       _id: season._id,
       name: season.name,
       year: season.year,
+      isActive: season.isActive || false,
       activeDivisions:
         season.divisions?.map((div: any) => ({
           division: {

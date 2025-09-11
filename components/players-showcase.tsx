@@ -8,11 +8,11 @@ import {
   fetchLeadersByCategory,
   type ShowcasePlayer,
 } from "@/lib/data/fetch-players";
-import { SeasonSelect } from "@/components/filters/season-select";
+import { SeasonTabs } from "@/components/filters/season-tabs";
 import { Season } from "@/lib/utils/season-filters";
 import { debugPlayerData } from "@/lib/sanity/test-queries";
 import { type StatCategory } from "@/lib/sanity/player-queries";
-import { type FilterOptions } from "@/lib/sanity/types";
+import { type FilterOptions, type SanitySeason } from "@/lib/sanity/types";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,11 +31,8 @@ import { useState } from "react";
 
 export default function PlayersShowcase() {
   const [activeTab, setActiveTab] = useState<string>("leaders");
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-
-  // Leaders tab filters
-  const [selectedDivision, setSelectedDivision] = useState("Diamond");
-  const [selectedSeason, setSelectedSeason] = useState("all");
+  // State for filters
+  const [selectedSeason, setSelectedSeason] = useState<string>("");
 
   // Debug function to check data availability
   const handleDebugData = async () => {
@@ -67,53 +64,18 @@ export default function PlayersShowcase() {
   const statLeaders = statLeadersData || [];
   console.log("players", players);
   console.log("statLeaders", statLeaders);
+
   // Extract filter options from fetched data
-  const availableSeasons: Season[] = [
-    {
-      id: "all",
-      name: "All Seasons",
-      year: "All",
-      startDate: new Date(),
-      endDate: new Date(),
-      isActive: true,
-    },
-    ...(filterOptions?.seasons || []).map((season) => ({
+  const availableSeasons: Season[] = (filterOptions?.seasons || []).map(
+    (season: SanitySeason) => ({
       id: season._id,
       name: season.name,
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
       endDate: new Date(season.year + 1, 7, 31),
-      isActive: season.status === 'active' || season.status === 'completed',
-    })),
-  ];
-  
-  const divisions = Array.from(
-    new Set(filterOptions?.divisions?.map((division) => division.name) || [])
+      isActive: season.status === "active",
+    })
   );
-
-  // Cache for leaderboard data
-  const [leaderboardCache, setLeaderboardCache] = useState<
-    Record<string, ShowcasePlayer[]>
-  >({});
-
-  const getLeadersByCategory = (category: StatCategory) => {
-    switch (category) {
-      case "ppg":
-        return { data: pointsLeaders, isLoading: pointsLoading };
-      case "rpg":
-        return { data: reboundsLeaders, isLoading: reboundsLoading };
-      case "apg":
-        return { data: assistsLeaders, isLoading: assistsLoading };
-      case "spg":
-        return { data: stealsLeaders, isLoading: stealsLoading };
-      case "bpg":
-        return { data: blocksLeaders, isLoading: blocksLoading };
-      case "mpg":
-        return { data: minutesLeaders, isLoading: minutesLoading };
-      default:
-        return { data: [], isLoading: false };
-    }
-  };
 
   // Optimized leaderboard queries using React Query
   const { data: pointsLeaders, isLoading: pointsLoading } = useQuery({
@@ -158,114 +120,48 @@ export default function PlayersShowcase() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const filteredPlayers = players.filter(player => {
-    if (selectedSeason !== "all" && player.seasonId !== selectedSeason) return false;
-    if (selectedDivision !== "Diamond" && player.division !== selectedDivision) return false;
+  const getLeadersByCategory = (category: StatCategory) => {
+    switch (category) {
+      case "ppg":
+        return { data: pointsLeaders, isLoading: pointsLoading };
+      case "rpg":
+        return { data: reboundsLeaders, isLoading: reboundsLoading };
+      case "apg":
+        return { data: assistsLeaders, isLoading: assistsLoading };
+      case "spg":
+        return { data: stealsLeaders, isLoading: stealsLoading };
+      case "bpg":
+        return { data: blocksLeaders, isLoading: blocksLoading };
+      case "mpg":
+        return { data: minutesLeaders, isLoading: minutesLoading };
+      default:
+        return { data: [], isLoading: false };
+    }
+  };
+
+  const filteredPlayers = players.filter((player) => {
+    if (selectedSeason && player.seasonId !== selectedSeason) return false;
     return true;
   });
-  
+
+  // Group players by team
+  const playersByTeam = filteredPlayers.reduce((acc, player) => {
+    const team = player.team || "Unassigned";
+    if (!acc[team]) {
+      acc[team] = [];
+    }
+    acc[team].push(player);
+    return acc;
+  }, {} as Record<string, ShowcasePlayer[]>);
+
   console.log("Filtered players:", {
     total: players.length,
     filtered: filteredPlayers.length,
+    byTeam: Object.keys(playersByTeam).map(
+      (team) => `${team}: ${playersByTeam[team].length}`
+    ),
     selectedSeason,
-    selectedDivision
   });
-
-  const LeadersFilterSidebar = ({ className = "" }: { className?: string }) => (
-    <div className={`space-y-6 ${className}`}>
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Season *</h3>
-        <SeasonSelect
-          selectedSeason={selectedSeason}
-          seasons={availableSeasons}
-          onChange={setSelectedSeason}
-        />
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Division *</h3>
-        <Select
-          value={selectedDivision}
-          onValueChange={setSelectedDivision}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Division" />
-          </SelectTrigger>
-          <SelectContent>
-            {divisions.map((division) => (
-              <SelectItem
-                key={division}
-                value={division}
-              >
-                {division}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Button
-        variant="outline"
-        onClick={() => {
-          setSelectedDivision("Diamond");
-          setSelectedSeason("Regular Season");
-        }}
-        className="w-full"
-      >
-        Reset Filters
-      </Button>
-    </div>
-  );
-
-  const AllPlayersFilterSidebar = ({
-    className = "",
-  }: {
-    className?: string;
-  }) => (
-    <div className={`space-y-6 ${className}`}>
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Season</h3>
-        <SeasonSelect
-          selectedSeason={selectedSeason}
-          seasons={availableSeasons}
-          onChange={setSelectedSeason}
-        />
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Division</h3>
-        <Select
-          value={selectedDivision}
-          onValueChange={setSelectedDivision}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Division" />
-          </SelectTrigger>
-          <SelectContent>
-            {divisions.map((division) => (
-              <SelectItem
-                key={division}
-                value={division}
-              >
-                {division}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Button
-        variant="outline"
-        onClick={() => {
-          setSelectedDivision("Diamond");
-          setSelectedSeason("all");
-        }}
-        className="w-full"
-      >
-        Reset Filters
-      </Button>
-    </div>
-  );
 
   const StatLeaderCard = ({
     player,
@@ -367,214 +263,197 @@ export default function PlayersShowcase() {
   }
 
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="w-full"
-    >
-      <div className="flex gap-6">
-        <div className="hidden lg:block w-64 flex-shrink-0">
-          <Card className="sticky top-6">
-            <CardContent className="p-6">
-              {activeTab === "leaders" ? (
-                <LeadersFilterSidebar />
-              ) : (
-                <AllPlayersFilterSidebar />
-              )}
-            </CardContent>
-          </Card>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <SeasonTabs
+          selectedSeason={selectedSeason}
+          seasons={availableSeasons}
+          onSeasonChange={setSelectedSeason}
+        />
+      </div>
 
-        <div className="flex-1 space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger
-              value="leaders"
-              className="flex items-center gap-2"
-              onClick={() => setActiveTab("leaders")}
-            >
-              <Trophy className="h-4 w-4" />
-              Leaders
-            </TabsTrigger>
-            <TabsTrigger
-              value="all-players"
-              className="flex items-center gap-2"
-              onClick={() => setActiveTab("all-players")}
-            >
-              <Award className="h-4 w-4" />
-              All Players
-            </TabsTrigger>
-          </TabsList>
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger
+            value="leaders"
+            className="flex items-center gap-2"
+          >
+            <Trophy className="h-4 w-4" />
+            Leaders
+          </TabsTrigger>
+          <TabsTrigger
+            value="all-players"
+            className="flex items-center gap-2"
+          >
+            <Award className="h-4 w-4" />
+            All Players
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="leaders">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <StatLeaderColumn
+              title="Points Leaders"
+              category="ppg"
+              statLabel="PPG"
+            />
+            <StatLeaderColumn
+              title="Assists Leaders"
+              category="apg"
+              statLabel="APG"
+            />
+            <StatLeaderColumn
+              title="Rebounds Leaders"
+              category="rpg"
+              statLabel="RPG"
+            />
+          </div>
+          <div className="grid lg:grid-cols-3 gap-6">
+            <StatLeaderColumn
+              title="Steals Leaders"
+              category="spg"
+              statLabel="SPG"
+            />
+            <StatLeaderColumn
+              title="Blocks Leaders"
+              category="bpg"
+              statLabel="BPG"
+            />
+            <StatLeaderColumn
+              title="Minutes Leaders"
+              category="mpg"
+              statLabel="MPG"
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="all-players">
+          <div className="space-y-8">
+            {Object.entries(playersByTeam)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([team, teamPlayers]) => (
+                <div
+                  key={team}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center space-x-3">
+                    <h2 className="text-2xl font-bold text-foreground">
+                      {team}
+                    </h2>
+                    <Badge
+                      variant="secondary"
+                      className="text-sm"
+                    >
+                      {teamPlayers.length} players
+                    </Badge>
+                  </div>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {teamPlayers.map((player) => (
+                      <Link
+                        key={player.id}
+                        href={`/players/${player.id}`}
+                      >
+                        <Card className="group hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                          <CardContent className="p-0">
+                            <div className="relative overflow-hidden">
+                              <img
+                                src={player.headshot || "/placeholder.svg"}
+                                alt={`${player.firstName} ${player.lastName}`}
+                                className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                                {player.jersey}
+                              </div>
 
-          <div className="lg:hidden">
-            <Button
-              variant="outline"
-              onClick={() => setShowMobileFilters(!showMobileFilters)}
-              className="w-full"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              {showMobileFilters ? "Hide Filters" : "Show Filters"}
-            </Button>
+                              {player.hasHighlight && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                  <Button
+                                    size="sm"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+                                  >
+                                    <Play className="h-4 w-4 mr-1" />
+                                    Highlight
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
 
-            {showMobileFilters && (
-              <Card className="mt-4">
-                <CardContent className="p-4">
-                  {activeTab === "leaders" ? (
-                    <LeadersFilterSidebar />
-                  ) : (
-                    <AllPlayersFilterSidebar />
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                            <div className="p-4 space-y-3">
+                              <div>
+                                <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                                  {player.firstName} {player.lastName}
+                                </h3>
+                                <p className="text-sm text-primary font-medium">
+                                  {player.team}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {player.position} • Class of {player.gradYear}
+                                </p>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-2 text-center">
+                                <div>
+                                  <div className="text-sm font-bold text-primary">
+                                    {player.stats.ppg}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    PPG
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-primary">
+                                    {player.stats.rpg}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    RPG
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-primary">
+                                    {player.stats.apg}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    APG
+                                  </div>
+                                </div>
+                              </div>
+
+                              {player.awards.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {player.awards.map((award, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="secondary"
+                                      className="text-xs"
+                                    >
+                                      <Award className="h-3 w-3 mr-1" />
+                                      {award}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
           </div>
 
-          <TabsContent
-            value="leaders"
-            className="space-y-8"
-          >
-            <div className="grid lg:grid-cols-3 gap-6">
-              <StatLeaderColumn
-                title="Points Leaders"
-                category="ppg"
-                statLabel="PPG"
-              />
-              <StatLeaderColumn
-                title="Assists Leaders"
-                category="apg"
-                statLabel="APG"
-              />
-              <StatLeaderColumn
-                title="Rebounds Leaders"
-                category="rpg"
-                statLabel="RPG"
-              />
+          {Object.keys(playersByTeam).length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-muted-foreground mb-2">No players found</div>
+              <p className="text-sm text-muted-foreground">
+                Try adjusting your search criteria
+              </p>
             </div>
-            <div className="grid lg:grid-cols-3 gap-6">
-              <StatLeaderColumn
-                title="Steals Leaders"
-                category="spg"
-                statLabel="SPG"
-              />
-              <StatLeaderColumn
-                title="Blocks Leaders"
-                category="bpg"
-                statLabel="BPG"
-              />
-              <StatLeaderColumn
-                title="Minutes Leaders"
-                category="mpg"
-                statLabel="MPG"
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="all-players">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredPlayers.map((player) => (
-                <Link
-                  key={player.id}
-                  href={`/players/${player.id}`}
-                >
-                  <Card className="group hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-                    <CardContent className="p-0">
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={player.headshot || "/placeholder.svg"}
-                          alt={`${player.firstName} ${player.lastName}`}
-                          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-
-                        <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
-                          {player.jersey}
-                        </div>
-
-                        {player.hasHighlight && (
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <Button
-                              size="sm"
-                              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
-                            >
-                              <Play className="h-4 w-4 mr-1" />
-                              Highlight
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-4 space-y-3">
-                        <div>
-                          <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                            {player.firstName} {player.lastName}
-                          </h3>
-                          <p className="text-sm text-primary font-medium">
-                            {player.team}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {player.position} • Class of {player.gradYear}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div>
-                            <div className="text-sm font-bold text-primary">
-                              {player.stats.ppg}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              PPG
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold text-primary">
-                              {player.stats.rpg}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              RPG
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold text-primary">
-                              {player.stats.apg}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              APG
-                            </div>
-                          </div>
-                        </div>
-
-                        {player.awards.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {player.awards.map((award, index) => (
-                              <Badge
-                                key={index}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                <Award className="h-3 w-3 mr-1" />
-                                {award}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-
-            {filteredPlayers.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-muted-foreground mb-2">
-                  No players found
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Try adjusting your search criteria
-                </p>
-              </div>
-            )}
-          </TabsContent>
-        </div>
-      </div>
-    </Tabs>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

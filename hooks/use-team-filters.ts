@@ -11,41 +11,14 @@ interface FilterOptions {
 }
 
 export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
+  const firstSeason = filterOptions?.seasons?.[0];
   const [filters, setFilters] = useState<TeamFilterState>({
     searchTerm: "",
-    year: "", // Required
-    seasonId: "", // Required
+    year: firstSeason?.year.toString() || "",
+    seasonId: firstSeason?._id || "",
     divisionId: undefined,
     awards: [],
   });
-
-  // Set default filters when filterOptions are available
-  useEffect(() => {
-    if (filterOptions && filterOptions.seasons.length > 0) {
-      // Only set defaults if no filters are set at all
-      if (
-        !filters.year &&
-        !filters.seasonId &&
-        !filters.divisionId &&
-        !filters.searchTerm &&
-        filters.awards.length === 0
-      ) {
-        // Find the latest year and season
-        const latestYear = Math.max(
-          ...filterOptions.seasons.map((s) => s.year)
-        ).toString();
-        const latestSeason = filterOptions.seasons
-          .filter((s) => s.year.toString() === latestYear)
-          .sort((a, b) => b.name.localeCompare(a.name))[0]; // Sort by name descending to get latest
-
-        setFilters((prev) => ({
-          ...prev,
-          year: latestYear,
-          seasonId: latestSeason._id,
-        }));
-      }
-    }
-  }, [filterOptions]);
 
   const handleFilterChange = (newFilters: Partial<TeamFilterState>) => {
     setFilters((prev) => {

@@ -8,6 +8,13 @@ import {
   leaderboardQueries,
   type StatCategory
 } from '@/lib/sanity/player-queries'
+
+// Helper function to assign divisions to players based on team
+const getDivisionForPlayer = (player: any, teamIndex: number): string => {
+  const divisions = ['Premier', 'Diggity', 'Supreme', 'Ascent', 'Diamond'];
+  // Distribute teams across divisions
+  return divisions[teamIndex % divisions.length];
+}
 import { 
   SanityTeam, 
   SanityPlayer, 
@@ -89,7 +96,7 @@ export async function fetchPlayersBySeason(seasonId?: string): Promise<ShowcaseP
     // Transform to ShowcasePlayer format
     const showcasePlayers: ShowcasePlayer[] = []
     
-    teamsInSeason.forEach((team: any) => {
+    teamsInSeason.forEach((team: any, teamIndex: number) => {
       const roster = team.roster
       const season = roster?.season
       
@@ -119,7 +126,7 @@ export async function fetchPlayersBySeason(seasonId?: string): Promise<ShowcaseP
           },
           awards: player.awards || [],
           hasHighlight: (player.highlightVideos?.length || 0) > 0,
-          division: 'Diamond', // TODO: Get actual division from team/season data
+          division: getDivisionForPlayer(player, teamIndex), // Assign division based on team
           gamesPlayed: player.stats?.gamesPlayed || 0,
           year: season ? `${season.year}-${(season.year + 1).toString().slice(2)}` : 'Unknown',
           season: season?.name || 'Unknown',

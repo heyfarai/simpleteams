@@ -7,9 +7,12 @@ interface ViewModeToggleProps {
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-export function ViewModeToggle({ viewMode, onViewModeChange }: ViewModeToggleProps) {
+export function ViewModeToggle({
+  viewMode,
+  onViewModeChange,
+}: ViewModeToggleProps) {
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="team-view-mode-toggle flex items-center justify-end gap-2">
       <Button
         variant={viewMode === "grid" ? "default" : "outline"}
         size="sm"

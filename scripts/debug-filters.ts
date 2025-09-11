@@ -73,7 +73,29 @@ async function debugFilters() {
   })
   console.log('📊 Total players in season:', totalPlayersInSeason)
 
-  // Test 5: Combined filter options query (what the UI uses)
+  // Test 5: Check if divisions are at roster level
+  console.log('\n🧪 Testing roster-level divisions...')
+  const rosterDivisionQuery = groq`*[_type == "team"] {
+    _id, name,
+    rosters[] {
+      season-> { _id, name },
+      division-> { _id, name, ageGroup, skillLevel },
+      players[0...2] {
+        player-> { _id, firstName, lastName }
+      }
+    }
+  }`
+  
+  const teamsWithRosterDivisions = await client.fetch(rosterDivisionQuery)
+  console.log('📊 Teams with roster divisions:', teamsWithRosterDivisions.length)
+  teamsWithRosterDivisions.slice(0, 3).forEach((team: any) => {
+    console.log(`  - ${team.name}:`)
+    team.rosters?.forEach((roster: any) => {
+      console.log(`    Season: ${roster.season?.name}, Division: ${roster.division?.name || 'None'}`)
+    })
+  })
+
+  // Test 6: Combined filter options query (what the UI uses)
   const filterOptionsQuery = groq`{
     "seasons": *[_type == "season"] | order(year desc) {
       _id, name, year, status

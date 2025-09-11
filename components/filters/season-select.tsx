@@ -1,8 +1,8 @@
-import * as React from 'react';
-import * as Select from '@radix-ui/react-select';
-import { Check, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Season } from '@/lib/utils/season-filters';
+import * as React from "react";
+import * as Select from "@radix-ui/react-select";
+import { Check, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Season } from "@/lib/utils/season-filters";
 
 interface SeasonSelectProps {
   selectedSeason: string;
@@ -11,23 +11,32 @@ interface SeasonSelectProps {
   className?: string;
 }
 
-export function SeasonSelect({ selectedSeason, seasons, onChange, className }: SeasonSelectProps) {
+export function SeasonSelect({
+  selectedSeason,
+  seasons,
+  onChange,
+  className,
+}: SeasonSelectProps) {
   const activeSeasons = React.useMemo(() => {
     return seasons
-      .filter(season => season.isActive && season.id !== "")
+      .filter((season) => season.isActive && season.id !== "")
       .sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
   }, [seasons]);
 
   return (
-    <Select.Root value={selectedSeason || "all"} onValueChange={onChange}>
+    <Select.Root
+      value={selectedSeason || "all"}
+      onValueChange={onChange}
+    >
       <Select.Trigger
         className={cn(
-          'flex h-9 w-[180px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+          "flex h-9 w-[180px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
       >
         <Select.Value>
-          {activeSeasons.find(s => s.id === selectedSeason)?.year || (selectedSeason === "" ? "Select season" : "All seasons")}
+          {activeSeasons.find((s) => s.id === selectedSeason)?.year ||
+            (selectedSeason === "" ? "Select season" : "All seasons")}
         </Select.Value>
         <Select.Icon>
           <ChevronDown className="h-4 w-4 opacity-50" />

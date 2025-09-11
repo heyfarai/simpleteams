@@ -7,6 +7,7 @@ interface Season {
   _id: string;
   name: string;
   year: number;
+  isActive: boolean;
   activeDivisions: Array<{
     division: { _ref: string };
     status: string;

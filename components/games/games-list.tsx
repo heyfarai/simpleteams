@@ -15,7 +15,7 @@ interface GamesListProps {
   filterData: {
     sessions: Array<{ _id: string; name: string }>;
     divisions: Array<{ _id: string; name: string }>;
-    seasons: Array<{ _id: string; name: string }>;
+    seasons: Array<{ _id: string; name: string; year: number }>;
   };
 }
 
@@ -23,12 +23,6 @@ export function GamesList({ filterData }: GamesListProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // Get filter values from URL
-  const season = searchParams.get("season") || "all";
-  const session = searchParams.get("session") || "all";
-  const division = searchParams.get("division") || "all";
-  const status = searchParams.get("status") || "all";
 
   const createQueryString = useCallback(
     (params: Record<string, string>) => {
@@ -44,6 +38,26 @@ export function GamesList({ filterData }: GamesListProps) {
     },
     [searchParams]
   );
+
+  // Find 2025 Summer Series season
+  const defaultSeason = filterData.seasons.find(s => s.name === "2025 Summer Series")?._id || "all";
+
+  // Get filter values from URL or use defaults
+  const season = searchParams.get("season") || defaultSeason;
+  const session = searchParams.get("session") || "all";
+  const division = searchParams.get("division") || "all";
+  const status = searchParams.get("status") || "all";
+
+  // Set default season on initial load if no filters are active
+  useEffect(() => {
+    if (!searchParams.has("season") && !searchParams.has("session") && 
+        !searchParams.has("division") && !searchParams.has("status") && 
+        defaultSeason !== "all") {
+      const queryString = createQueryString({ season: defaultSeason });
+      router.push(`${pathname}?${queryString}`);
+    }
+  }, [defaultSeason, pathname, router, createQueryString, searchParams]);
+
 
   // Handle filter changes
   const handleFilterChange = (key: string, value: string) => {

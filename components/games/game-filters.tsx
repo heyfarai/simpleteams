@@ -62,16 +62,16 @@ export function GameFilters({
       year: "All",
       startDate: new Date(),
       endDate: new Date(),
-      isActive: true
+      isActive: true,
     },
-    ...(filterData.seasons || []).map(season => ({
+    ...(filterData.seasons || []).map((season) => ({
       id: season._id,
       name: season.name,
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
       endDate: new Date(season.year + 1, 7, 31),
-      isActive: true
-    }))
+      isActive: true,
+    })),
   ];
 
   return (

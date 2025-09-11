@@ -11,7 +11,6 @@ export function Navigation() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/", label: "Home" },
     { href: "/teams", label: "Teams" },
     { href: "/players", label: "Players" },
     { href: "/games", label: "Games" },
