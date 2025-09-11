@@ -66,7 +66,6 @@ export default function PlayersShowcase() {
   // Extract filter options from fetched data
   const availableSeasons: Season[] = (filterOptions?.seasons || [])
     .filter((season: SanitySeason) => {
-      console.log(season);
       return season._id === "1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3"; // Only include seasons that have ended
     })
     .map((season: SanitySeason) => ({

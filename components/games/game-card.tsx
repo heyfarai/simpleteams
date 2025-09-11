@@ -85,20 +85,14 @@ export function GameCard({ game, loading = false }: GameCardProps) {
               {/* Status and Session */}
               <div className="flex justify-center items-center gap-2 mb-2">
                 {getStatusBadge(game.status)}
-                {game.session && (
+                {game.session?.name && (
                   <Badge
                     variant="outline"
                     className="text-xs bg-primary/10 text-primary border-primary/20"
                   >
-                    {game.session.name}
-                  </Badge>
-                )}
-                {game.session?.type === "playoff" && (
-                  <Badge
-                    variant="outline"
-                    className="text-xs bg-primary/10 text-primary border-primary/20"
-                  >
-                    <Trophy className="h-3 w-3 mr-1" />
+                    {game.session.type === "playoff" && (
+                      <Trophy className="h-3 w-3 mr-1" />
+                    )}
                     {game.session.name}
                   </Badge>
                 )}

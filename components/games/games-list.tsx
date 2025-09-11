@@ -29,6 +29,8 @@ interface GamesListProps {
       isActive: boolean;
     }>;
   };
+  games?: Game[];
+  emptyMessage?: string;
 }
 
 export function GamesList({ filterData }: GamesListProps) {

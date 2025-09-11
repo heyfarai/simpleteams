@@ -1,6 +1,8 @@
 import { client } from '@/lib/sanity/client'
 import { groq } from 'next-sanity'
 
+import { FilterOptions } from '@/lib/sanity/types'
+
 const filterDataQuery = groq`{
   "sessions": *[_type == "session"] | order(startDate desc) {
     _id,
@@ -25,19 +27,29 @@ const filterDataQuery = groq`{
     _id,
     name,
     year,
+    startDate,
+    endDate,
+    status,
     isActive
-  }
+  },
+  "teams": *[_type == "team"] {
+    _id,
+    name,
+    shortName
+  },
+  "positions": *[_type == "player"].position[]
 }`
 
-export async function fetchFilterData() {
+export async function fetchFilterData(): Promise<FilterOptions> {
   try {
     return await client.fetch(filterDataQuery)
   } catch (error) {
     console.error('Error fetching filter data:', error)
     return {
-      sessions: [],
       divisions: [],
-      seasons: []
+      seasons: [],
+      teams: [],
+      positions: []
     }
   }
 }

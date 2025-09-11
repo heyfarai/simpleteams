@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,36 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, MapPin, Plus, Trophy, Users } from "lucide-react";
 import type { FilterData } from "@/lib/sanity/get-filter-data";
 import { GamesList } from "./games/games-list";
-import { fetchAllGames, type Game } from "@/lib/data/fetch-games";
+import { fetchGames } from "@/lib/data/fetch-games";
+import type { Game } from "@/types/schema";
 import { useQuery } from "@tanstack/react-query";
-import {
-  sampleGames,
-  sampleSessions,
-  getTeamById,
-  getSessionById,
-  getSeasonById,
-} from "@/lib/sample-data";
-import {
-  TransformedGame,
-  getActiveFiltersCount,
-} from "@/lib/utils/game-filters";
+import { sampleGames, sampleSessions, getSeasonById } from "@/lib/sample-data";
+import { TransformedGame } from "@/lib/utils/game-filters";
 
 interface GamesScheduleProps {
   filterData: FilterData;
-}
-
-interface Tournament {
-  id: string;
-  name: string;
-  division: string;
-  startDate: string;
-  endDate: string;
-  eligibility: string;
-  venue: string;
-  description: string;
-  teams: number;
-  status: "upcoming" | "registration";
-  seasonName?: string;
 }
 
 interface Tournament {
@@ -58,19 +36,39 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
   const [selectedDivision, setSelectedDivision] = useState<string>("all");
   const [selectedSession, setSelectedSession] = useState<string>("all");
   const [selectedSeason, setSelectedSeason] = useState<string>("all");
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Fetch games using the same pattern as players/teams
+  // Fetch games using React Query
   const {
     data = { games: [], sessions: [] },
     isLoading,
     error,
   } = useQuery({
     queryKey: ["games"],
-    queryFn: fetchAllGames,
+    queryFn: () => fetchGames(),
   });
 
   const { games, sessions } = data;
+
+  // Utility functions
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(":");
+    const date = new Date();
+    date.setHours(Number.parseInt(hours), Number.parseInt(minutes));
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   if (isLoading) {
     return <div className="text-center py-8">Loading games...</div>;
@@ -83,37 +81,43 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
   }
 
   // Transform Sanity games to component format
-  const transformedGames = games.map((game) => ({
-    id: game._id,
-    sessionId: game.session?._id, // For filtering
-    sessionName: game.session?.name || "Unknown Session", // For display
-    season: game.season, // Keep original season reference for filtering
-    homeTeam: game.homeTeam?.name || "Unknown Team",
-    awayTeam: game.awayTeam?.name || "Unknown Team",
-    homeScore: game.score?.homeScore || null,
-    awayScore: game.score?.awayScore || null,
-    date: game.gameDate,
-    time: game.gameTime,
-    venue: "TBD", // TODO: Add venue from location reference
-    venueAddress: "",
-    division: "TBD", // TODO: Add division from game reference
-    status: game.status,
-    isTournament: game.session?.type === "playoff",
-    tournamentName:
-      game.session?.type === "playoff" ? game.session.name : undefined,
-  }));
+  const transformedGames = games.map((game: Game) => {
+    const session = game.session;
+    return {
+      id: game._id,
+      sessionId: session?._id,
+      sessionName: session?.name || "Regular Season",
+      season: game.season,
+      homeTeam: game.homeTeam?.name || "Unknown Team",
+      awayTeam: game.awayTeam?.name || "Unknown Team",
+      homeScore: game.score?.homeScore || null,
+      awayScore: game.score?.awayScore || null,
+      date: game.gameDate,
+      time: game.gameTime,
+      venue: game.venue || "TBD",
+      venueAddress: game.venueAddress || "",
+      division: "TBD",
+      status: game.status,
+      isTournament: session?.type === "playoff",
+      tournamentName: session?.type === "playoff" ? session.name : undefined,
+    };
+  });
 
   // Apply filters to games
-  const filteredGames = transformedGames.filter((game) => {
+  const filteredGames = transformedGames.filter((game: TransformedGame) => {
     if (
       selectedSeason !== "all" &&
       game.season?.year.toString() !== selectedSeason
     ) {
       return false;
     }
-    if (selectedSession !== "all" && game.sessionId !== selectedSession) {
-      console.log("Filtering out game:", game.id, "session:", game.sessionId);
-      return false;
+    if (selectedSession !== "all") {
+      if (!game.sessionId && selectedSession !== "regular") {
+        return false;
+      }
+      if (game.sessionId && game.sessionId !== selectedSession) {
+        return false;
+      }
     }
     if (selectedDivision !== "all" && game.division !== selectedDivision) {
       return false;
@@ -122,27 +126,15 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
   });
 
   const upcomingGames = filteredGames.filter(
-    (game) => game.status === "scheduled" || game.status === "in-progress"
+    (game: TransformedGame) =>
+      game.status === "scheduled" || game.status === "in-progress"
   );
 
   const completedGames = filteredGames.filter(
-    (game) => game.status === "final"
+    (game: TransformedGame) => game.status === "final"
   );
 
-  interface Tournament {
-    id: string;
-    name: string;
-    division: string;
-    startDate: string;
-    endDate: string;
-    eligibility: string;
-    venue: string;
-    description: string;
-    teams: number;
-    status: "upcoming" | "registration";
-    seasonName?: string;
-  }
-
+  // Generate tournaments from sample data
   const tournaments: Tournament[] = sampleSessions
     .filter((session) => session.type === "playoff")
     .map((session) => {
@@ -166,62 +158,20 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
             ? "upcoming"
             : "registration",
         seasonName: season?.name,
-      } satisfies Tournament;
+      };
     });
-
-  console.log("Sessions from query:", sessions);
-  console.log("Selected session:", selectedSession);
-
-  // Create extended filter data with sessions from the query
-  const extendedFilterData = {
-    ...filterData,
-    sessions: [{ _id: "all", name: "All Sessions" }, ...sessions],
-  };
-
-  const clearAllFilters = () => {
-    setSelectedDivision("all");
-    setSelectedSession("all");
-    setSelectedSeason("all");
-  };
-
-  // Count active filters manually
-  const activeFiltersCount = [
-    selectedDivision !== "all",
-    selectedSession !== "all",
-    selectedSeason !== "all",
-  ].filter(Boolean).length;
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(":");
-    const date = new Date();
-    date.setHours(Number.parseInt(hours), Number.parseInt(minutes));
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
 
   return (
     <div className="flex gap-6">
-      {/* Main Content */}
       <div className="flex-1 min-w-0">
         <Tabs
           defaultValue="upcoming"
-          className="hidden space-y-6"
+          className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="upcoming">Upcoming Games</TabsTrigger>
             <TabsTrigger value="completed">Completed Games</TabsTrigger>
+            <TabsTrigger value="tournaments">Tournaments</TabsTrigger>
           </TabsList>
 
           <TabsContent
@@ -244,7 +194,6 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
             />
           </TabsContent>
 
-          {/* Tournaments */}
           <TabsContent
             value="tournaments"
             className="space-y-4"

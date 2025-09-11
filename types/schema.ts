@@ -47,7 +47,7 @@ export interface Game {
     homeScore: number
     awayScore: number
   }
-  session: Session
+  session?: Session
   season: Season
   venue?: string
   venueAddress?: string

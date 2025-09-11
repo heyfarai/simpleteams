@@ -3,13 +3,9 @@
 import { TeamFilterState } from "@/lib/types/teams";
 import { SeasonTabs } from "@/components/filters/season-tabs";
 
-interface TeamSeason {
-  _id: string;
-  name: string;
-  year: number;
-  status: string;
-  isActive?: boolean;
-}
+import { SanitySeason } from '@/lib/sanity/types';
+
+type TeamSeason = SanitySeason;
 
 interface TeamFiltersProps {
   filters: TeamFilterState;
@@ -29,9 +25,9 @@ export function TeamFilters({
         .map((season) => ({
           id: season._id,
           name: season.name,
-          year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
-          startDate: new Date(season.year, 8, 1),
-          endDate: new Date(season.year + 1, 7, 31),
+          year: season.year.toString(),
+          startDate: new Date(season.startDate),
+          endDate: new Date(season.endDate),
           status: season.status,
           isActive: season.isActive || false,
         }))}

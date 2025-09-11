@@ -289,19 +289,12 @@ export async function fetchLeadersByCategory(
 
     // If no leaders found in specific season, fall back to global leaders
     if (seasonLeadersWithStats.length === 0 && seasonId && seasonId !== "all") {
-      console.log(
-        `No ${category} leaders in season ${seasonId}, falling back to global leaders`
-      );
       const globalPlayers = await fetchPlayersBySeason(); // Get all players
       const globalLeadersWithStats = globalPlayers
         .filter((player) => player.stats[statField] > 0)
         .sort((a, b) => b.stats[statField] - a.stats[statField])
         .slice(0, 10);
 
-      console.log(
-        `Global ${category} leaders found:`,
-        globalLeadersWithStats.length
-      );
       return globalLeadersWithStats;
     }
 

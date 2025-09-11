@@ -111,6 +111,15 @@ export interface SanityRosterPlayer {
   status: "active" | "inactive" | "injured";
 }
 
+export interface SanityDivisionInfo {
+  division: {
+    _id: string;
+    name: string;
+  };
+  status: string;
+  teams: { _ref: string }[];
+}
+
 export interface SanitySeason {
   _id: string;
   name: string;
@@ -119,6 +128,7 @@ export interface SanitySeason {
   startDate: string;
   status: "upcoming" | "active" | "completed";
   isActive: boolean;
+  activeDivisions: SanityDivisionInfo[];
 }
 
 export interface PlayerWithTeamInfo extends SanityPlayer {

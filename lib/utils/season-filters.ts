@@ -1,16 +1,18 @@
+import { SanitySeason } from '@/lib/sanity/types';
+
 export interface Season {
-  id: string;
-  name: string; // e.g. "2024-25 Season"
-  year: string; // e.g. "2024-25"
-  startDate: Date;
-  endDate: Date;
+  id: string; // maps to _id
+  name: string;
+  year: string;
   status: string;
   isActive: boolean;
+  startDate: Date;
+  endDate: Date;
 }
 
 export const sortSeasonsByDate = (seasons: Season[]): Season[] => {
   return [...seasons].sort(
-    (a, b) => b.startDate.getTime() - a.startDate.getTime()
+    (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
   );
 };
 
@@ -19,5 +21,5 @@ export const getActiveSeasons = (seasons: Season[]): Season[] => {
 };
 
 export const formatSeasonYear = (season: Season): string => {
-  return season.year;
+  return season.year.toString();
 };

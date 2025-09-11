@@ -251,17 +251,12 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
 
     // Get all team IDs that are in divisions of the target season
     const seasonTeamIds = new Set<string>();
+    const teamDivisions = new Map<string, { _id: string; name: string }>();
+    
     targetSeason.divisions.forEach((div) => {
       div.teamRefs.forEach((teamRef) => {
         seasonTeamIds.add(teamRef);
-      });
-    });
-
-    // Create a map of team ID to division for the target season
-    const teamDivisionMap = new Map<string, { _id: string; name: string }>();
-    targetSeason.divisions.forEach((div) => {
-      div.teamRefs.forEach((teamRef) => {
-        teamDivisionMap.set(teamRef, div.division);
+        teamDivisions.set(teamRef, div.division);
       });
     });
 
@@ -274,6 +269,11 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
           (r) => r.season._id === targetSeason._id
         );
 
+        // Find the division for this team in the target season
+        const teamDivision = targetSeason.divisions.find(div => 
+          div.teamRefs.includes(team._id)
+        )?.division;
+
         const hasStats = Boolean(
           activeRoster?.seasonStats?.wins !== null &&
             activeRoster?.seasonStats?.wins !== undefined &&
@@ -284,7 +284,7 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
         return {
           ...team,
           id: team._id,
-          division: teamDivisionMap.get(team._id),
+          division: teamDivisions.get(team._id),
           season: {
             _id: targetSeason._id,
             name: targetSeason.name,

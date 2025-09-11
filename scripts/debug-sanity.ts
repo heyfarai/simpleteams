@@ -15,6 +15,10 @@ async function debugSanityData() {
     
     // Test our updated query
     const teamsQuery = `{
+  "divisions": *[_type == "division"] {
+    _id,
+    name
+  },
       "seasons": *[_type == "season" && defined(activeDivisions)] | order(year desc) {
         _id,
         name,
@@ -62,14 +66,14 @@ async function debugSanityData() {
     const data = await sanityClient.fetch(teamsQuery);
     
     // Find the target season
-    const targetSeason = data.seasons.find(s => s._id === seasonId);
+    const targetSeason = data.seasons.find((s: { _id: string }) => s._id === seasonId);
     console.log('Target Season:', JSON.stringify(targetSeason, null, 2));
     
     if (targetSeason) {
       // Get team IDs for this season
       const seasonTeamIds = new Set();
-      targetSeason.divisions.forEach(div => {
-        div.teamRefs.forEach(teamRef => {
+      targetSeason.divisions.forEach((div: { teamRefs: string[] }) => {
+        div.teamRefs.forEach((teamRef: string) => {
           seasonTeamIds.add(teamRef);
         });
       });
@@ -77,8 +81,8 @@ async function debugSanityData() {
       console.log('\nTeam IDs in season:', Array.from(seasonTeamIds));
       
       // Filter teams
-      const filteredTeams = data.teams.filter(team => seasonTeamIds.has(team._id));
-      console.log('\nFiltered Teams for season:', filteredTeams.map(t => ({ id: t._id, name: t.name })));
+      const filteredTeams = data.teams.filter((team: { _id: string }) => seasonTeamIds.has(team._id));
+      console.log('\nFiltered Teams for season:', filteredTeams.map((t: { _id: string; name: string }) => ({ id: t._id, name: t.name })));
     }
 
   } catch (error) {

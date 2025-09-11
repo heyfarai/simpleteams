@@ -50,12 +50,14 @@ export default async function GamePage({ params }: GamePageProps) {
                game.status === "final" ? "Final" :
                game.status === "cancelled" ? "Cancelled" : "Scheduled"}
             </Badge>
-            <Badge
-              variant="outline"
-              className="bg-primary/10 text-primary border-primary/20"
-            >
-              {game.session.name}
-            </Badge>
+            {game.session?.name && (
+              <Badge
+                variant="outline"
+                className="bg-primary/10 text-primary border-primary/20"
+              >
+                {game.session.name}
+              </Badge>
+            )}
           </div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             {game.homeTeam.name} vs {game.awayTeam.name}
@@ -110,10 +112,12 @@ export default async function GamePage({ params }: GamePageProps) {
                     ) : "TBD"}
                   </dd>
                 </div>
-                <div>
-                  <dt className="text-sm text-muted-foreground">Session</dt>
-                  <dd className="font-medium">{game.session.name}</dd>
-                </div>
+                {game.session?.name && (
+                  <div>
+                    <dt className="text-sm text-muted-foreground">Session</dt>
+                    <dd className="font-medium">{game.session.name}</dd>
+                  </div>
+                )}
                 <div>
                   <dt className="text-sm text-muted-foreground">Status</dt>
                   <dd className="font-medium capitalize">{game.status}</dd>
