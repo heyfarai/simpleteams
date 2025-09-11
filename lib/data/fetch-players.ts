@@ -35,7 +35,7 @@ export interface ShowcasePlayer {
   position: string;
   gradYear: number;
   height?: string;
-  headshot?: string;
+  photo?: string;
   stats: {
     ppg: number;
     rpg: number;
@@ -77,6 +77,7 @@ export async function fetchPlayersBySeason(
               name,
               firstName,
               lastName,
+              jerseyNumber,
               personalInfo,
               photo,
               stats,
@@ -84,7 +85,6 @@ export async function fetchPlayersBySeason(
               bio,
               highlightVideos
             },
-            jerseyNumber,
             position,
             status
           }
@@ -116,12 +116,12 @@ export async function fetchPlayersBySeason(
             `${player.firstName || "Unknown"} ${player.lastName || "Player"}`,
           team: team.name,
           teamId: team._id,
-          jersey: rosterPlayer.jerseyNumber || 0,
+          jersey: player.jerseyNumber || 7,
           position: getPositionFullName(rosterPlayer.position || "PG"),
           gradYear:
             player.personalInfo?.gradYear || new Date().getFullYear() + 1,
           height: player.personalInfo?.height || "N/A",
-          headshot: player.photo
+          photo: player.photo
             ? urlFor(player.photo).width(400).height(400).url()
             : undefined,
           stats: {
@@ -196,7 +196,6 @@ export async function fetchAllPlayers(): Promise<ShowcasePlayer[]> {
       const roster = teamInfo?.roster;
       const season = roster?.season;
       const playerDetails = roster?.playerDetails;
-
       return {
         id: player._id,
         firstName: player.firstName || "Unknown",
@@ -206,7 +205,7 @@ export async function fetchAllPlayers(): Promise<ShowcasePlayer[]> {
           `${player.firstName || "Unknown"} ${player.lastName || "Player"}`,
         team: teamInfo?.name || "Free Agent",
         teamId: teamInfo?._id || "unknown",
-        jersey: playerDetails?.jerseyNumber || 0,
+        jersey: playerDetails?.jerseyNumber || 7,
         position: getPositionFullName(playerDetails?.position || "PG"),
         gradYear: player.personalInfo?.gradYear || new Date().getFullYear() + 1,
         height: player.personalInfo?.height || "N/A",
@@ -385,4 +384,107 @@ export function getPositionAbbreviation(position: string): string {
     Center: "C",
   };
   return positionMap[position] || position;
+}
+
+// Fetch random featured players for spotlight
+export async function fetchFeaturedPlayers(
+  count: number = 4
+): Promise<ShowcasePlayer[]> {
+  try {
+    // Get all players with their latest season stats
+    const featuredPlayersQuery = groq`
+      *[_type == "player" && defined(stats) && stats.points > 0] {
+        _id,
+        name,
+        firstName,
+        lastName,
+        jerseyNumber,
+        personalInfo,
+        photo,
+        stats,
+        awards,
+        highlightVideos,
+        "teamInfo": *[_type == "team" && references(^._id)][0] {
+          _id,
+          name,
+          "roster": rosters[players[].player._ref match ^._id][0] {
+            season->{
+              _id,
+              name,
+              year
+            },
+            "playerDetails": players[player._ref == ^._id][0] {
+              jerseyNumber,
+              position,
+              status
+            }
+          }
+        }
+      } | order(stats.points desc)
+    `;
+
+    const players = await client.fetch(featuredPlayersQuery);
+
+    // Randomly select 'count' players from the top performers
+    const topPlayers = players.slice(0, Math.min(20, players.length)); // Get top 20 scorers
+    const selectedPlayers = [];
+    const selectedIndices = new Set<number>();
+
+    while (
+      selectedPlayers.length < count &&
+      selectedIndices.size < topPlayers.length
+    ) {
+      const randomIndex = Math.floor(Math.random() * topPlayers.length);
+      if (!selectedIndices.has(randomIndex)) {
+        selectedIndices.add(randomIndex);
+        const player = topPlayers[randomIndex];
+        const teamInfo = player.teamInfo;
+        const roster = teamInfo?.roster;
+        const season = roster?.season;
+        const playerDetails = roster?.playerDetails;
+        console.log("playerDetails", player);
+        selectedPlayers.push({
+          id: player._id,
+          firstName: player.firstName || "Unknown",
+          lastName: player.lastName || "Player",
+          name:
+            player.name ||
+            `${player.firstName || "Unknown"} ${player.lastName || "Player"}`,
+          team: teamInfo?.name || "Free Agent",
+          teamId: teamInfo?._id || "unknown",
+          jersey: player.jerseyNumber || 0,
+          position: getPositionFullName(playerDetails?.position || "PG"),
+          gradYear:
+            player.personalInfo?.gradYear || new Date().getFullYear() + 1,
+          height: player.personalInfo?.height || "N/A",
+          headshot: player.photo
+            ? urlFor(player.photo).width(400).height(400).url()
+            : undefined,
+          stats: {
+            ppg: player.stats?.points || 0,
+            rpg: player.stats?.rebounds || 0,
+            apg: player.stats?.assists || 0,
+            spg: player.stats?.steals || 0,
+            bpg: player.stats?.blocks || 0,
+            mpg: player.stats?.minutes || 0,
+          },
+          awards: player.awards || [],
+          hasHighlight: (player.highlightVideos?.length || 0) > 0,
+          division: "Diamond", // TODO: Get actual division
+          gamesPlayed: player.stats?.gamesPlayed || 0,
+          year: season
+            ? `${season.year}-${(season.year + 1).toString().slice(2)}`
+            : "Unknown",
+          season: season?.name || "Unknown",
+          seasonId: season?._id || "unknown",
+          hometown: player.personalInfo?.hometown || "Unknown",
+        });
+      }
+    }
+
+    return selectedPlayers;
+  } catch (error) {
+    console.error("Error fetching featured players:", error);
+    return [];
+  }
 }

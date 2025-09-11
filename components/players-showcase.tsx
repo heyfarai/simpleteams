@@ -165,7 +165,7 @@ export default function PlayersShowcase() {
       <div className="flex items-center space-x-3 p-3 hover:bg-muted/50 rounded-lg transition-colors cursor-pointer group">
         <div className="flex-shrink-0">
           <img
-            src={player.headshot || "/placeholder.svg"}
+            src={player.photo || "/placeholder.svg"}
             alt={`${player.firstName} ${player.lastName}`}
             className="w-12 h-12 rounded-full object-cover"
           />
@@ -253,7 +253,7 @@ export default function PlayersShowcase() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="flex  items-center justify-between gap-4">
         <SeasonTabs
           selectedSeason={selectedSeason}
           seasons={availableSeasons}
@@ -348,7 +348,7 @@ export default function PlayersShowcase() {
                           <CardContent className="p-0">
                             <div className="relative overflow-hidden">
                               <img
-                                src={player.headshot || "/placeholder.svg"}
+                                src={player.photo || "/placeholder.svg"}
                                 alt={`${player.firstName} ${player.lastName}`}
                                 className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                               />
