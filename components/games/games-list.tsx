@@ -12,6 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import { SeasonTabs } from "@/components/filters/season-tabs";
 import { Season } from "@/lib/utils/season-filters";
 import type { Game } from "@/types/schema";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { UpcomingSeason } from "./upcoming-season";
 
 interface GamesListProps {
   filterData: {
@@ -21,6 +25,7 @@ interface GamesListProps {
       _id: string;
       name: string;
       year: number;
+      status: string;
       isActive: boolean;
     }>;
   };
@@ -108,6 +113,7 @@ export function GamesList({ filterData }: GamesListProps) {
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
       endDate: new Date(season.year + 1, 7, 31),
+      status: season.status,
       isActive: Boolean(season.isActive), // Using explicit isActive field from schema
     })
   );
@@ -164,116 +170,122 @@ export function GamesList({ filterData }: GamesListProps) {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1">
-          <Hydrate<
-            ["games", string, string, string, string],
-            { games: Game[]; total: number }
-          >
-            queryKey={["games", season, session, division, status]}
-            queryFn={() =>
-              fetchGames({
-                season: season === "all" ? undefined : season,
-                session: session === "all" ? undefined : session,
-                division: division === "all" ? undefined : division,
-                status: status === "all" ? undefined : status,
-              })
-            }
-          >
-            {isLoading ? (
-              <div className="grid gap-4">
-                {Array(3)
-                  .fill(null)
-                  .map((_, i) => (
-                    <GameCard
-                      key={`skeleton-${i}`}
-                      game={allGames[0] ?? ({} as Game)}
-                      loading={true}
-                    />
-                  ))}
-              </div>
-            ) : allGames.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">No games found</p>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {Object.entries(
-                  // Group games by date
-                  allGames.reduce((acc, game) => {
-                    const date = new Date(game.gameDate);
-                    const dateKey = date.toISOString().split("T")[0];
-                    if (!acc[dateKey]) acc[dateKey] = [];
-                    acc[dateKey].push(game);
-                    return acc;
-                  }, {} as Record<string, Game[]>)
-                )
-                  // Sort dates newest first
-                  .sort(
-                    ([dateA], [dateB]) =>
-                      new Date(dateB).getTime() - new Date(dateA).getTime()
+          {season === "01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad" ? (
+            <UpcomingSeason />
+          ) : (
+            <Hydrate<
+              ["games", string, string, string, string],
+              { games: Game[]; total: number }
+            >
+              queryKey={["games", season, session, division, status]}
+              queryFn={() =>
+                fetchGames({
+                  season: season === "all" ? undefined : season,
+                  session: session === "all" ? undefined : session,
+                  division: division === "all" ? undefined : division,
+                  status: status === "all" ? undefined : status,
+                })
+              }
+            >
+              {isLoading ? (
+                <div className="grid gap-4">
+                  {Array(3)
+                    .fill(null)
+                    .map((_, i) => (
+                      <GameCard
+                        key={`skeleton-${i}`}
+                        game={allGames[0] ?? ({} as Game)}
+                        loading={true}
+                      />
+                    ))}
+                </div>
+              ) : allGames.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground">
+                    No games found
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {Object.entries(
+                    // Group games by date
+                    allGames.reduce((acc, game) => {
+                      const date = new Date(game.gameDate);
+                      const dateKey = date.toISOString().split("T")[0];
+                      if (!acc[dateKey]) acc[dateKey] = [];
+                      acc[dateKey].push(game);
+                      return acc;
+                    }, {} as Record<string, Game[]>)
                   )
-                  .map(([date, gamesForDate]) => {
-                    const gameDate = new Date(date);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const tomorrow = new Date(today);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    const yesterday = new Date(today);
-                    yesterday.setDate(yesterday.getDate() - 1);
+                    // Sort dates newest first
+                    .sort(
+                      ([dateA], [dateB]) =>
+                        new Date(dateB).getTime() - new Date(dateA).getTime()
+                    )
+                    .map(([date, gamesForDate]) => {
+                      const gameDate = new Date(date);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const tomorrow = new Date(today);
+                      tomorrow.setDate(tomorrow.getDate() + 1);
+                      const yesterday = new Date(today);
+                      yesterday.setDate(yesterday.getDate() - 1);
 
-                    let relativeDate = "";
-                    if (gameDate.getTime() === today.getTime()) {
-                      relativeDate = "Today";
-                    } else if (gameDate.getTime() === tomorrow.getTime()) {
-                      relativeDate = "Tomorrow";
-                    } else if (gameDate.getTime() === yesterday.getTime()) {
-                      relativeDate = "Yesterday";
-                    }
+                      let relativeDate = "";
+                      if (gameDate.getTime() === today.getTime()) {
+                        relativeDate = "Today";
+                      } else if (gameDate.getTime() === tomorrow.getTime()) {
+                        relativeDate = "Tomorrow";
+                      } else if (gameDate.getTime() === yesterday.getTime()) {
+                        relativeDate = "Yesterday";
+                      }
 
-                    const formattedDate = new Intl.DateTimeFormat("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    }).format(gameDate);
+                      const formattedDate = new Intl.DateTimeFormat("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(gameDate);
 
-                    return (
-                      <div
-                        key={date}
-                        className="space-y-4"
-                      >
-                        <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-2 border-b">
-                          <h2 className="text-lg font-semibold tracking-tight">
-                            {relativeDate
-                              ? `${relativeDate} - ${formattedDate}`
-                              : formattedDate}
-                          </h2>
-                          <p className="text-sm text-muted-foreground">
-                            {gamesForDate.length} game
-                            {gamesForDate.length !== 1 ? "s" : ""}
-                          </p>
+                      return (
+                        <div
+                          key={date}
+                          className="space-y-4"
+                        >
+                          <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-2 border-b">
+                            <h2 className="text-lg font-semibold tracking-tight">
+                              {relativeDate
+                                ? `${relativeDate} - ${formattedDate}`
+                                : formattedDate}
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                              {gamesForDate.length} game
+                              {gamesForDate.length !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                          <div className="grid gap-4">
+                            {gamesForDate
+                              .sort((a, b) => {
+                                // Sort by game time within the same date
+                                const timeA = a.gameTime || "";
+                                const timeB = b.gameTime || "";
+                                return timeA.localeCompare(timeB);
+                              })
+                              .map((game: Game) => (
+                                <GameCard
+                                  key={game._id}
+                                  game={game}
+                                  loading={false}
+                                />
+                              ))}
+                          </div>
                         </div>
-                        <div className="grid gap-4">
-                          {gamesForDate
-                            .sort((a, b) => {
-                              // Sort by game time within the same date
-                              const timeA = a.gameTime || "";
-                              const timeB = b.gameTime || "";
-                              return timeA.localeCompare(timeB);
-                            })
-                            .map((game: Game) => (
-                              <GameCard
-                                key={game._id}
-                                game={game}
-                                loading={false}
-                              />
-                            ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
-          </Hydrate>
+                      );
+                    })}
+                </div>
+              )}
+            </Hydrate>
+          )}
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ interface TeamSeason {
   _id: string;
   name: string;
   year: number;
+  status: string;
   isActive?: boolean;
 }
 
@@ -23,15 +24,20 @@ export function TeamFilters({
 }: TeamFiltersProps) {
   return (
     <SeasonTabs
-      seasons={seasons.filter(season => season.isActive).map((season) => ({
-        id: season._id,
-        name: season.name,
-        year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
-        startDate: new Date(season.year, 8, 1),
-        endDate: new Date(season.year + 1, 7, 31),
-        isActive: season.isActive || false,
-      }))}
-      selectedSeason={filters.seasonId || seasons.find(s => s.isActive)?._id || ""}
+      seasons={seasons
+        .filter((season) => season.isActive)
+        .map((season) => ({
+          id: season._id,
+          name: season.name,
+          year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
+          startDate: new Date(season.year, 8, 1),
+          endDate: new Date(season.year + 1, 7, 31),
+          status: season.status,
+          isActive: season.isActive || false,
+        }))}
+      selectedSeason={
+        filters.seasonId || seasons.find((s) => s.isActive)?._id || ""
+      }
       onSeasonChange={(seasonId) => {
         onFilterChange({
           seasonId,

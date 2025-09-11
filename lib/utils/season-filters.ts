@@ -15,7 +15,6 @@ export const sortSeasonsByDate = (seasons: Season[]): Season[] => {
 };
 
 export const getActiveSeasons = (seasons: Season[]): Season[] => {
-  console.log("seasons", seasons);
   return seasons.filter((season) => season.isActive);
 };
 

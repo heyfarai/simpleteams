@@ -30,7 +30,7 @@ function PlayerCard({ player }: { player: Player }) {
   };
 
   return (
-    <Link href={`/players/${player.player._id}`} legacyBehavior>
+    <Link href={`/players/${player.player._id}`} className="block">
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">

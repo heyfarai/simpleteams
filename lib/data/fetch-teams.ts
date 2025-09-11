@@ -93,6 +93,139 @@ interface SanityResponse {
   seasons: SanitySeason[];
 }
 
+interface SanityAllTeamsResponse {
+  teams: SanityTeam[];
+}
+
+export async function fetchAllTeams(): Promise<Team[]> {
+  try {
+    const allTeamsQuery = `{
+      "teams": *[_type == "team"] {
+        _id,
+        name,
+        shortName,
+        logo,
+        coach,
+        region,
+        description,
+        homeVenue,
+        awards,
+        stats,
+        "divisions": *[_type == "seasonDivision" && references(^._id)]{
+          "season": season->{
+            _id,
+            name,
+            year
+          },
+          "division": division->{
+            _id,
+            name
+          }
+        },
+        rosters[] {
+          "season": season->{
+            _id,
+            name,
+            year
+          },
+          seasonStats {
+            wins,
+            losses,
+            ties,
+            pointsFor,
+            pointsAgainst,
+            homeRecord,
+            awayRecord,
+            conferenceRecord
+          }
+        }
+      }
+    }`;
+
+    const data = await fetchWithRetry<SanityAllTeamsResponse>(allTeamsQuery);
+
+    if (!data?.teams || !Array.isArray(data.teams)) {
+      throw new Error("Invalid response format from Sanity");
+    }
+
+    const { teams } = data;
+
+    // Transform all teams without season filtering
+    return teams.map((team) => {
+      // Get the most recent roster for stats
+      const mostRecentRoster = team.rosters?.sort(
+        (a, b) => b.season.year - a.season.year
+      )[0];
+
+      const hasStats = Boolean(
+        mostRecentRoster?.seasonStats?.wins !== null &&
+          mostRecentRoster?.seasonStats?.wins !== undefined &&
+          mostRecentRoster?.seasonStats?.losses !== null &&
+          mostRecentRoster?.seasonStats?.losses !== undefined
+      );
+
+      // Get the most recent division info
+      const mostRecentDivision = team.divisions?.sort(
+        (a, b) => b.season.year - a.season.year
+      )[0];
+
+      return {
+        ...team,
+        id: team._id,
+        division: mostRecentDivision?.division,
+        season: mostRecentDivision?.season || {
+          _id: "",
+          name: "No Season",
+          year: 0,
+        },
+        coach: team.coach || "TBA",
+        region: team.region || "Unknown",
+        homeVenue: team.homeVenue || "TBA",
+        awards: team.awards || [],
+        rosters: (team.rosters ?? []).map((roster) => ({
+          season: roster.season,
+          seasonStats: roster.seasonStats
+            ? {
+                wins: roster.seasonStats.wins ?? 0,
+                losses: roster.seasonStats.losses ?? 0,
+                ties: roster.seasonStats.ties ?? 0,
+                pointsFor: roster.seasonStats.pointsFor ?? 0,
+                pointsAgainst: roster.seasonStats.pointsAgainst ?? 0,
+                gamesPlayed:
+                  (roster.seasonStats.wins ?? 0) +
+                  (roster.seasonStats.losses ?? 0) +
+                  (roster.seasonStats.ties ?? 0),
+              }
+            : undefined,
+        })),
+        stats:
+          hasStats && mostRecentRoster?.seasonStats
+            ? {
+                wins: mostRecentRoster.seasonStats.wins ?? 0,
+                losses: mostRecentRoster.seasonStats.losses ?? 0,
+                pointsFor: mostRecentRoster.seasonStats.pointsFor ?? 0,
+                pointsAgainst: mostRecentRoster.seasonStats.pointsAgainst ?? 0,
+                gamesPlayed:
+                  (mostRecentRoster.seasonStats.wins ?? 0) +
+                  (mostRecentRoster.seasonStats.losses ?? 0) +
+                  (mostRecentRoster.seasonStats.ties ?? 0),
+              }
+            : {
+                wins: 0,
+                losses: 0,
+                pointsFor: 0,
+                pointsAgainst: 0,
+                gamesPlayed: 0,
+              },
+        showStats: hasStats,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching all teams:", error);
+    throw error;
+  }
+}
+
 export async function fetchTeams(seasonId?: string): Promise<Team[]> {
   try {
     const data = await fetchWithRetry<SanityResponse>(teamsQuery);
@@ -108,7 +241,7 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
     const { teams, seasons } = data;
 
     // Find the specified season or default to the first active season
-    let targetSeason = seasonId 
+    let targetSeason = seasonId
       ? seasons.find((s) => s._id === seasonId)
       : seasons.find((s) => s.isActive) || seasons[0];
 
