@@ -284,8 +284,6 @@ export async function fetchLeadersByCategory(
   seasonId?: string
 ): Promise<ShowcasePlayer[]> {
   try {
-    console.log(`Fetching ${category} leaders for season:`, seasonId);
-
     // Get all players for the season (or all players if no season)
     const seasonPlayers = await fetchPlayersBySeason(seasonId);
 
@@ -295,11 +293,6 @@ export async function fetchLeadersByCategory(
       .filter((player) => player.stats[statField] > 0)
       .sort((a, b) => b.stats[statField] - a.stats[statField])
       .slice(0, 10); // Top 10 leaders
-
-    console.log(
-      `${category} leaders found in season:`,
-      seasonLeadersWithStats.length
-    );
 
     // If no leaders found in specific season, fall back to global leaders
     if (seasonLeadersWithStats.length === 0 && seasonId && seasonId !== "all") {

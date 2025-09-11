@@ -152,15 +152,6 @@ export default function PlayersShowcase() {
     return acc;
   }, {} as Record<string, ShowcasePlayer[]>);
 
-  console.log("Filtered players:", {
-    total: players.length,
-    filtered: filteredPlayers.length,
-    byTeam: Object.keys(playersByTeam).map(
-      (team) => `${team}: ${playersByTeam[team].length}`
-    ),
-    selectedSeason,
-  });
-
   const StatLeaderCard = ({
     player,
     statValue,
