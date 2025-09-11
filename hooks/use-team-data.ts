@@ -28,16 +28,6 @@ type FilterOptions = {
 };
 
 function transformTeam(team: any, seasonId?: string): Team {
-  // Debug team data transformation
-  if (team._id === '13111760-ab34-4d1e-a512-cfe0c830312e') {
-    const activeRoster = team.rosters?.find((r: any) => seasonId ? r.season._id === seasonId : true);
-    console.log('transformTeam debug:', {
-      teamId: team._id,
-      seasonId,
-      activeRoster,
-      foundSeason: activeRoster?.season
-    });
-  }
   return {
     id: team._id,
     name: team.name,
@@ -48,7 +38,10 @@ function transformTeam(team: any, seasonId?: string): Team {
           name: team.division.name,
         }
       : undefined,
-    season: team.rosters?.find((r: { season: { _id: string } }) => seasonId ? r.season._id === seasonId : true)?.season ?? undefined,
+    season:
+      team.rosters?.find((r: { season: { _id: string } }) =>
+        seasonId ? r.season._id === seasonId : true
+      )?.season ?? undefined,
     coach: team.coach || "TBA",
     region: team.region || "Unknown Region",
     description: team.description,
@@ -87,25 +80,24 @@ export function useTeamData(seasonId?: string) {
           fetchTeamFilters(),
         ]);
         // Debug raw data
-        const targetTeam = teamsData.find((t) => t.id === '13111760-ab34-4d1e-a512-cfe0c830312e');
+        const targetTeam = teamsData.find(
+          (t) => t.id === "13111760-ab34-4d1e-a512-cfe0c830312e"
+        );
         if (targetTeam) {
-          console.log('useTeamData - before transform:', {
-            team: targetTeam
+          console.log("useTeamData - before transform:", {
+            team: targetTeam,
           });
         }
 
-        // Debug seasonId
-        console.log('useTeamData - seasonId:', { seasonId });
-        
         const transformedTeams = (
           teamsData.length > 0 ? teamsData : sampleTeams
         ).map((team: any) => {
           const transformed = transformTeam(team, seasonId);
-          if (team._id === '13111760-ab34-4d1e-a512-cfe0c830312e') {
-            console.log('useTeamData - after transform:', {
+          if (team._id === "13111760-ab34-4d1e-a512-cfe0c830312e") {
+            console.log("useTeamData - after transform:", {
               teamId: team._id,
               seasonId,
-              transformed
+              transformed,
             });
           }
           return transformed;

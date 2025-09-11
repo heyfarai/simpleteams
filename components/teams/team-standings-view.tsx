@@ -44,23 +44,6 @@ export function TeamStandingsView({
       (r) => r.season._id === team.season?._id
     );
 
-    // Debug logging
-    if (team.id === "13111760-ab34-4d1e-a512-cfe0c830312e") {
-      console.log("ONL-X Junior data:", {
-        activeRoster,
-        seasonId: team.season?._id,
-        rosters: team.rosters,
-      });
-    }
-    // Debug logging for ONL-X Junior
-    if (team.id === "13111760-ab34-4d1e-a512-cfe0c830312e") {
-      console.log("ONL-X Junior standings:", {
-        activeRoster,
-        seasonStats: activeRoster?.seasonStats,
-        showStats: team.showStats,
-      });
-    }
-
     const stats = team.stats;
     const gamesPlayed = stats.gamesPlayed ?? 0;
     const winPercentage =

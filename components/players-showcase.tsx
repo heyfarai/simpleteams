@@ -62,8 +62,6 @@ export default function PlayersShowcase() {
   // Use fetched data or fallback to empty arrays
   const players = allPlayersData || [];
   const statLeaders = statLeadersData || [];
-  console.log("players", players);
-  console.log("statLeaders", statLeaders);
 
   // Extract filter options from fetched data
   const availableSeasons: Season[] = (filterOptions?.seasons || []).map(
@@ -73,7 +71,7 @@ export default function PlayersShowcase() {
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
       endDate: new Date(season.year + 1, 7, 31),
-      isActive: season.status === "active",
+      isActive: Boolean(season.isActive),
     })
   );
 

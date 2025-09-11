@@ -17,7 +17,7 @@ interface GamesListProps {
   filterData: {
     sessions: Array<{ _id: string; name: string }>;
     divisions: Array<{ _id: string; name: string }>;
-    seasons: Array<{ _id: string; name: string; year: number }>;
+    seasons: Array<{ _id: string; name: string; year: number; isActive: boolean }>;
   };
 }
 
@@ -98,7 +98,7 @@ export function GamesList({ filterData }: GamesListProps) {
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
       endDate: new Date(season.year + 1, 7, 31),
-      isActive: true,
+      isActive: Boolean(season.isActive), // Using explicit isActive field from schema
     })
   );
 

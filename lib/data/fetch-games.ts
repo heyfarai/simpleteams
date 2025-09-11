@@ -1,15 +1,15 @@
-import { client } from '@/lib/sanity/client'
-import { groq } from 'next-sanity'
-import type { Game, PaginatedGames } from '@/types/schema'
-import { handleFetchError } from '@/lib/utils/errors'
+import { client } from "@/lib/sanity/client";
+import { groq } from "next-sanity";
+import type { Game, PaginatedGames } from "@/types/schema";
+import { handleFetchError } from "@/lib/utils/errors";
 
 interface GameFilters {
-  season?: string
-  session?: string
-  division?: string
-  status?: string
-  page?: number
-  pageSize?: number
+  season?: string;
+  session?: string;
+  division?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 const gameProjection = `{
@@ -38,11 +38,12 @@ const gameProjection = `{
   "season": season->{
     _id,
     name,
-    year
+    year,
+    isActive
   },
   venue,
   venueAddress
-}`
+}`;
 
 export async function fetchGames({
   season,
@@ -53,8 +54,8 @@ export async function fetchGames({
   pageSize = 10,
 }: GameFilters = {}): Promise<PaginatedGames> {
   try {
-    const start = (page - 1) * pageSize
-    const end = start + pageSize
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
 
     const filters = [
       '_type == "game"',
@@ -62,30 +63,26 @@ export async function fetchGames({
       session && `session._ref == "${session}"`,
       status && `status == "${status}"`,
       division && `session->division._ref == "${division}"`,
-    ].filter(Boolean).join(' && ')
-
-    console.log('Filters:', filters)
+    ]
+      .filter(Boolean)
+      .join(" && ");
 
     const query = groq`{
       "total": count(*[${filters}]),
       "games": *[${filters}] | order(gameDate desc) [${start}...${end}] ${gameProjection}
-    }`
+    }`;
 
-    console.log('GROQ query:', query)
-
-    const result = await client.fetch<PaginatedGames>(query, { start, end })
-    console.log('Raw Sanity result:', result)
+    const result = await client.fetch<PaginatedGames>(query, { start, end });
 
     if (!result?.games) {
-      console.error('Invalid Sanity response:', result)
-      throw new Error('Invalid response from Sanity')
+      console.error("Invalid Sanity response:", result);
+      throw new Error("Invalid response from Sanity");
     }
 
-    console.log('Returning valid result:', result)
-    return result
+    return result;
   } catch (error) {
-    console.error('Error fetching games:', error)
-    throw handleFetchError(error)
+    console.error("Error fetching games:", error);
+    throw handleFetchError(error);
   }
 }
 
@@ -95,18 +92,18 @@ export async function fetchGameById(id: string): Promise<Game | null> {
       "game": *[_type == "game" && _id == $id][0] ${gameProjection},
       "prev": *[_type == "game" && gameDate < ^.game.gameDate] | order(gameDate desc)[0] ${gameProjection},
       "next": *[_type == "game" && gameDate > ^.game.gameDate] | order(gameDate asc)[0] ${gameProjection}
-    }`
+    }`;
 
-    const result = await client.fetch(query, { id })
-    if (!result.game) return null
+    const result = await client.fetch(query, { id });
+    if (!result.game) return null;
 
     return {
       ...result.game,
       prev: result.prev || null,
-      next: result.next || null
-    }
+      next: result.next || null,
+    };
   } catch (error) {
-    console.error('Error fetching game:', error)
-    throw handleFetchError(error)
+    console.error("Error fetching game:", error);
+    throw handleFetchError(error);
   }
 }

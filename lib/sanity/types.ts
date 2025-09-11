@@ -116,6 +116,7 @@ export interface SanitySeason {
   name: string;
   year: number;
   status: 'upcoming' | 'active' | 'completed';
+  isActive: boolean;
 }
 
 export interface PlayerWithTeamInfo extends SanityPlayer {

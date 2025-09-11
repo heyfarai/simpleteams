@@ -1,27 +1,27 @@
-import { client, urlFor } from '@/lib/sanity/client'
-import { groq } from 'next-sanity'
-import { 
+import { client, urlFor } from "@/lib/sanity/client";
+import { groq } from "next-sanity";
+import {
   allPlayersQuery,
   allTeamsWithRostersQuery,
-  playerDetailsQuery, 
+  playerDetailsQuery,
   filterOptionsQuery,
   leaderboardQueries,
-  type StatCategory
-} from '@/lib/sanity/player-queries'
+  type StatCategory,
+} from "@/lib/sanity/player-queries";
 
 // Helper function to assign divisions to players based on team
 const getDivisionForPlayer = (player: any, teamIndex: number): string => {
-  const divisions = ['Premier', 'Diggity', 'Supreme', 'Ascent', 'Diamond'];
+  const divisions = ["Premier", "Diggity", "Supreme", "Ascent", "Diamond"];
   // Distribute teams across divisions
   return divisions[teamIndex % divisions.length];
-}
-import { 
-  SanityTeam, 
-  SanityPlayer, 
-  PlayerWithTeamInfo, 
+};
+import {
+  SanityTeam,
+  SanityPlayer,
+  PlayerWithTeamInfo,
   FilterOptions,
-  SanityRosterPlayer 
-} from '@/lib/sanity/types'
+  SanityRosterPlayer,
+} from "@/lib/sanity/types";
 
 // Transform player data for the showcase component
 export interface ShowcasePlayer {
@@ -55,11 +55,13 @@ export interface ShowcasePlayer {
 }
 
 // Fetch players filtered by season
-export async function fetchPlayersBySeason(seasonId?: string): Promise<ShowcasePlayer[]> {
+export async function fetchPlayersBySeason(
+  seasonId?: string
+): Promise<ShowcasePlayer[]> {
   try {
     if (!seasonId || seasonId === "all") {
       // Return all players if no season filter
-      return fetchAllPlayers()
+      return fetchAllPlayers();
     }
 
     // Get players for specific season
@@ -88,34 +90,45 @@ export async function fetchPlayersBySeason(seasonId?: string): Promise<ShowcaseP
           }
         }
       }
-    `
-    
-    const teamsInSeason = await client.fetch(playersInSeasonQuery, { seasonId })
-    console.log(`Players in season ${seasonId}:`, teamsInSeason.length, 'teams')
-    
+    `;
+
+    const teamsInSeason = await client.fetch(playersInSeasonQuery, {
+      seasonId,
+    });
+    console.log(
+      `Players in season ${seasonId}:`,
+      teamsInSeason.length,
+      "teams"
+    );
+
     // Transform to ShowcasePlayer format
-    const showcasePlayers: ShowcasePlayer[] = []
-    
+    const showcasePlayers: ShowcasePlayer[] = [];
+
     teamsInSeason.forEach((team: any, teamIndex: number) => {
-      const roster = team.roster
-      const season = roster?.season
-      
+      const roster = team.roster;
+      const season = roster?.season;
+
       roster?.players?.forEach((rosterPlayer: any) => {
-        const player = rosterPlayer.player
-        if (!player) return
-        
+        const player = rosterPlayer.player;
+        if (!player) return;
+
         showcasePlayers.push({
           id: player._id,
-          firstName: player.firstName || 'Unknown',
-          lastName: player.lastName || 'Player',
-          name: player.name || `${player.firstName || 'Unknown'} ${player.lastName || 'Player'}`,
+          firstName: player.firstName || "Unknown",
+          lastName: player.lastName || "Player",
+          name:
+            player.name ||
+            `${player.firstName || "Unknown"} ${player.lastName || "Player"}`,
           team: team.name,
           teamId: team._id,
           jersey: rosterPlayer.jerseyNumber || 0,
-          position: getPositionFullName(rosterPlayer.position || 'PG'),
-          gradYear: player.personalInfo?.gradYear || new Date().getFullYear() + 1,
-          height: player.personalInfo?.height || 'N/A',
-          headshot: player.photo ? urlFor(player.photo).width(400).height(400).url() : undefined,
+          position: getPositionFullName(rosterPlayer.position || "PG"),
+          gradYear:
+            player.personalInfo?.gradYear || new Date().getFullYear() + 1,
+          height: player.personalInfo?.height || "N/A",
+          headshot: player.photo
+            ? urlFor(player.photo).width(400).height(400).url()
+            : undefined,
           stats: {
             ppg: player.stats?.points || 0,
             rpg: player.stats?.rebounds || 0,
@@ -128,19 +141,21 @@ export async function fetchPlayersBySeason(seasonId?: string): Promise<ShowcaseP
           hasHighlight: (player.highlightVideos?.length || 0) > 0,
           division: getDivisionForPlayer(player, teamIndex), // Assign division based on team
           gamesPlayed: player.stats?.gamesPlayed || 0,
-          year: season ? `${season.year}-${(season.year + 1).toString().slice(2)}` : 'Unknown',
-          season: season?.name || 'Unknown',
+          year: season
+            ? `${season.year}-${(season.year + 1).toString().slice(2)}`
+            : "Unknown",
+          season: season?.name || "Unknown",
           seasonId: season?._id || seasonId,
-          hometown: player.personalInfo?.hometown || 'Unknown'
-        })
-      })
-    })
-    
-    console.log(`Transformed ${showcasePlayers.length} players for season`)
-    return showcasePlayers
+          hometown: player.personalInfo?.hometown || "Unknown",
+        });
+      });
+    });
+
+    console.log(`Transformed ${showcasePlayers.length} players for season`);
+    return showcasePlayers;
   } catch (error) {
-    console.error('Error fetching players by season:', error)
-    return []
+    console.error("Error fetching players by season:", error);
+    return [];
   }
 }
 
@@ -177,30 +192,33 @@ export async function fetchAllPlayers(): Promise<ShowcasePlayer[]> {
           }
         }
       }
-    `
-    
-    const playersData = await client.fetch(playersWithTeamsQuery)
-    console.log('Players with teams:', playersData.length)
+    `;
+
+    const playersData = await client.fetch(playersWithTeamsQuery);
 
     // Transform players with their team info
     const showcasePlayers: ShowcasePlayer[] = playersData.map((player: any) => {
-      const teamInfo = player.teamInfo
-      const roster = teamInfo?.roster
-      const season = roster?.season
-      const playerDetails = roster?.playerDetails
+      const teamInfo = player.teamInfo;
+      const roster = teamInfo?.roster;
+      const season = roster?.season;
+      const playerDetails = roster?.playerDetails;
 
       return {
         id: player._id,
-        firstName: player.firstName || 'Unknown',
-        lastName: player.lastName || 'Player',
-        name: player.name || `${player.firstName || 'Unknown'} ${player.lastName || 'Player'}`,
-        team: teamInfo?.name || 'Free Agent',
-        teamId: teamInfo?._id || 'unknown',
+        firstName: player.firstName || "Unknown",
+        lastName: player.lastName || "Player",
+        name:
+          player.name ||
+          `${player.firstName || "Unknown"} ${player.lastName || "Player"}`,
+        team: teamInfo?.name || "Free Agent",
+        teamId: teamInfo?._id || "unknown",
         jersey: playerDetails?.jerseyNumber || 0,
-        position: getPositionFullName(playerDetails?.position || 'PG'),
+        position: getPositionFullName(playerDetails?.position || "PG"),
         gradYear: player.personalInfo?.gradYear || new Date().getFullYear() + 1,
-        height: player.personalInfo?.height || 'N/A',
-        headshot: player.photo ? urlFor(player.photo).width(400).height(400).url() : undefined,
+        height: player.personalInfo?.height || "N/A",
+        headshot: player.photo
+          ? urlFor(player.photo).width(400).height(400).url()
+          : undefined,
         stats: {
           ppg: player.stats?.points || 0,
           rpg: player.stats?.rebounds || 0,
@@ -211,96 +229,120 @@ export async function fetchAllPlayers(): Promise<ShowcasePlayer[]> {
         },
         awards: player.awards || [],
         hasHighlight: (player.highlightVideos?.length || 0) > 0,
-        division: 'Diamond', // TODO: Get actual division from team/season data
+        division: "Diamond", // TODO: Get actual division from team/season data
         gamesPlayed: player.stats?.gamesPlayed || 0,
-        year: season ? `${season.year}-${(season.year + 1).toString().slice(2)}` : 'Unknown',
-        season: season?.name || 'Unknown',
-        seasonId: season?._id || 'unknown',
-        hometown: player.personalInfo?.hometown || 'Unknown'
-      }
-    })
+        year: season
+          ? `${season.year}-${(season.year + 1).toString().slice(2)}`
+          : "Unknown",
+        season: season?.name || "Unknown",
+        seasonId: season?._id || "unknown",
+        hometown: player.personalInfo?.hometown || "Unknown",
+      };
+    });
 
-    return showcasePlayers
+    return showcasePlayers;
   } catch (error) {
-    console.error('Error fetching players:', error)
-    return []
+    console.error("Error fetching players:", error);
+    return [];
   }
 }
 
 // Fetch a specific player with full details
-export async function fetchPlayerDetails(playerId: string): Promise<PlayerWithTeamInfo | null> {
+export async function fetchPlayerDetails(
+  playerId: string
+): Promise<PlayerWithTeamInfo | null> {
   try {
-    const player = await client.fetch(playerDetailsQuery, { playerId })
-    return player
+    const player = await client.fetch(playerDetailsQuery, { playerId });
+    return player;
   } catch (error) {
-    console.error('Error fetching player details:', error)
-    return null
+    console.error("Error fetching player details:", error);
+    return null;
   }
 }
 
 // Fetch stat leaders using optimized queries
-export async function fetchStatLeaders(seasonId: string): Promise<ShowcasePlayer[]> {
+export async function fetchStatLeaders(
+  seasonId: string
+): Promise<ShowcasePlayer[]> {
   try {
     // For now, return all players filtered by season ID
     // TODO: Add season filtering to the leaderboard queries
-    const allPlayers = await fetchAllPlayers()
+    const allPlayers = await fetchAllPlayers();
     if (seasonId === "all") {
       return allPlayers;
     }
-    return allPlayers.filter(player => player.seasonId === seasonId)
+    return allPlayers.filter((player) => player.seasonId === seasonId);
   } catch (error) {
-    console.error('Error fetching stat leaders:', error)
-    return []
+    console.error("Error fetching stat leaders:", error);
+    return [];
   }
 }
 
 // Fetch leaders for a specific stat category (optimized)
-export async function fetchLeadersByCategory(category: StatCategory, seasonId?: string): Promise<ShowcasePlayer[]> {
+export async function fetchLeadersByCategory(
+  category: StatCategory,
+  seasonId?: string
+): Promise<ShowcasePlayer[]> {
   try {
-    console.log(`Fetching ${category} leaders for season:`, seasonId)
-    
+    console.log(`Fetching ${category} leaders for season:`, seasonId);
+
     // Get all players for the season (or all players if no season)
-    const seasonPlayers = await fetchPlayersBySeason(seasonId)
-    
+    const seasonPlayers = await fetchPlayersBySeason(seasonId);
+
     // Filter players with stats for this category and sort
-    const statField = getStatField(category)
+    const statField = getStatField(category);
     const seasonLeadersWithStats = seasonPlayers
-      .filter(player => player.stats[statField] > 0)
+      .filter((player) => player.stats[statField] > 0)
       .sort((a, b) => b.stats[statField] - a.stats[statField])
-      .slice(0, 10) // Top 10 leaders
-    
-    console.log(`${category} leaders found in season:`, seasonLeadersWithStats.length)
-    
+      .slice(0, 10); // Top 10 leaders
+
+    console.log(
+      `${category} leaders found in season:`,
+      seasonLeadersWithStats.length
+    );
+
     // If no leaders found in specific season, fall back to global leaders
     if (seasonLeadersWithStats.length === 0 && seasonId && seasonId !== "all") {
-      console.log(`No ${category} leaders in season ${seasonId}, falling back to global leaders`)
-      const globalPlayers = await fetchPlayersBySeason() // Get all players
+      console.log(
+        `No ${category} leaders in season ${seasonId}, falling back to global leaders`
+      );
+      const globalPlayers = await fetchPlayersBySeason(); // Get all players
       const globalLeadersWithStats = globalPlayers
-        .filter(player => player.stats[statField] > 0)
+        .filter((player) => player.stats[statField] > 0)
         .sort((a, b) => b.stats[statField] - a.stats[statField])
-        .slice(0, 10)
-      
-      console.log(`Global ${category} leaders found:`, globalLeadersWithStats.length)
-      return globalLeadersWithStats
+        .slice(0, 10);
+
+      console.log(
+        `Global ${category} leaders found:`,
+        globalLeadersWithStats.length
+      );
+      return globalLeadersWithStats;
     }
-    
-    return seasonLeadersWithStats
+
+    return seasonLeadersWithStats;
   } catch (error) {
-    console.error(`Error fetching ${category} leaders:`, error)
-    return []
+    console.error(`Error fetching ${category} leaders:`, error);
+    return [];
   }
 }
 
 // Helper function to map stat categories to stat fields
-function getStatField(category: StatCategory): keyof ShowcasePlayer['stats'] {
+function getStatField(category: StatCategory): keyof ShowcasePlayer["stats"] {
   switch (category) {
-    case 'ppg': return 'ppg'
-    case 'rpg': return 'rpg'
-    case 'apg': return 'apg'
-    case 'spg': return 'spg'
-    case 'bpg': return 'bpg'
-    case 'mpg': return 'mpg'
-    default: return 'ppg'
+    case "ppg":
+      return "ppg";
+    case "rpg":
+      return "rpg";
+    case "apg":
+      return "apg";
+    case "spg":
+      return "spg";
+    case "bpg":
+      return "bpg";
+    case "mpg":
+      return "mpg";
+    default:
+      return "ppg";
   }
 }
 
@@ -318,46 +360,46 @@ export async function fetchFilterOptions(): Promise<FilterOptions> {
         _id, name, shortName
       },
       "positions": ["PG", "SG", "SF", "PF", "C"]
-    }`
-    
-    const options = await client.fetch(filterQuery)
-    console.log('Filter options fetched:', {
+    }`;
+
+    const options = await client.fetch(filterQuery);
+    console.log("Filter options fetched:", {
       seasons: options?.seasons?.length || 0,
       divisions: options?.divisions?.length || 0,
-      teams: options?.teams?.length || 0
-    })
-    return options
+      teams: options?.teams?.length || 0,
+    });
+    return options;
   } catch (error) {
-    console.error('Error fetching filter options:', error)
+    console.error("Error fetching filter options:", error);
     return {
       seasons: [],
       divisions: [],
       teams: [],
-      positions: ['PG', 'SG', 'SF', 'PF', 'C']
-    }
+      positions: ["PG", "SG", "SF", "PF", "C"],
+    };
   }
 }
 
 // Helper function to convert position abbreviations to full names
 function getPositionFullName(position: string): string {
   const positionMap: Record<string, string> = {
-    'PG': 'Point Guard',
-    'SG': 'Shooting Guard',
-    'SF': 'Small Forward',
-    'PF': 'Power Forward',
-    'C': 'Center'
-  }
-  return positionMap[position] || position
+    PG: "Point Guard",
+    SG: "Shooting Guard",
+    SF: "Small Forward",
+    PF: "Power Forward",
+    C: "Center",
+  };
+  return positionMap[position] || position;
 }
 
 // Helper function to get position abbreviation from full name
 export function getPositionAbbreviation(position: string): string {
   const positionMap: Record<string, string> = {
-    'Point Guard': 'PG',
-    'Shooting Guard': 'SG',
-    'Small Forward': 'SF',
-    'Power Forward': 'PF',
-    'Center': 'C'
-  }
-  return positionMap[position] || position
+    "Point Guard": "PG",
+    "Shooting Guard": "SG",
+    "Small Forward": "SF",
+    "Power Forward": "PF",
+    Center: "C",
+  };
+  return positionMap[position] || position;
 }

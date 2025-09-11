@@ -1,14 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { Team, TeamFilterState } from "@/lib/types/teams";
 
-interface FilterOptions {
-  seasons: Array<{
-    _id: string;
-    name: string;
-    year: number;
-  }>;
-  years: string[];
-}
+import type { FilterOptions as SanityFilterOptions } from '@/lib/sanity/types';
+
+type FilterOptions = SanityFilterOptions;
 
 export function useTeamFilters(teams: Team[], filterOptions?: FilterOptions) {
   const firstSeason = filterOptions?.seasons?.[0];

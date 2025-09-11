@@ -12,12 +12,20 @@ const filterDataQuery = groq`{
   "divisions": *[_type == "division"] | order(order asc) {
     _id,
     name,
-    order
+    order,
+    "seasons": *[_type == "season"] | order(year desc) {
+      _id, 
+      name, 
+      year, 
+      status, 
+      isActive
+    }
   },
   "seasons": *[_type == "season"] | order(year desc) {
     _id,
     name,
-    year
+    year,
+    isActive
   }
 }`
 

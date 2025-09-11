@@ -12,9 +12,18 @@ import { ViewMode } from "@/lib/types/teams";
 import { useTeamData } from "@/hooks/use-team-data";
 import { useTeamFilters } from "@/hooks/use-team-filters";
 import { Season as UISeasonType } from "@/lib/utils/season-filters";
+import { useQuery } from "@tanstack/react-query";
+import { fetchFilterData } from "@/lib/data/fetch-filters";
+import type { FilterOptions } from "@/lib/sanity/types";
 
 export function TeamsDirectory() {
-  const { teams, filterOptions, isLoading, error } = useTeamData();
+  const { teams, isLoading: teamsLoading, error: teamsError } = useTeamData();
+  const { data: filterOptions, isLoading: filtersLoading } =
+    useQuery<FilterOptions>({
+      queryKey: ["filter-options"],
+      queryFn: () => fetchFilterData(),
+    });
+
   const { filters, filteredTeams, handleFilterChange, getStandingsData } =
     useTeamFilters(teams, filterOptions);
 
@@ -30,27 +39,36 @@ export function TeamsDirectory() {
   const [viewMode, setViewMode] = useState<ViewMode>("standings");
   const [playoffCutoff] = useState(4);
 
-  if (isLoading) {
+  if (teamsLoading || filtersLoading) {
     return <div className="text-center py-8">Loading teams...</div>;
   }
 
-  if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
+  if (teamsError) {
+    return <div className="text-center py-8 text-red-500">{teamsError}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <SeasonTabs
-          seasons={(filterOptions.seasons || []).filter(season => season.isActive).map((season): UISeasonType => ({
-            id: season._id,
-            name: season.name,
-            year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
-            startDate: new Date(season.year, 8, 1),
-            endDate: new Date(season.year + 1, 7, 31),
-            isActive: Boolean(season.isActive)
-          })) || []}
-          selectedSeason={filters.seasonId || filterOptions.seasons?.filter(s => s.isActive)?.[0]?._id || ""}
+          seasons={
+            (filterOptions?.seasons || []).map(
+              (season): UISeasonType => ({
+                id: season._id,
+                name: season.name,
+                year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
+                startDate: new Date(season.year, 8, 1),
+                endDate: new Date(season.year + 1, 7, 31),
+                isActive: Boolean(season.isActive),
+              })
+            ) || []
+          }
+          selectedSeason={
+            filters.seasonId ||
+            filterOptions?.seasons?.filter((s) => Boolean(s.isActive))?.[0]
+              ?._id ||
+            ""
+          }
           onSeasonChange={(seasonId: string) => {
             handleFilterChange({
               seasonId,
