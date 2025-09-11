@@ -42,7 +42,7 @@ export function TeamsDirectory() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <SeasonTabs
-          seasons={(filterOptions.seasons || []).map((season): UISeasonType => ({
+          seasons={(filterOptions.seasons || []).filter(season => season.isActive).map((season): UISeasonType => ({
             id: season._id,
             name: season.name,
             year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
@@ -50,7 +50,7 @@ export function TeamsDirectory() {
             endDate: new Date(season.year + 1, 7, 31),
             isActive: Boolean(season.isActive)
           })) || []}
-          selectedSeason={filters.seasonId || filterOptions.seasons?.find(s => s.isActive)?._id || filterOptions.seasons?.[0]?._id || ""}
+          selectedSeason={filters.seasonId || filterOptions.seasons?.filter(s => s.isActive)?.[0]?._id || ""}
           onSeasonChange={(seasonId: string) => {
             handleFilterChange({
               seasonId,

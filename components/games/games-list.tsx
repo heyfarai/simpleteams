@@ -9,6 +9,8 @@ import { useGames } from "@/hooks/use-games";
 import { Hydrate } from "@/components/hydrate";
 import { fetchGames } from "@/lib/data/fetch-games";
 import { useToast } from "@/hooks/use-toast";
+import { SeasonTabs } from "@/components/filters/season-tabs";
+import { Season } from "@/lib/utils/season-filters";
 import type { Game } from "@/types/schema";
 
 interface GamesListProps {
@@ -88,6 +90,18 @@ export function GamesList({ filterData }: GamesListProps) {
 
   const allGames = data?.games ?? [];
 
+  // Convert filter data seasons to Season format for SeasonTabs
+  const availableSeasons: Season[] = (filterData.seasons || []).map(
+    (season) => ({
+      id: season._id,
+      name: season.name,
+      year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
+      startDate: new Date(season.year, 8, 1),
+      endDate: new Date(season.year + 1, 7, 31),
+      isActive: true,
+    })
+  );
+
   useEffect(() => {
     if (isError && error instanceof Error) {
       toast({
@@ -124,62 +138,71 @@ export function GamesList({ filterData }: GamesListProps) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
-      {isLoading ? (
-        <FilterSkeleton />
-      ) : (
-        <GameFilters
-          filterData={filterData}
-          selectedSeason={season}
-          selectedSession={session}
-          selectedDivision={division}
-          onSeasonChange={(value) => handleFilterChange("season", value)}
-          onSessionChange={(value) => handleFilterChange("session", value)}
-          onDivisionChange={(value) => handleFilterChange("division", value)}
-          onClearAll={() => {
-            router.push(pathname);
-          }}
-          activeFiltersCount={activeFiltersCount}
+    <div className="space-y-6">
+      {/* Season Tabs */}
+      <div className="flex items-center justify-between gap-4">
+        <SeasonTabs
+          selectedSeason={season === "all" ? "" : season}
+          seasons={availableSeasons}
+          onSeasonChange={(value) => handleFilterChange("season", value || "all")}
         />
-      )}
+      </div>
 
-      <div className="flex-1">
-        <Hydrate<["games", string, string, string, string], { games: Game[], total: number }>
-          queryKey={["games", season, session, division, status]}
-          queryFn={() =>
-            fetchGames({
-              season: season === "all" ? undefined : season,
-              session: session === "all" ? undefined : session,
-              division: division === "all" ? undefined : division,
-              status: status === "all" ? undefined : status,
-            })
-          }
-        >
-          <div className="grid gap-4">
-            {allGames.map((game: Game) => (
-              <GameCard
-                key={game._id}
-                game={game}
-                loading={false}
-              />
-            ))}
-            {isLoading && [
-              ...Array(3).fill(null).map((_, i) => (
+      <div className="flex flex-col lg:flex-row gap-6">
+        {isLoading ? (
+          <FilterSkeleton />
+        ) : (
+          <GameFilters
+            filterData={filterData}
+            selectedSession={session}
+            selectedDivision={division}
+            onSessionChange={(value) => handleFilterChange("session", value)}
+            onDivisionChange={(value) => handleFilterChange("division", value)}
+            onClearAll={() => {
+              router.push(pathname);
+            }}
+            activeFiltersCount={activeFiltersCount - (season !== "all" ? 1 : 0)}
+          />
+        )}
+
+        <div className="flex-1">
+          <Hydrate<["games", string, string, string, string], { games: Game[], total: number }>
+            queryKey={["games", season, session, division, status]}
+            queryFn={() =>
+              fetchGames({
+                season: season === "all" ? undefined : season,
+                session: session === "all" ? undefined : session,
+                division: division === "all" ? undefined : division,
+                status: status === "all" ? undefined : status,
+              })
+            }
+          >
+            <div className="grid gap-4">
+              {allGames.map((game: Game) => (
                 <GameCard
-                  key={`skeleton-${i}`}
-                  game={allGames[0] ?? {} as Game}
-                  loading={true}
+                  key={game._id}
+                  game={game}
+                  loading={false}
                 />
-              ))
-            ]}
-          </div>
-
-          {!isLoading && allGames.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">No games found</p>
+              ))}
+              {isLoading && [
+                ...Array(3).fill(null).map((_, i) => (
+                  <GameCard
+                    key={`skeleton-${i}`}
+                    game={allGames[0] ?? {} as Game}
+                    loading={true}
+                  />
+                ))
+              ]}
             </div>
-          )}
-        </Hydrate>
+
+            {!isLoading && allGames.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">No games found</p>
+              </div>
+            )}
+          </Hydrate>
+        </div>
       </div>
     </div>
   );

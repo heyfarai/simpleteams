@@ -11,8 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Download, Calendar, Filter, X } from "lucide-react";
-import { SeasonSelect } from "@/components/filters/season-select";
-import { Season } from "@/lib/utils/season-filters";
 
 interface FilterData {
   seasons: Array<{ _id: string; name: string; year: number }>;
@@ -22,10 +20,8 @@ interface FilterData {
 
 interface GameFiltersProps {
   filterData: FilterData;
-  selectedSeason: string;
   selectedSession: string;
   selectedDivision: string;
-  onSeasonChange: (value: string) => void;
   onSessionChange: (value: string) => void;
   onDivisionChange: (value: string) => void;
   onClearAll: () => void;
@@ -36,10 +32,8 @@ interface GameFiltersProps {
 
 export function GameFilters({
   filterData,
-  selectedSeason,
   selectedSession,
   selectedDivision,
-  onSeasonChange,
   onSessionChange,
   onDivisionChange,
   onClearAll,
@@ -54,24 +48,6 @@ export function GameFilters({
   const sessions = [
     { _id: "all", name: "All Sessions" },
     ...(filterData.sessions || []),
-  ];
-  const seasons: Season[] = [
-    {
-      id: "all",
-      name: "All Seasons",
-      year: "All",
-      startDate: new Date(),
-      endDate: new Date(),
-      isActive: true,
-    },
-    ...(filterData.seasons || []).map((season) => ({
-      id: season._id,
-      name: season.name,
-      year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
-      startDate: new Date(season.year, 8, 1),
-      endDate: new Date(season.year + 1, 7, 31),
-      isActive: true,
-    })),
   ];
 
   return (
@@ -96,16 +72,6 @@ export function GameFilters({
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Season Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Season</label>
-                <SeasonSelect
-                  selectedSeason={selectedSeason}
-                  seasons={seasons}
-                  onChange={onSeasonChange}
-                />
-              </div>
-
               {/* Session Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Session</label>
@@ -186,12 +152,6 @@ export function GameFilters({
           <Card className="mt-4">
             <CardContent className="p-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <SeasonSelect
-                  selectedSeason={selectedSeason}
-                  seasons={seasons}
-                  onChange={onSeasonChange}
-                />
-
                 <Select
                   value={selectedSession}
                   onValueChange={onSessionChange}
