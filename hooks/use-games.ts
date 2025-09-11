@@ -20,7 +20,7 @@ export function useGames({
   session,
   division,
   status,
-  pageSize = 20,
+  pageSize = 50,
 }: UseGamesOptions = {}) {
   return useQuery({
     queryKey: ['games', season || 'all', session || 'all', division || 'all', status || 'all'],

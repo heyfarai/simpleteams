@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, MapPin, Plus, Trophy, Users } from "lucide-react";
 import type { FilterData } from "@/lib/sanity/get-filter-data";
-import { GameFilters } from "./games/game-filters";
 import { GamesList } from "./games/games-list";
 import { fetchAllGames, type Game } from "@/lib/data/fetch-games";
 import { useQuery } from "@tanstack/react-query";
@@ -214,25 +213,11 @@ export function GamesSchedule({ filterData }: GamesScheduleProps) {
 
   return (
     <div className="flex gap-6">
-      <GameFilters
-        filterData={extendedFilterData}
-        selectedSeason={selectedSeason}
-        selectedSession={selectedSession}
-        selectedDivision={selectedDivision}
-        onSeasonChange={setSelectedSeason}
-        onSessionChange={setSelectedSession}
-        onDivisionChange={setSelectedDivision}
-        onClearAll={clearAllFilters}
-        activeFiltersCount={activeFiltersCount}
-        showMobileFilters={showMobileFilters}
-        onToggleMobileFilters={() => setShowMobileFilters(!showMobileFilters)}
-      />
-
       {/* Main Content */}
       <div className="flex-1 min-w-0">
         <Tabs
           defaultValue="upcoming"
-          className="space-y-6"
+          className="hidden space-y-6"
         >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upcoming">Upcoming Games</TabsTrigger>

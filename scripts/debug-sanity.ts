@@ -11,28 +11,75 @@ const sanityClient = createClient({
 
 async function debugSanityData() {
   try {
-    // First, get all seasons
-    const seasonsQuery = `*[_type == "season"] {
-      _id,
-      name,
-      year,
-      activeDivisions[] {
-        division->,
-        teams[] {
-          _ref
+    const seasonId = '1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3';
+    
+    // Test our updated query
+    const teamsQuery = `{
+      "seasons": *[_type == "season" && defined(activeDivisions)] | order(year desc) {
+        _id,
+        name,
+        year,
+        isActive,
+        "divisions": activeDivisions[status == "active" && defined(teams) && count(teams) > 0]{
+          "division": division->{
+            _id,
+            name
+          },
+          "teamRefs": teams[]._ref
+        }
+      },
+      "teams": *[_type == "team"] {
+        _id,
+        name,
+        shortName,
+        "logo": logo.asset._ref,
+        coach,
+        region,
+        description,
+        homeVenue,
+        awards,
+        stats,
+        rosters[] {
+          "season": season->{
+            _id,
+            name,
+            year
+          },
+          seasonStats {
+            wins,
+            losses,
+            ties,
+            pointsFor,
+            pointsAgainst,
+            homeRecord,
+            awayRecord,
+            conferenceRecord
+          }
         }
       }
     }`;
-    const seasons = await sanityClient.fetch(seasonsQuery);
-    console.log('Seasons:', JSON.stringify(seasons, null, 2));
-
-    // Then get all teams
-    const teamsQuery = `*[_type == "team"] {
-      _id,
-      name
-    }`;
-    const teams = await sanityClient.fetch(teamsQuery);
-    console.log('\nTeams:', JSON.stringify(teams, null, 2));
+    
+    const data = await sanityClient.fetch(teamsQuery);
+    
+    // Find the target season
+    const targetSeason = data.seasons.find(s => s._id === seasonId);
+    console.log('Target Season:', JSON.stringify(targetSeason, null, 2));
+    
+    if (targetSeason) {
+      // Get team IDs for this season
+      const seasonTeamIds = new Set();
+      targetSeason.divisions.forEach(div => {
+        div.teamRefs.forEach(teamRef => {
+          seasonTeamIds.add(teamRef);
+        });
+      });
+      
+      console.log('\nTeam IDs in season:', Array.from(seasonTeamIds));
+      
+      // Filter teams
+      const filteredTeams = data.teams.filter(team => seasonTeamIds.has(team._id));
+      console.log('\nFiltered Teams for season:', filteredTeams.map(t => ({ id: t._id, name: t.name })));
+    }
 
   } catch (error) {
     console.error('Error:', error);

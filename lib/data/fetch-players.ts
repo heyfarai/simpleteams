@@ -95,11 +95,6 @@ export async function fetchPlayersBySeason(
     const teamsInSeason = await client.fetch(playersInSeasonQuery, {
       seasonId,
     });
-    console.log(
-      `Players in season ${seasonId}:`,
-      teamsInSeason.length,
-      "teams"
-    );
 
     // Transform to ShowcasePlayer format
     const showcasePlayers: ShowcasePlayer[] = [];
@@ -151,7 +146,6 @@ export async function fetchPlayersBySeason(
       });
     });
 
-    console.log(`Transformed ${showcasePlayers.length} players for season`);
     return showcasePlayers;
   } catch (error) {
     console.error("Error fetching players by season:", error);
@@ -356,11 +350,7 @@ export async function fetchFilterOptions(): Promise<FilterOptions> {
     }`;
 
     const options = await client.fetch(filterQuery);
-    console.log("Filter options fetched:", {
-      seasons: options?.seasons?.length || 0,
-      divisions: options?.divisions?.length || 0,
-      teams: options?.teams?.length || 0,
-    });
+
     return options;
   } catch (error) {
     console.error("Error fetching filter options:", error);

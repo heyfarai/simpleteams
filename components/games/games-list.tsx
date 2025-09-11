@@ -17,7 +17,12 @@ interface GamesListProps {
   filterData: {
     sessions: Array<{ _id: string; name: string }>;
     divisions: Array<{ _id: string; name: string }>;
-    seasons: Array<{ _id: string; name: string; year: number; isActive: boolean }>;
+    seasons: Array<{
+      _id: string;
+      name: string;
+      year: number;
+      isActive: boolean;
+    }>;
   };
 }
 
@@ -42,7 +47,9 @@ export function GamesList({ filterData }: GamesListProps) {
   );
 
   // Find 2025 Summer Series season
-  const defaultSeason = filterData.seasons.find(s => s.name === "2025 Summer Series")?._id || "all";
+  const defaultSeason =
+    filterData.seasons.find((s) => s.name === "2025 Summer Series")?._id ||
+    "all";
 
   // Get filter values from URL or use defaults
   const season = searchParams.get("season") || defaultSeason;
@@ -52,14 +59,17 @@ export function GamesList({ filterData }: GamesListProps) {
 
   // Set default season on initial load if no filters are active
   useEffect(() => {
-    if (!searchParams.has("season") && !searchParams.has("session") && 
-        !searchParams.has("division") && !searchParams.has("status") && 
-        defaultSeason !== "all") {
+    if (
+      !searchParams.has("season") &&
+      !searchParams.has("session") &&
+      !searchParams.has("division") &&
+      !searchParams.has("status") &&
+      defaultSeason !== "all"
+    ) {
       const queryString = createQueryString({ season: defaultSeason });
       router.push(`${pathname}?${queryString}`);
     }
   }, [defaultSeason, pathname, router, createQueryString, searchParams]);
-
 
   // Handle filter changes
   const handleFilterChange = (key: string, value: string) => {
@@ -70,7 +80,7 @@ export function GamesList({ filterData }: GamesListProps) {
   const { toast } = useToast();
 
   const {
-    data,
+    data: gamesData,
     isLoading,
     isError,
     error,
@@ -88,7 +98,7 @@ export function GamesList({ filterData }: GamesListProps) {
     status !== "all",
   ].filter(Boolean).length;
 
-  const allGames = data?.games ?? [];
+  const allGames = gamesData?.games || [];
 
   // Convert filter data seasons to Season format for SeasonTabs
   const availableSeasons: Season[] = (filterData.seasons || []).map(
@@ -125,7 +135,9 @@ export function GamesList({ filterData }: GamesListProps) {
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
         <h2 className="text-2xl font-bold mb-4">Unable to load games</h2>
         <p className="text-muted-foreground mb-6 max-w-md">
-          {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          {error instanceof Error
+            ? error.message
+            : "An unexpected error occurred"}
         </p>
         <button
           onClick={() => window.location.reload()}
@@ -144,29 +156,18 @@ export function GamesList({ filterData }: GamesListProps) {
         <SeasonTabs
           selectedSeason={season === "all" ? "" : season}
           seasons={availableSeasons}
-          onSeasonChange={(value) => handleFilterChange("season", value || "all")}
+          onSeasonChange={(value) =>
+            handleFilterChange("season", value || "all")
+          }
         />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {isLoading ? (
-          <FilterSkeleton />
-        ) : (
-          <GameFilters
-            filterData={filterData}
-            selectedSession={session}
-            selectedDivision={division}
-            onSessionChange={(value) => handleFilterChange("session", value)}
-            onDivisionChange={(value) => handleFilterChange("division", value)}
-            onClearAll={() => {
-              router.push(pathname);
-            }}
-            activeFiltersCount={activeFiltersCount - (season !== "all" ? 1 : 0)}
-          />
-        )}
-
         <div className="flex-1">
-          <Hydrate<["games", string, string, string, string], { games: Game[], total: number }>
+          <Hydrate<
+            ["games", string, string, string, string],
+            { games: Game[]; total: number }
+          >
             queryKey={["games", season, session, division, status]}
             queryFn={() =>
               fetchGames({
@@ -177,28 +178,99 @@ export function GamesList({ filterData }: GamesListProps) {
               })
             }
           >
-            <div className="grid gap-4">
-              {allGames.map((game: Game) => (
-                <GameCard
-                  key={game._id}
-                  game={game}
-                  loading={false}
-                />
-              ))}
-              {isLoading && [
-                ...Array(3).fill(null).map((_, i) => (
-                  <GameCard
-                    key={`skeleton-${i}`}
-                    game={allGames[0] ?? {} as Game}
-                    loading={true}
-                  />
-                ))
-              ]}
-            </div>
-
-            {!isLoading && allGames.length === 0 && (
+            {isLoading ? (
+              <div className="grid gap-4">
+                {Array(3)
+                  .fill(null)
+                  .map((_, i) => (
+                    <GameCard
+                      key={`skeleton-${i}`}
+                      game={allGames[0] ?? ({} as Game)}
+                      loading={true}
+                    />
+                  ))}
+              </div>
+            ) : allGames.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-lg text-muted-foreground">No games found</p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {Object.entries(
+                  // Group games by date
+                  allGames.reduce((acc, game) => {
+                    const date = new Date(game.gameDate);
+                    const dateKey = date.toISOString().split("T")[0];
+                    if (!acc[dateKey]) acc[dateKey] = [];
+                    acc[dateKey].push(game);
+                    return acc;
+                  }, {} as Record<string, Game[]>)
+                )
+                  // Sort dates newest first
+                  .sort(
+                    ([dateA], [dateB]) =>
+                      new Date(dateB).getTime() - new Date(dateA).getTime()
+                  )
+                  .map(([date, gamesForDate]) => {
+                    const gameDate = new Date(date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+
+                    let relativeDate = "";
+                    if (gameDate.getTime() === today.getTime()) {
+                      relativeDate = "Today";
+                    } else if (gameDate.getTime() === tomorrow.getTime()) {
+                      relativeDate = "Tomorrow";
+                    } else if (gameDate.getTime() === yesterday.getTime()) {
+                      relativeDate = "Yesterday";
+                    }
+
+                    const formattedDate = new Intl.DateTimeFormat("en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    }).format(gameDate);
+
+                    return (
+                      <div
+                        key={date}
+                        className="space-y-4"
+                      >
+                        <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-2 border-b">
+                          <h2 className="text-lg font-semibold tracking-tight">
+                            {relativeDate
+                              ? `${relativeDate} - ${formattedDate}`
+                              : formattedDate}
+                          </h2>
+                          <p className="text-sm text-muted-foreground">
+                            {gamesForDate.length} game
+                            {gamesForDate.length !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+                        <div className="grid gap-4">
+                          {gamesForDate
+                            .sort((a, b) => {
+                              // Sort by game time within the same date
+                              const timeA = a.gameTime || "";
+                              const timeB = b.gameTime || "";
+                              return timeA.localeCompare(timeB);
+                            })
+                            .map((game: Game) => (
+                              <GameCard
+                                key={game._id}
+                                game={game}
+                                loading={false}
+                              />
+                            ))}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </Hydrate>

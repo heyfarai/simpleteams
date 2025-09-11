@@ -1,6 +1,19 @@
 import { groq } from 'next-sanity';
 
 export const teamsQuery = groq`{
+  "seasons": *[_type == "season" && defined(activeDivisions)] | order(year desc) {
+    _id,
+    name,
+    year,
+    isActive,
+    "divisions": activeDivisions[status == "active" && defined(teams) && count(teams) > 0]{
+      "division": division->{
+        _id,
+        name
+      },
+      "teamRefs": teams[]._ref
+    }
+  },
   "teams": *[_type == "team"] {
     _id,
     name,
@@ -28,18 +41,6 @@ export const teamsQuery = groq`{
         awayRecord,
         conferenceRecord
       }
-    }
-  },
-  "seasons": *[_type == "season" && defined(activeDivisions)] | order(year desc) {
-    _id,
-    name,
-    year,
-    "divisions": activeDivisions[status == "active" && defined(teams) && count(teams) > 0]{
-      "division": division->{
-        _id,
-        name
-      },
-      "teamRefs": teams[]._ref
     }
   }
 }`;

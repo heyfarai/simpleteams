@@ -253,7 +253,7 @@ export default function PlayersShowcase() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <SeasonTabs
           selectedSeason={selectedSeason}
           seasons={availableSeasons}

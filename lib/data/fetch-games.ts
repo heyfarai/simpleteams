@@ -51,7 +51,7 @@ export async function fetchGames({
   division,
   status,
   page = 1,
-  pageSize = 10,
+  pageSize = 50,
 }: GameFilters = {}): Promise<PaginatedGames> {
   try {
     const start = (page - 1) * pageSize;
@@ -60,7 +60,7 @@ export async function fetchGames({
     const filters = [
       '_type == "game"',
       season && `season._ref == "${season}"`,
-      session && `session._ref == "${session}"`,
+      session && `coalesce(session._ref, "regular") == "${session}"`,
       status && `status == "${status}"`,
       division && `session->division._ref == "${division}"`,
     ]

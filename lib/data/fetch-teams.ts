@@ -37,6 +37,7 @@ interface SanitySeason {
   _id: string;
   name: string;
   year: number;
+  isActive?: boolean;
   divisions: SanityDivisionInfo[];
 }
 
@@ -57,6 +58,17 @@ interface SanityTeam {
     pointsAgainst?: number;
     gamesPlayed?: number;
   };
+  divisions?: Array<{
+    season: {
+      _id: string;
+      name: string;
+      year: number;
+    };
+    division: {
+      _id: string;
+      name: string;
+    };
+  }>;
   rosters?: Array<{
     season: {
       _id: string;
@@ -95,94 +107,40 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
 
     const { teams, seasons } = data;
 
-    // Find the specified season or default to most recent
-    const activeSeason = seasonId
+    // Find the specified season or default to the first active season
+    let targetSeason = seasonId 
       ? seasons.find((s) => s._id === seasonId)
-      : seasons[0];
-    if (!activeSeason) {
-      return teams.map((team) => ({
-        ...team,
-        id: team._id,
-        division: undefined,
-        season: undefined,
-        coach: team.coach || "TBA",
-        region: team.region || "Unknown",
-        homeVenue: team.homeVenue || "TBA",
-        awards: team.awards || [],
-        stats: {
-          wins: team.stats?.wins || 0,
-          losses: team.stats?.losses || 0,
-          pointsFor: team.stats?.pointsFor || 0,
-          pointsAgainst: team.stats?.pointsAgainst || 0,
-          gamesPlayed: team.stats?.gamesPlayed || 0,
-        },
-        rosters: (team.rosters || []).map((roster) => ({
-          season: roster.season,
-          seasonStats: roster.seasonStats
-            ? {
-                wins: roster.seasonStats.wins || 0,
-                losses: roster.seasonStats.losses || 0,
-                pointsFor: roster.seasonStats.pointsFor || 0,
-                pointsAgainst: roster.seasonStats.pointsAgainst || 0,
-                gamesPlayed:
-                  (roster.seasonStats.wins || 0) +
-                  (roster.seasonStats.losses || 0) +
-                  (roster.seasonStats.ties || 0),
-              }
-            : undefined,
-        })),
-      }));
+      : seasons.find((s) => s.isActive) || seasons[0];
+
+    if (!targetSeason) {
+      return [];
     }
 
-    // Create a map of team divisions
-    const teamDivisions = new Map<string, { _id: string; name: string }>();
-    activeSeason.divisions.forEach((div) => {
+    // Get all team IDs that are in divisions of the target season
+    const seasonTeamIds = new Set<string>();
+    targetSeason.divisions.forEach((div) => {
       div.teamRefs.forEach((teamRef) => {
-        teamDivisions.set(teamRef, {
-          _id: div.division._id,
-          name: div.division.name,
-        });
+        seasonTeamIds.add(teamRef);
       });
     });
 
-    // Get list of team IDs in active season
-    const activeTeamIds = new Set<string>();
-    activeSeason.divisions.forEach((div) => {
+    // Create a map of team ID to division for the target season
+    const teamDivisionMap = new Map<string, { _id: string; name: string }>();
+    targetSeason.divisions.forEach((div) => {
       div.teamRefs.forEach((teamRef) => {
-        activeTeamIds.add(teamRef);
+        teamDivisionMap.set(teamRef, div.division);
       });
     });
 
-    // Transform only teams that are in the active season
+    // Filter and transform teams that are in the target season
     return teams
-      .filter((team) => activeTeamIds.has(team._id))
+      .filter((team) => seasonTeamIds.has(team._id))
       .map((team) => {
-        // Find roster for active season
+        // Find roster for target season
         const activeRoster = team.rosters?.find(
-          (r) => r.season._id === activeSeason._id
+          (r) => r.season._id === targetSeason._id
         );
 
-        // Debug logging
-        if (team._id === "13111760-ab34-4d1e-a512-cfe0c830312e") {
-          console.log("ONL-X Junior data:", {
-            activeSeasonId: activeSeason._id,
-            rosters: team.rosters,
-            activeRoster,
-            seasonStats: activeRoster?.seasonStats,
-          });
-        }
-        // TODO: Remove this after debugging
-        // Check if we have valid season stats
-        // const hasStats = activeRoster?.seasonStats && (
-        //   activeRoster.seasonStats.wins !== null &&
-        //   activeRoster.seasonStats.wins !== undefined &&
-        //   activeRoster.seasonStats.losses !== null &&
-        //   activeRoster.seasonStats.losses !== undefined &&
-        //   activeRoster.seasonStats.pointsFor !== null &&
-        //   activeRoster.seasonStats.pointsFor !== undefined &&
-        //   activeRoster.seasonStats.pointsAgainst !== null &&
-        //   activeRoster.seasonStats.pointsAgainst !== undefined
-        // );
         const hasStats = Boolean(
           activeRoster?.seasonStats?.wins !== null &&
             activeRoster?.seasonStats?.wins !== undefined &&
@@ -190,24 +148,14 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
             activeRoster?.seasonStats?.losses !== undefined
         );
 
-        // Debug logging
-        if (team._id === "13111760-ab34-4d1e-a512-cfe0c830312e") {
-          console.log("ONL-X Junior fetchTeams:", {
-            activeRoster,
-            hasStats,
-            seasonStats: activeRoster?.seasonStats,
-          });
-        }
-
-        // Preserve all team data and override specific fields
         return {
           ...team,
           id: team._id,
-          division: teamDivisions.get(team._id),
+          division: teamDivisionMap.get(team._id),
           season: {
-            _id: activeSeason._id,
-            name: activeSeason.name,
-            year: activeSeason.year,
+            _id: targetSeason._id,
+            name: targetSeason.name,
+            year: targetSeason.year,
           },
           coach: team.coach || "TBA",
           region: team.region || "Unknown",
@@ -249,22 +197,6 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
                   gamesPlayed: 0,
                 },
           showStats: hasStats,
-          // Don't transform rosters here since we preserved them above
-          /* rosters: (team.rosters || []).map((roster) => ({
-            season: roster.season,
-            seasonStats: roster.seasonStats
-              ? {
-                  wins: roster.seasonStats.wins || 0,
-                  losses: roster.seasonStats.losses || 0,
-                  pointsFor: roster.seasonStats.pointsFor || 0,
-                  pointsAgainst: roster.seasonStats.pointsAgainst || 0,
-                  gamesPlayed:
-                    (roster.seasonStats.wins || 0) +
-                    (roster.seasonStats.losses || 0) +
-                    (roster.seasonStats.ties || 0),
-                }
-              : undefined,
-          })) */
         };
       });
   } catch (error) {
