@@ -19,7 +19,7 @@ export interface SanityGame {
     _id: string;
     name: string;
   };
-  status: 'scheduled' | 'live' | 'completed' | 'cancelled' | 'postponed';
+  status: "scheduled" | "live" | "completed" | "cancelled" | "postponed";
   homeScore?: number;
   awayScore?: number;
 }
@@ -107,15 +107,17 @@ export interface SanityRoster {
 export interface SanityRosterPlayer {
   player: SanityPlayer;
   jerseyNumber: number;
-  position: 'PG' | 'SG' | 'SF' | 'PF' | 'C';
-  status: 'active' | 'inactive' | 'injured';
+  position: "PG" | "SG" | "SF" | "PF" | "C";
+  status: "active" | "inactive" | "injured";
 }
 
 export interface SanitySeason {
   _id: string;
   name: string;
   year: number;
-  status: 'upcoming' | 'active' | 'completed';
+  endDate: string;
+  startDate: string;
+  status: "upcoming" | "active" | "completed";
   isActive: boolean;
 }
 
@@ -144,6 +146,6 @@ export interface PlayerWithTeamInfo extends SanityPlayer {
 export interface FilterOptions {
   seasons: SanitySeason[];
   divisions: SanityDivision[];
-  teams: Pick<SanityTeam, '_id' | 'name' | 'shortName'>[];
+  teams: Pick<SanityTeam, "_id" | "name" | "shortName">[];
   positions: string[];
 }

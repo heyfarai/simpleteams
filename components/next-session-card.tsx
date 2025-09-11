@@ -50,7 +50,7 @@ export function NextSessionCard() {
     <Card className="border-black/10">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Next Session: West Capital
+          Next season: Session #1 West Capital
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -90,28 +90,6 @@ export function NextSessionCard() {
             <MapPin className="h-4 w-4" />
             <span>{nextGame.venue}</span>
           </div>
-        </div>
-
-        {/* Embedded Map Placeholder */}
-        <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
-          <img
-            src="/map-showing-sports-complex-location.jpg"
-            alt="Venue location map"
-            className="w-full h-full object-cover rounded-lg"
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button className="flex-1 bg-primary hover:bg-primary/90">
-            View Details
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 bg-transparent"
-          >
-            Add to Calendar
-          </Button>
         </div>
       </CardContent>
     </Card>

@@ -11,10 +11,9 @@ export function Navigation() {
   const pathname = usePathname();
 
   const navItems = [
+    { href: "/games", label: "Schedule" },
     { href: "/teams", label: "Teams" },
     { href: "/players", label: "Players" },
-    { href: "/games", label: "Games" },
-    { href: "/watch", label: "Watch" },
   ];
 
   return (

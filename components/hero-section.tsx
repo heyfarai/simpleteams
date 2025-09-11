@@ -73,44 +73,6 @@ export function HeroSection() {
       </div>
 
       <div className="relative flex-1 lg:w-2/3">
-        {/* Background Video Placeholder */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/80 to-gray-900/20">
-          <img
-            src="/basketball-game-action-shot-with-players-dunking.jpg"
-            alt="Basketball game highlights"
-            className="w-full h-full object-cover opacity-80"
-          />
-        </div>
-
-        {/* Video Controls Overlay */}
-        <div className="hidden top-6 right-6  gap-2 z-20">
-          <Button
-            variant="secondary"
-            size="icon"
-            className="bg-black/50 hover:bg-black/70 text-white border-0"
-            onClick={() => setIsMuted(!isMuted)}
-          >
-            {isMuted ? (
-              <VolumeX className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-
-        {/* Play Button Overlay */}
-        {showPlayButton && (
-          <div className="hidden inset-0  items-center justify-center z-10">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-6 shadow-2xl"
-              onClick={() => setShowPlayButton(false)}
-            >
-              <Play className="h-8 w-8 ml-1" />
-            </Button>
-          </div>
-        )}
-
         {/* Hero Content */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
           <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-16">
@@ -126,14 +88,7 @@ export function HeroSection() {
                   size="default"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
-                  Join the League
-                </Button>
-                <Button
-                  size="default"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-primary bg-transparent"
-                >
-                  Watch Highlights
+                  Register for 2025-26 Season
                 </Button>
               </div>
             </div>

@@ -64,16 +64,21 @@ export default function PlayersShowcase() {
   const statLeaders = statLeadersData || [];
 
   // Extract filter options from fetched data
-  const availableSeasons: Season[] = (filterOptions?.seasons || []).map(
-    (season: SanitySeason) => ({
+  const availableSeasons: Season[] = (filterOptions?.seasons || [])
+    .filter((season: SanitySeason) => {
+      console.log(season);
+      return season._id === "1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3"; // Only include seasons that have ended
+    })
+    .map((season: SanitySeason) => ({
       id: season._id,
       name: season.name,
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
       endDate: new Date(season.year + 1, 7, 31),
+      status: season.status,
       isActive: Boolean(season.isActive),
-    })
-  );
+    }))
+    .sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
 
   // Optimized leaderboard queries using React Query
   const { data: pointsLeaders, isLoading: pointsLoading } = useQuery({
@@ -253,7 +258,7 @@ export default function PlayersShowcase() {
 
   return (
     <div className="space-y-6">
-      <div className="flex  items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <SeasonTabs
           selectedSeason={selectedSeason}
           seasons={availableSeasons}

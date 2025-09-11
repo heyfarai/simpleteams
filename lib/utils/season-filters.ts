@@ -4,6 +4,7 @@ export interface Season {
   year: string; // e.g. "2024-25"
   startDate: Date;
   endDate: Date;
+  status: string;
   isActive: boolean;
 }
 
