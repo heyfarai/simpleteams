@@ -5,7 +5,7 @@ import { Trophy, Users2, CalendarDays, CheckCircle2 } from "lucide-react";
 
 export function LeagueStructure() {
   return (
-    <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+    <div className="max-w-[85rem] md:min-h-screen md:max-h-[600px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto flex justify-center items-center">
       <div className="lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
         <div className="lg:col-span-7">
           <div className="grid grid-cols-12 gap-2 sm:gap-6 items-center lg:-translate-x-10">
@@ -54,10 +54,6 @@ export function LeagueStructure() {
               <h2 className="font-bold text-3xl lg:text-4xl text-foreground">
                 Circuit Format
               </h2>
-              <p className="text-muted-foreground">
-                Our league is structured to provide competitive basketball for
-                players of all skill levels.
-              </p>
             </div>
             {/* End Title */}
 

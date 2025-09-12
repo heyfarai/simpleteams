@@ -7,12 +7,12 @@ import {
   Video,
   BarChart2,
   Instagram,
-  Handshake
+  Handshake,
 } from "lucide-react";
 
 export function LeagueFeatures() {
   return (
-    <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+    <div className="max-w-[85rem] md:min-h-screen md:max-h-[600px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto flex justify-center items-center">
       {/* Grid */}
       <div className="grid md:grid-cols-2 gap-12">
         <div className="lg:w-3/4">
@@ -20,7 +20,8 @@ export function LeagueFeatures() {
             Enhanced League Experience
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Get more than just basketball games with our comprehensive league features and services.
+            Get more than just basketball games with our comprehensive league
+            features and services.
           </p>
         </div>
         {/* End Col */}
@@ -37,7 +38,8 @@ export function LeagueFeatures() {
                 Live Streams & Broadcasts
               </h3>
               <p className="mt-1 text-muted-foreground">
-                Watch games live on NCHC TV with professional commentary and replays.
+                Watch games live on NCHC TV with professional commentary and
+                replays.
               </p>
             </div>
           </div>
@@ -71,7 +73,8 @@ export function LeagueFeatures() {
                 Enhanced Social Media Presence
               </h3>
               <p className="mt-1 text-muted-foreground">
-                Increased exposure through our active social media channels and content.
+                Increased exposure through our active social media channels and
+                content.
               </p>
             </div>
           </div>
@@ -88,7 +91,8 @@ export function LeagueFeatures() {
                 Community Partnerships
               </h3>
               <p className="mt-1 text-muted-foreground">
-                Collaborations with local organizations and basketball communities.
+                Collaborations with local organizations and basketball
+                communities.
               </p>
             </div>
           </div>

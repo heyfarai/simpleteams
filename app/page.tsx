@@ -1,10 +1,8 @@
-import { HeroSection } from "@/components/hero-section";
-import { NextSessionCard } from "@/components/next-session-card";
-import { SeasonsSummary } from "@/components/seasons-summary";
+import { HeroSection } from "@/components/home/hero-section";
+import { NextSessionCard } from "@/components/home/next-session-card";
 import { PlayerSpotlight } from "@/components/player-spotlight";
-import { HomepageWatchSection } from "@/components/homepage-watch-section";
+import { HomepageWatchSection } from "@/components/home/homepage-watch-section";
 import { EnhancedSponsorStrip } from "@/components/enhanced-sponsor-strip";
-import { NewsFeed } from "@/components/news-feed";
 import { LeagueDivisions } from "@/components/home/league-divisions";
 import { LeagueStructure } from "@/components/home/league-structure";
 import { LeagueFeatures } from "@/components/home/league-features";
@@ -15,10 +13,9 @@ export default function HomePage() {
     <main className="min-h-screen bg-background">
       <HeroSection />
       <div className="container mx-auto px-4 py-8 space-y-12">
-        <NextSessionCard />
+        {/* <NextSessionCard /> */}
         <PlayerSpotlight />
         <LeagueTeamSpotlight />
-        {/* <SeasonsSummary /> */}
         <LeagueStructure />
         <LeagueDivisions />
         <LeagueFeatures />
