@@ -1,0 +1,258 @@
+"use client";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Upload, Palette } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useQuery } from "@tanstack/react-query";
+import { client } from "@/lib/sanity/client";
+
+interface Division {
+  _id: string;
+  name: string;
+  ageGroup: string;
+}
+
+const fetchDivisions = async () => {
+  const query = `*[_type == "season" && _id == $seasonId][0]{
+    "divisions": activeDivisions[].division->{
+      _id,
+      name,
+      ageGroup
+    }
+  }`;
+
+  const result = await client.fetch(query, {
+    seasonId: process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID,
+  });
+
+  return result?.divisions || [];
+};
+
+interface TeamInfoStepProps {
+  formData: {
+    teamName: string;
+    city: string;
+    province: string;
+    contactEmail: string;
+    primaryColors: string[];
+    divisionPreference: string;
+  };
+  logoPreview: string | null;
+  onInputChange: (field: string, value: any) => void;
+  onLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onColorChange: (index: number, color: string) => void;
+  onAddColor: () => void;
+  onRemoveColor: (index: number) => void;
+}
+
+export function TeamInfoStep({
+  formData,
+  logoPreview,
+  onInputChange,
+  onLogoUpload,
+  onColorChange,
+  onAddColor,
+  onRemoveColor,
+}: TeamInfoStepProps) {
+  const { data: divisions = [], isLoading, error } = useQuery<Division[]>({
+    queryKey: ["divisions"],
+    queryFn: fetchDivisions,
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h4 className="text-md font-medium text-gray-900 mb-4">Division</h4>
+        {isLoading ? (
+          <div className="text-gray-500">Loading divisions...</div>
+        ) : error ? (
+          <div className="text-red-500">
+            Error loading divisions: {error.message}
+          </div>
+        ) : divisions.length === 0 ? (
+          <div className="text-yellow-600">
+            No divisions found for active season
+          </div>
+        ) : (
+          <RadioGroup
+            value={formData.divisionPreference}
+            onValueChange={(value: string) =>
+              onInputChange("divisionPreference", value)
+            }
+            className="space-y-3"
+          >
+            {divisions.map((division) => (
+              <div
+                key={division._id}
+                className="flex items-center space-x-3"
+              >
+                <RadioGroupItem
+                  value={division._id}
+                  id={division._id}
+                  className="w-4 h-4 border-2 border-gray-300 rounded-full data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                />
+                <Label
+                  htmlFor={division._id}
+                  className="text-sm font-medium text-gray-700 cursor-pointer"
+                >
+                  {division.name} - {division.ageGroup}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        )}
+      </div>
+      <Separator />
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="teamName">Team Name *</Label>
+            <Input
+              id="teamName"
+              value={formData.teamName}
+              onChange={(e) => onInputChange("teamName", e.target.value)}
+              placeholder="Enter team name"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="city">City *</Label>
+            <Input
+              id="city"
+              value={formData.city}
+              onChange={(e) => onInputChange("city", e.target.value)}
+              placeholder="Enter city"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="province">Province *</Label>
+            <Input
+              id="province"
+              value={formData.province}
+              onChange={(e) => onInputChange("province", e.target.value)}
+              placeholder="Enter province"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactEmail">Contact Email *</Label>
+            <Input
+              id="contactEmail"
+              type="email"
+              value={formData.contactEmail}
+              onChange={(e) => onInputChange("contactEmail", e.target.value)}
+              placeholder="Enter contact email for updates"
+              required
+            />
+            <p className="text-xs text-gray-500">
+              We'll use this to save your progress and send updates
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <h4 className="text-md font-medium text-gray-900 mb-4">
+          Team Branding
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Logo Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="logo">Team Logo</Label>
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage
+                  src={logoPreview || "/placeholder.svg"}
+                  alt="Team logo"
+                />
+                <AvatarFallback>
+                  {formData.teamName.substring(0, 2) || "TM"}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <Input
+                  id="logo"
+                  type="file"
+                  accept="image/*"
+                  onChange={onLogoUpload}
+                  className="hidden"
+                />
+                <Label
+                  htmlFor="logo"
+                  className="cursor-pointer"
+                >
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <span>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Logo
+                    </span>
+                  </Button>
+                </Label>
+                <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Primary Colors */}
+          <div className="space-y-2">
+            <Label>Primary Colors</Label>
+            <div className="space-y-3">
+              {formData.primaryColors.map((color, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-3"
+                >
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => onColorChange(index, e.target.value)}
+                    className="w-10 h-10 rounded border border-gray-300 cursor-pointer"
+                  />
+                  <Input
+                    value={color}
+                    onChange={(e) => onColorChange(index, e.target.value)}
+                    placeholder="#000000"
+                    className="flex-1"
+                  />
+                  {formData.primaryColors.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onRemoveColor(index)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              ))}
+              {formData.primaryColors.length < 3 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onAddColor}
+                >
+                  <Palette className="h-4 w-4 mr-2" />
+                  Add Color
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

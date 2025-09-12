@@ -75,148 +75,7 @@ export function LeagueDivisions() {
       <div className="relative p-6 md:p-16 ">
         {/* Grid */}
         <div className="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
-          <div className="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-7 lg:order-2 text-white">
-            <h2 className=" text-2xl font-bold text-white sm:text-3xl">
-              4 Divisions
-            </h2>
-
-            {/* Tab Navs */}
-            <nav
-              className="grid gap-4 mt-5 md:mt-10"
-              aria-label="Tabs"
-              role="tablist"
-              aria-orientation="vertical"
-            >
-              <button
-                type="button"
-                onClick={() => handleTabChange("tab-1")}
-                className={cn(
-                  "text-start p-4 md:p-5 rounded-xl transition-all",
-                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
-                  activeTab === "tab-1" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800"
-                )}
-                id="tab-1"
-                role="tab"
-                aria-selected={activeTab === "tab-1"}
-                aria-controls="tab-panel-1"
-              >
-                <span className="flex gap-x-6">
-                  <Trophy className="h-5 w-5 mt-0.5" />
-                  <span className="grow">
-                    <span className="block text-lg font-semibold ">
-                      Diamond Division
-                    </span>
-                    <div className=" mt-1 text-sm  grid grid-cols-2">
-                      <div>U19/Mens</div>
-                      <div>Grade 12 AAA+</div>
-                      <div>Senior Prep</div>
-                      <div>CEGEP D1</div>
-                    </div>
-                  </span>
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabChange("tab-2")}
-                className={cn(
-                  "text-start p-4 md:p-5 rounded-xl transition-all",
-                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
-                  activeTab === "tab-2" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800"
-                )}
-                id="tab-2"
-                role="tab"
-                aria-selected={activeTab === "tab-2"}
-                aria-controls="tab-panel-2"
-              >
-                <span className="flex gap-x-6">
-                  <Users2 className="h-5 w-5 mt-0.5" />
-                  <span className="grow">
-                    <span className="block text-lg font-semibold ">
-                      Premier Division
-                    </span>
-                    <div className=" mt-1 text-sm  grid grid-cols-2">
-                      <div>U17-U18</div>
-                      <div>Grade 11</div>
-                      <div>Grade 12 AA</div>
-                      <div>Junior Prep</div>
-                      <div>CEGEP D2</div>
-                    </div>
-                  </span>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTabChange("tab-3")}
-                className={cn(
-                  "text-start p-4 md:p-5 rounded-xl transition-all",
-                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-950/20",
-                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
-                  activeTab === "tab-3" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800 border-2 border-primary"
-                )}
-                id="tab-3"
-                role="tab"
-                aria-selected={activeTab === "tab-3"}
-                aria-controls="tab-panel-3"
-              >
-                <span className="flex gap-x-6">
-                  <CalendarDays className="h-5 w-5 mt-0.5" />
-                  <span className="grow">
-                    <span className="block text-lg font-semibold ">
-                      Supreme Division
-                    </span>
-                    <div className=" mt-1 text-sm  grid grid-cols-2">
-                      <div>U16 AAA</div>
-                      <div>Grade 10+</div>
-                      <div>Junior Prep</div>
-                      <div>Juvenile Gars</div>
-                    </div>
-                  </span>
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabChange("tab-4")}
-                className={cn(
-                  "text-start p-4 md:p-5 rounded-xl transition-all",
-                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-950/20",
-                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
-                  activeTab === "tab-4" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800"
-                )}
-                id="tab-4"
-                role="tab"
-                aria-selected={activeTab === "tab-4"}
-                aria-controls="tab-panel-4"
-              >
-                <span className="flex gap-x-6">
-                  <CalendarDays className="mt-0.5 h-5 w-5" />
-                  <span className="grow ">
-                    <span className="flex flex-row items-center mb-3  font-semibold ">
-                      Ascent Division
-                      <Badge className="ml-2">New</Badge>
-                    </span>
-                    <div className=" mt-1 text-sm  grid grid-cols-2">
-                      <div>U15 AAA</div>
-                      <div>U16 AA</div>
-                      <div>Grade 9+</div>
-                      <div>Cadet Gars</div>
-                    </div>
-                  </span>
-                </span>
-              </button>
-            </nav>
-            {/* End Tab Navs */}
-          </div>
-          {/* End Col */}
-
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-6 order-1 lg:order-2">
             <div className="relative">
               {/* Tab Content */}
               <div>
@@ -402,6 +261,147 @@ export function LeagueDivisions() {
               {/* End SVG Element */}
             </div>
           </div>
+          <div className="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-8 md:col-start-7 order-2  text-white">
+            <h2 className=" text-2xl font-bold text-white sm:text-3xl">
+              4 Divisions
+            </h2>
+
+            {/* Tab Navs */}
+            <nav
+              className="grid gap-4 mt-5 md:mt-10"
+              aria-label="Tabs"
+              role="tablist"
+              aria-orientation="vertical"
+            >
+              <button
+                type="button"
+                onClick={() => handleTabChange("tab-1")}
+                className={cn(
+                  "text-start p-4 md:p-5 rounded-xl transition-all",
+                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-primary/20",
+                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
+                  activeTab === "tab-1" &&
+                    "bg-white text-black shadow-md dark:bg-neutral-800"
+                )}
+                id="tab-1"
+                role="tab"
+                aria-selected={activeTab === "tab-1"}
+                aria-controls="tab-panel-1"
+              >
+                <span className="flex gap-x-6">
+                  <Trophy className="h-5 w-5 mt-0.5" />
+                  <span className="grow">
+                    <span className="block text-lg font-semibold ">
+                      Diamond Division
+                    </span>
+                    <div className=" mt-1 text-sm  grid grid-cols-2">
+                      <div>U19/Mens</div>
+                      <div>Grade 12 AAA+</div>
+                      <div>Senior Prep</div>
+                      <div>CEGEP D1</div>
+                    </div>
+                  </span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange("tab-2")}
+                className={cn(
+                  "text-start p-4 md:p-5 rounded-xl transition-all",
+                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-primary/20",
+                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
+                  activeTab === "tab-2" &&
+                    "bg-white text-black shadow-md dark:bg-neutral-800"
+                )}
+                id="tab-2"
+                role="tab"
+                aria-selected={activeTab === "tab-2"}
+                aria-controls="tab-panel-2"
+              >
+                <span className="flex gap-x-6">
+                  <Users2 className="h-5 w-5 mt-0.5" />
+                  <span className="grow">
+                    <span className="block text-lg font-semibold ">
+                      Premier Division
+                    </span>
+                    <div className=" mt-1 text-sm  grid grid-cols-2">
+                      <div>U17-U18</div>
+                      <div>Grade 11</div>
+                      <div>Grade 12 AA</div>
+                      <div>Junior Prep</div>
+                      <div>CEGEP D2</div>
+                    </div>
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTabChange("tab-3")}
+                className={cn(
+                  "text-start p-4 md:p-5 rounded-xl transition-all",
+                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-950/20",
+                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
+                  activeTab === "tab-3" &&
+                    "bg-white text-black shadow-md dark:bg-neutral-800 border-2 border-primary"
+                )}
+                id="tab-3"
+                role="tab"
+                aria-selected={activeTab === "tab-3"}
+                aria-controls="tab-panel-3"
+              >
+                <span className="flex gap-x-6">
+                  <CalendarDays className="h-5 w-5 mt-0.5" />
+                  <span className="grow">
+                    <span className="block text-lg font-semibold ">
+                      Supreme Division
+                    </span>
+                    <div className=" mt-1 text-sm  grid grid-cols-2">
+                      <div>U16 AAA</div>
+                      <div>Grade 10+</div>
+                      <div>Junior Prep</div>
+                      <div>Juvenile Gars</div>
+                    </div>
+                  </span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange("tab-4")}
+                className={cn(
+                  "text-start p-4 md:p-5 rounded-xl transition-all",
+                  "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-950/20",
+                  "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
+                  activeTab === "tab-4" &&
+                    "bg-white text-black shadow-md dark:bg-neutral-800"
+                )}
+                id="tab-4"
+                role="tab"
+                aria-selected={activeTab === "tab-4"}
+                aria-controls="tab-panel-4"
+              >
+                <span className="flex gap-x-6">
+                  <CalendarDays className="mt-0.5 h-5 w-5" />
+                  <span className="grow ">
+                    <span className="flex flex-row items-center mb-3  font-semibold ">
+                      Ascent Division
+                      <Badge className="ml-2">New</Badge>
+                    </span>
+                    <div className=" mt-1 text-sm  grid grid-cols-2">
+                      <div>U15 AAA</div>
+                      <div>U16 AA</div>
+                      <div>Grade 9+</div>
+                      <div>Cadet Gars</div>
+                    </div>
+                  </span>
+                </span>
+              </button>
+            </nav>
+            {/* End Tab Navs */}
+          </div>
+          {/* End Col */}
+
           {/* End Col */}
         </div>
         {/* End Grid */}

@@ -1,0 +1,2 @@
+# This tells Windsurf to include .env.local even though it's in .gitignore
+!.env.local
