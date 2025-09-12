@@ -59,10 +59,10 @@ export function NextSessionCard() {
         </div>
 
         {/* Game Details */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="justify-center w-full">
           <Link
             href="/register"
-            className="w-full sm:w-auto whitespace-nowrap py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-transparent bg-gray-800 text-white hover:bg-gray-900 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+            className="w-full  whitespace-nowrap py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-transparent bg-primary text-white hover:bg-gray-900 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
           >
             Register for 2025-26 Season
           </Link>

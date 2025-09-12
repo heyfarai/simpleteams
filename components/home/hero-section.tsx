@@ -12,8 +12,8 @@ export function HeroSection() {
       <div className="relative flex-1 lg:w-2/3">
         {/* Hero Content */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
-          <div className="contentContainer container mx-auto px-4 h-full flex flex-col md:flex-row items-center justify-end pb-16">
-            <div className="text-white">
+          <div className="contentContainer container mx-auto px-4 h-full flex flex-col md:flex-row items-center justify-between pb-16">
+            <div className="text-white max-w-2xl">
               <h1 className="text-3xl md:text-5xl font-bold mb-3 text-balance">
                 National Capital Hoops Circuit
               </h1>
