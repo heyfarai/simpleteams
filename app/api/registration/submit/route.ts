@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 const supabase = createClient(
-  'https://qrvmoeoifjszbujnllbu.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     const registrationData = {
-      season_id: "1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3",
+      season_id: process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID!,
       team_name: formData.teamName,
       contact_email: formData.contactEmail,
       primary_contact_name: formData.primaryContactName,
