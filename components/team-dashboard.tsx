@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -181,7 +182,7 @@ export function TeamDashboard() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={team.logo || "/placeholder.svg"} alt={team.name} />
+            <AvatarImage src={getTeamLogoUrl(team.logo, 'small')} alt={team.name} />
             <AvatarFallback>{team.name.substring(0, 2)}</AvatarFallback>
           </Avatar>
           <div>

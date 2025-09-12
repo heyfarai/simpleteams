@@ -5,6 +5,7 @@ import { fetchAllTeams } from "@/lib/data/fetch-teams";
 import { Team } from "@/lib/types/teams";
 import Image from "next/image";
 import Link from "next/link";
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 
 export function LeagueTeamSpotlight() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -68,42 +69,14 @@ export function LeagueTeamSpotlight() {
             href={`/teams/${team.id}`}
             className="text-center block transition-transform hover:scale-105 hover:opacity-80"
           >
-            <div className="flex justify-center items-center size-12 bg-gray-50 border border-gray-200 rounded-full mx-auto dark:bg-neutral-800 dark:border-neutral-700 overflow-hidden">
-              {team.logo ? (
-                <Image
-                  src={team.logo}
-                  alt={`${team.name} logo`}
-                  width={48}
-                  height={48}
-                  className="object-cover"
-                />
-              ) : (
-                <svg
-                  className="shrink-0 size-5 text-gray-600 dark:text-neutral-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 7h-9" />
-                  <path d="M14 17H5" />
-                  <circle
-                    cx="17"
-                    cy="17"
-                    r="3"
-                  />
-                  <circle
-                    cx="7"
-                    cy="7"
-                    r="3"
-                  />
-                </svg>
-              )}
+            <div className="flex justify-center items-center size-32  mx-auto dark:bg-neutral-800  overflow-hidden">
+              <Image
+                src={getTeamLogoUrl(team.logo)}
+                alt={`${team.name} logo`}
+                width={96}
+                height={96}
+                className="object-fill"
+              />
             </div>
             <div className="mt-3">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">

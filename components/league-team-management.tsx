@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Users, CheckCircle, Clock, AlertCircle, X, FileText, CreditCard, Send, Eye, Search } from "lucide-react"
 import {
@@ -515,7 +516,7 @@ function InvoiceForm({
         <div className="p-3 bg-gray-50 rounded-lg">
           <div className="flex items-center space-x-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={team.logo || "/placeholder.svg"} alt={team.name} />
+              <AvatarImage src={getTeamLogoUrl(team.logo, 'thumbnail')} alt={team.name} />
               <AvatarFallback>{team.name.substring(0, 2)}</AvatarFallback>
             </Avatar>
             <div>

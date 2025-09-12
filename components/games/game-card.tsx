@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Calendar, Clock, MapPin, Plus, Trophy } from "lucide-react";
 import type { Game } from "@/types/schema";
 import { formatGameDate, formatGameTime } from "@/lib/utils/date";
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 
 interface GameCardProps {
   game: Game;
@@ -79,11 +80,11 @@ export function GameCard({ game, loading = false }: GameCardProps) {
       className="block"
     >
       <Card className="hover:shadow-md transition-shadow duration-300 cursor-pointer">
-        <CardContent className="p-6">
+        <CardContent className="md:p-4 lg:p-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1">
               {/* Status and Session */}
-              <div className="flex justify-center items-center gap-2 mb-2">
+              <div className="hidden md:flex justify-center items-center gap-2 mb-2">
                 {getStatusBadge(game.status)}
                 {game.session?.name && (
                   <Badge
@@ -99,24 +100,16 @@ export function GameCard({ game, loading = false }: GameCardProps) {
               </div>
 
               {/* Teams and Score */}
-              <div className="flex flex-col md:flex-row justify-center gap-4 mb-4">
+              <div className="flex flex-col md:flex-row justify-center md:gap-4 mb-4">
                 <div className="flex justify-between flex-1 items-center">
-                  <div className="flex items-center gap-2">
-                    {game.homeTeam?.logo?.asset?.url ? (
-                      <Image
-                        src={game.homeTeam.logo.asset.url}
-                        alt={game.homeTeam.name || "Home Team"}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-xs font-medium">
-                          {game.homeTeam?.name?.substring(0, 2) || "HT"}
-                        </span>
-                      </div>
-                    )}
+                  <div className="team-lockup flex items-center gap-2 p-2">
+                    <Image
+                      src={getTeamLogoUrl(game.homeTeam.logo, "thumbnail")}
+                      alt={game.homeTeam.name || "Home Team"}
+                      width={54}
+                      height={54}
+                      className=""
+                    />
                     <div className="flex flex-col">
                       <span className="font-semibold text-lg">
                         {game.homeTeam?.name || "Home Team"}
@@ -145,27 +138,19 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                       {game.score.awayScore}
                     </span>
                   )}
-                  <div className="flex items-center gap-2 order-1 md:order-2">
-                    {game.awayTeam?.logo?.asset?.url ? (
-                      <Image
-                        src={game.awayTeam.logo.asset.url}
-                        alt={game.awayTeam.name || "Away Team"}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-xs font-medium">
-                          {game.awayTeam?.name?.substring(0, 2) || "AT"}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex flex-col items-end">
+                  <div className="team-lockup md:p-2 p-0 flex items-center  gap-2 order-1 md:order-2">
+                    <Image
+                      src={getTeamLogoUrl(game.awayTeam.logo, "thumbnail")}
+                      alt={game.awayTeam.name || "Away Team"}
+                      width={54}
+                      height={54}
+                      className="md:order-2"
+                    />
+                    <div className="flex flex-col md:items-end gap-0">
                       <span className="font-semibold text-lg">
                         {game.awayTeam?.name || "Away Team"}
                       </span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         Away
                       </span>
                     </div>

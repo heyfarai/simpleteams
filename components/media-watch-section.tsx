@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Play, Menu, X } from "lucide-react";
-import { sampleData } from "@/lib/sample-data";
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
+import { fetchTeams } from "@/lib/data/fetch-teams";
+import type { Team } from "@/types/schema";
+
+interface Video {
+  id: string;
+  title: string;
+  thumbnail: string | null;
+  duration: string;
+  date: string;
+  teams: string;
+  views: number;
+  type: "highlights" | "full_game" | "popular" | "recap" | "replay";
+}
 
 export function MediaWatchSection() {
   const [selectedYear, setSelectedYear] = useState("all");
@@ -19,53 +32,26 @@ export function MediaWatchSection() {
   const [selectedTeam, setSelectedTeam] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const popularVideos = [
-    {
-      id: 1,
-      title: "Championship Finals Highlights",
-      thumbnail: null,
-      duration: "8:45",
-      date: "2025-01-15",
-      teams: "ONL-X Senior vs Kingmo Elite",
-      views: 5200,
-      type: "highlight",
-    },
-    {
-      id: 2,
-      title: "Season's Best Dunks",
-      thumbnail: null,
-      duration: "6:30",
-      date: "2025-01-20",
-      teams: "All Teams",
-      views: 4800,
-      type: "highlight",
-    },
-    {
-      id: 3,
-      title: "Playoff Semifinals Full Game",
-      thumbnail: null,
-      duration: "1:58:45",
-      date: "2025-01-12",
-      teams: "Helisis vs Phoenix Rising",
-      views: 3900,
-      type: "full_game",
-    },
-    {
-      id: 4,
-      title: "Marcus Thompson Career High",
-      thumbnail: null,
-      duration: "4:20",
-      date: "2025-01-18",
-      teams: "ONL-X Senior",
-      views: 3200,
-      type: "highlight",
-    },
-  ];
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        const teamsData = await fetchTeams();
+      } catch (error) {
+        console.error("Failed to fetch teams:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTeams();
+  }, []);
 
-  const recentVideos = [
+  // Sample video data
+  const popularVideos: Video[] = [
     {
-      id: 5,
+      id: "5",
       title: "Last Night's Game Recap",
       thumbnail: null,
       duration: "5:20",
@@ -75,7 +61,7 @@ export function MediaWatchSection() {
       type: "recap",
     },
     {
-      id: 6,
+      id: "6",
       title: "Weekly Division Roundup",
       thumbnail: null,
       duration: "12:15",
@@ -85,71 +71,94 @@ export function MediaWatchSection() {
       type: "recap",
     },
     {
-      id: 7,
+      id: "7",
       title: "Player Interview: Maya Anderson",
       thumbnail: null,
       duration: "7:30",
       date: "2025-01-20",
       teams: "Phoenix Rising",
       views: 1500,
-      type: "recap",
+      type: "popular",
     },
     {
-      id: 8,
+      id: "8",
       title: "Practice Session Behind Scenes",
       thumbnail: null,
       duration: "9:45",
       date: "2025-01-19",
       teams: "Kingmo Elite",
       views: 650,
+      type: "popular",
+    },
+  ];
+
+  const recentVideos: Video[] = [
+    {
+      id: "1",
+      title: "Championship Finals Highlights",
+      thumbnail: null,
+      duration: "8:45",
+      date: "2025-01-23",
+      teams: "All Teams",
+      views: 3200,
+      type: "highlights",
+    },
+    {
+      id: "2",
+      title: "Game Recap: Intense Overtime",
+      thumbnail: null,
+      duration: "3:30",
+      date: "2025-01-22",
+      teams: "Phoenix Rising vs Elite Squad",
+      views: 1800,
       type: "recap",
     },
   ];
 
-  const highlightVideos = [
+  const highlightVideos: Video[] = [
     {
-      id: 9,
+      id: "9",
       title: "Top 10 Plays This Week",
       thumbnail: null,
       duration: "6:20",
       date: "2025-01-21",
       teams: "All Teams",
       views: 2800,
-      type: "highlight",
+      type: "highlights",
     },
     {
-      id: 10,
+      id: "10",
       title: "Clutch Shots Compilation",
       thumbnail: null,
       duration: "4:15",
       date: "2025-01-20",
       teams: "All Teams",
       views: 2100,
-      type: "highlight",
+      type: "highlights",
     },
     {
-      id: 11,
+      id: "11",
       title: "Best Defensive Plays",
       thumbnail: null,
       duration: "5:45",
       date: "2025-01-18",
       teams: "All Teams",
       views: 1900,
-      type: "highlight",
+      type: "highlights",
     },
     {
-      id: 12,
+      id: "12",
       title: "Rookie Highlights Reel",
       thumbnail: null,
       duration: "8:30",
       date: "2025-01-16",
       teams: "All Teams",
       views: 1600,
-      type: "highlight",
+      type: "highlights",
     },
   ];
 
-  const filterVideos = (videos: any[]) => {
+  const filterVideos = (videos: Video[]) => {
     return videos.filter((video) => {
       const matchesYear =
         selectedYear === "all" || video.date.includes(selectedYear);
@@ -221,14 +230,6 @@ export function MediaWatchSection() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Divisions</SelectItem>
-                  {sampleData.divisions.map((division) => (
-                    <SelectItem
-                      key={division.id}
-                      value={division.name}
-                    >
-                      {division.name}
-                    </SelectItem>
-                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -244,9 +245,9 @@ export function MediaWatchSection() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Teams</SelectItem>
-                  {sampleData.teams.map((team) => (
+                  {teams.map((team) => (
                     <SelectItem
-                      key={team.id}
+                      key={team._id}
                       value={team.name}
                     >
                       {team.name}
@@ -269,7 +270,7 @@ export function MediaWatchSection() {
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="recap">RECAP</SelectItem>
                   <SelectItem value="replay">REPLAY</SelectItem>
-                  <SelectItem value="highlight">HIGHLIGHT</SelectItem>
+                  <SelectItem value="highlights">HIGHLIGHT</SelectItem>
                   <SelectItem value="full_game">FULL GAMES</SelectItem>
                 </SelectContent>
               </Select>
@@ -326,17 +327,18 @@ export function MediaWatchSection() {
           </div>
         </div>
 
+        {/* Teams Section */}
         <div>
           <h2 className="text-xl font-bold mb-6">Teams</h2>
           <div className="flex flex-wrap gap-5">
-            {sampleData.teams.slice(0, 5).map((team) => (
+            {teams.map((team) => (
               <div
-                key={team.id}
+                key={team._id}
                 className="flex flex-col items-center space-y-2 cursor-pointer group"
               >
                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-muted group-hover:border-primary transition-colors">
                   <img
-                    src={team.logo || "/placeholder.svg"}
+                    src={getTeamLogoUrl(team.logo, "small")}
                     alt={team.name}
                     className="w-full h-full object-cover"
                   />
@@ -354,16 +356,7 @@ export function MediaWatchSection() {
 }
 
 interface VideoCardProps {
-  video: {
-    id: number;
-    title: string;
-    thumbnail: string | null;
-    duration: string;
-    date: string;
-    teams: string;
-    views: number;
-    type: string;
-  };
+  video: Video;
 }
 
 function VideoCard({ video }: VideoCardProps) {

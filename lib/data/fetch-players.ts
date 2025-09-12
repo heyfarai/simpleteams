@@ -435,7 +435,6 @@ export async function fetchFeaturedPlayers(
         const roster = teamInfo?.roster;
         const season = roster?.season;
         const playerDetails = roster?.playerDetails;
-        console.log("playerDetails", player);
         selectedPlayers.push({
           id: player._id,
           firstName: player.firstName || "Unknown",

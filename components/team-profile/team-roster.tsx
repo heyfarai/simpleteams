@@ -13,7 +13,7 @@ interface Player {
   };
   jerseyNumber: number;
   position: string;
-  status: 'active' | 'inactive' | 'injured';
+  status: "active" | "inactive" | "injured";
 }
 
 interface TeamRosterProps {
@@ -25,12 +25,15 @@ interface TeamRosterProps {
 function PlayerCard({ player }: { player: Player }) {
   const statusColors = {
     active: "bg-green-100 text-green-800",
-    inactive: "bg-gray-100 text-gray-800", 
-    injured: "bg-red-100 text-red-800"
+    inactive: "bg-gray-100 text-gray-800",
+    injured: "bg-red-100 text-red-800",
   };
 
   return (
-    <Link href={`/players/${player.player._id}`} className="block">
+    <Link
+      href={`/players/${player.player._id}`}
+      className="block"
+    >
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
@@ -44,12 +47,6 @@ function PlayerCard({ player }: { player: Player }) {
               <div className="text-sm text-muted-foreground">
                 {player.position}
               </div>
-              <Badge 
-                className={`text-xs mt-1 ${statusColors[player.status]}`}
-                variant="secondary"
-              >
-                {player.status}
-              </Badge>
             </div>
           </div>
         </CardContent>
@@ -59,8 +56,8 @@ function PlayerCard({ player }: { player: Player }) {
 }
 
 export function TeamRoster({ players, seasonName, year }: TeamRosterProps) {
-  const activePlayers = players.filter(p => p.status === 'active');
-  const inactivePlayers = players.filter(p => p.status !== 'active');
+  const activePlayers = players.filter((p) => p.status === "active");
+  const inactivePlayers = players.filter((p) => p.status !== "active");
 
   return (
     <Card>
@@ -85,12 +82,15 @@ export function TeamRoster({ players, seasonName, year }: TeamRosterProps) {
                 </h3>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {activePlayers.map((player) => (
-                    <PlayerCard key={player.player._id} player={player} />
+                    <PlayerCard
+                      key={player.player._id}
+                      player={player}
+                    />
                   ))}
                 </div>
               </div>
             )}
-            
+
             {inactivePlayers.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
@@ -98,7 +98,10 @@ export function TeamRoster({ players, seasonName, year }: TeamRosterProps) {
                 </h3>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {inactivePlayers.map((player) => (
-                    <PlayerCard key={player.player._id} player={player} />
+                    <PlayerCard
+                      key={player.player._id}
+                      player={player}
+                    />
                   ))}
                 </div>
               </div>

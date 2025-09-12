@@ -3,12 +3,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Heart } from "lucide-react";
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 
 interface TeamHeaderProps {
   team: {
     _id: string;
     name: string;
-    logo?: string;
+    logo?: any; // Sanity image object
     division?: {
       _id: string;
       name: string;
@@ -26,7 +27,7 @@ export function TeamHeader({ team, isFollowing, onToggleFollow }: TeamHeaderProp
     <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
       <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
         <img
-          src={team.logo || "/placeholder.svg"}
+          src={getTeamLogoUrl(team.logo, 'small')}
           alt={`${team.name} logo`}
           className="w-full h-full object-cover"
         />

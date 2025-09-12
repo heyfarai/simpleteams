@@ -101,7 +101,7 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
         )}
 
         {/* Placeholder sections for future features */}
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="hidden lg:grid-cols-2 gap-6">
           <div className="bg-muted/30 rounded-lg p-8 text-center">
             <h3 className="text-lg font-semibold mb-2">Schedule</h3>
             <p className="text-muted-foreground">Coming soon</p>

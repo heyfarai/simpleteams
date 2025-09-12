@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X as XIcon, Minus } from "lucide-react";
 import { Team } from "@/lib/types/teams";
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 
 interface TeamStandingsViewProps {
   teams: Team[];
@@ -198,7 +199,7 @@ export function TeamStandingsView({
                             className="flex items-center gap-3 hover:text-primary transition-colors"
                           >
                             <img
-                              src={team.logo || "/placeholder.svg"}
+                              src={getTeamLogoUrl(team.logo, 'thumbnail')}
                               alt={`${team.name} logo`}
                               className="w-8 h-8 rounded-full object-cover"
                             />

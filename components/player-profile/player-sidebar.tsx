@@ -1,12 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Mail,
-  Instagram,
-  Twitter,
-  ExternalLink,
-} from "lucide-react";
+import { Mail, Instagram, Twitter, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { type PlayerProfile } from "@/lib/data/fetch-player-profile";
 
@@ -93,14 +88,12 @@ export function PlayerSidebar({ player }: PlayerSidebarProps) {
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3">
               <img
-                src="/placeholder-team.svg"
-                alt={`${team?.name || 'Team'} logo`}
+                src="/placeholder-team.png"
+                alt={`${team?.name || "Team"} logo`}
                 className="w-12 h-12 rounded-full object-cover bg-muted"
               />
               <div>
-                <div className="font-medium text-foreground">
-                  {team?.name}
-                </div>
+                <div className="font-medium text-foreground">{team?.name}</div>
                 <div className="text-sm text-muted-foreground">
                   {team?.division}
                 </div>
@@ -124,10 +117,11 @@ export function PlayerSidebar({ player }: PlayerSidebarProps) {
               )}
             </div>
 
-            <Button className="w-full bg-primary hover:bg-primary/90 mt-4" asChild>
-              <Link href={`/teams/${team?._id}`}>
-                View Team Profile
-              </Link>
+            <Button
+              className="w-full bg-primary hover:bg-primary/90 mt-4"
+              asChild
+            >
+              <Link href={`/teams/${team?._id}`}>View Team Profile</Link>
             </Button>
           </CardContent>
         </Card>

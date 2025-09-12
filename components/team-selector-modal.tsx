@@ -3,9 +3,12 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { X } from "lucide-react"
 import { Search } from "lucide-react"
-import { sampleTeams } from "@/lib/sample-data"
+import { sampleTeams } from "@/lib/data/teams"
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image"
 import Image from "next/image"
 
 interface TeamSelectorModalProps {
@@ -59,7 +62,7 @@ export function TeamSelectorModal({ isOpen, onClose, onSelectTeam, selectedTeam 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Image
-                    src={selectedTeam.logo || "/placeholder.svg"}
+                    src={getTeamLogoUrl(selectedTeam.logo, 'thumbnail')}
                     alt={selectedTeam.name}
                     width={32}
                     height={32}
@@ -89,7 +92,7 @@ export function TeamSelectorModal({ isOpen, onClose, onSelectTeam, selectedTeam 
               >
                 <div className="flex items-center gap-3">
                   <Image
-                    src={team.logo || "/placeholder.svg"}
+                    src={getTeamLogoUrl(team.logo, 'thumbnail')}
                     alt={team.name}
                     width={32}
                     height={32}

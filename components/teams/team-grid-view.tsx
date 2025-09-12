@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy } from "lucide-react";
 import { Team } from "@/lib/types/teams";
+import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 
 interface TeamGridViewProps {
   teams: Team[];
@@ -57,7 +58,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                       {/* Team Logo */}
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                         <img
-                          src={team.logo || "/placeholder.svg"}
+                          src={getTeamLogoUrl(team.logo, 'small')}
                           alt={`${team.name} logo`}
                           className="w-full h-full object-cover"
                         />
