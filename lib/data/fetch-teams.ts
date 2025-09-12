@@ -41,6 +41,31 @@ interface SanitySeason {
   divisions: SanityDivisionInfo[];
 }
 
+interface SanityRoster {
+  season: {
+    _id: string;
+    name: string;
+    year: number;
+  };
+  players?: Array<{
+    player: {
+      _id: string;
+      name: string;
+    };
+    jerseyNumber: number;
+    position: string;
+    status: 'active' | 'inactive' | 'injured';
+  }>;
+  seasonStats?: {
+    wins?: number;
+    losses?: number;
+    ties?: number;
+    pointsFor?: number;
+    pointsAgainst?: number;
+    gamesPlayed?: number;
+  };
+}
+
 interface SanityTeam {
   _id: string;
   name: string;
@@ -340,7 +365,7 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
 
 export async function fetchTeamDetails(teamId: string) {
   try {
-    const team = await client.fetch(
+    const team = await client.fetch<SanityTeam & { rosters?: SanityRoster[] }>(
       `*[_type == "team" && _id == $teamId][0] {
       _id,
       name,
@@ -386,7 +411,29 @@ export async function fetchTeamDetails(teamId: string) {
     return {
       ...team,
       id: team._id,
-      rosters: team.rosters || [],
+      rosters: (team.rosters || []).map((roster: SanityRoster) => {
+        if (!roster.season || !roster.players) {
+          console.warn(`Invalid roster data for team ${teamId}:`, roster);
+          return null;
+        }
+        return {
+          season: roster.season,
+          players: roster.players.map(player => ({
+            player: player.player,
+            jerseyNumber: player.jerseyNumber,
+            position: player.position,
+            status: player.status
+          })),
+          seasonStats: roster.seasonStats || {
+            wins: 0,
+            losses: 0,
+            ties: 0,
+            pointsFor: 0,
+            pointsAgainst: 0,
+            gamesPlayed: 0
+          }
+        };
+      }).filter((roster): roster is NonNullable<typeof roster> => roster !== null),
       stats: {
         wins: team.stats?.wins || 0,
         losses: team.stats?.losses || 0,

@@ -17,7 +17,7 @@ interface Player {
 }
 
 interface TeamRosterProps {
-  players: Player[];
+  players: Player[] | null;
   seasonName: string;
   year: string; // Format: "2024-25"
 }
@@ -56,6 +56,24 @@ function PlayerCard({ player }: { player: Player }) {
 }
 
 export function TeamRoster({ players, seasonName, year }: TeamRosterProps) {
+  if (!players) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Team Roster - {seasonName}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground py-8">
+            Loading roster...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const activePlayers = players.filter((p) => p.status === "active");
   const inactivePlayers = players.filter((p) => p.status !== "active");
 

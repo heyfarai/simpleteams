@@ -82,13 +82,13 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
 
       <div className="space-y-8">
         {/* Roster Section - only show if team has rosters */}
-        {hasRosters && currentRoster && (
+        {hasRosters && currentRoster ? (
           <TeamRoster
-            players={currentRoster.players}
+            players={currentRoster.players || null}
             seasonName={currentSeasonName}
             year={currentRoster.season.year.toString()}
           />
-        )}
+        ) : null}
 
         {/* No roster message */}
         {!hasRosters && (

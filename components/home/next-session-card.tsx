@@ -38,33 +38,37 @@ export function NextSessionCard() {
   }, []);
 
   return (
-    <Card className="border-black/10">
+    <Card className="border-0 shadow-none bg-none">
       <CardHeader>
-        <CardTitle className="md:text-2xl text-xl font-bold text-center">
+        <CardTitle className="hidden md:text-2xl text-xl font-bold text-center">
           Season 2: <span className="font-light">Session #1</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Countdown Timer */}
-        <div className="grid grid-cols-4 gap-4 text-center">
-          {Object.entries(timeLeft).map(([unit, value]) => (
-            <div
-              key={unit}
-              className=" rounded-lg p-5 text-center"
-            >
-              <div className="lg:text-4xl text-2xl font-bold ">{value}</div>
-              <div className="lg:text-sm text-xs capitalize">{unit}</div>
-            </div>
-          ))}
+        <div className="text-center">
+          Starts in:
+          {/* Countdown Timer */}
+          <div className="flex flex-row gap-1 items-center justify-center text-center">
+            {Object.entries(timeLeft)
+              .slice(0, 4)
+              .map(([unit, value]) => (
+                <div
+                  key={unit}
+                  className=" rounded-lg p-2 text-center"
+                >
+                  <div className="lg:text-4xl text-2xl font-bold ">{value}</div>
+                  <div className="lg:text-sm text-xs capitalize">{unit}</div>
+                </div>
+              ))}
+          </div>
         </div>
-
         {/* Game Details */}
-        <div className="justify-center w-full">
+        <div className="flex justify-center">
           <Link
             href="/register"
-            className="w-full  whitespace-nowrap py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-transparent bg-primary text-white hover:bg-gray-900 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+            className="whitespace-nowrap py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-transparent bg-primary text-white hover:bg-gray-900 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
           >
-            Register for 2025-26 Season
+            Register your Team
           </Link>
         </div>
       </CardContent>
