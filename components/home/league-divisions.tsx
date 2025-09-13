@@ -262,7 +262,7 @@ export function LeagueDivisions() {
             </div>
           </div>
           <div className="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-8 md:col-start-7 order-2  text-white">
-            <h2 className=" text-2xl font-bold text-white sm:text-3xl">
+            <h2 className=" text-5xl font-black text-white sm:text-3xl mt-8 md:mt-0">
               4 Divisions
             </h2>
 
@@ -408,7 +408,7 @@ export function LeagueDivisions() {
 
         {/* Background Color */}
         <div className="absolute inset-0 grid grid-cols-12 size-full">
-          <div className="col-span-full lg:col-span-7 lg:col-start-6 bg-[#131211] w-full h-5/6 rounded-xl sm:h-3/4 lg:h-full dark:bg-neutral-800"></div>
+          <div className="col-span-full lg:col-span-7 lg:col-start-6 bg-[#131211] w-full  rounded-xl lg:h-full dark:bg-neutral-800"></div>
         </div>
         {/* End Background Color */}
       </div>

@@ -59,10 +59,10 @@ export function LeagueTeamSpotlight() {
 
   return (
     <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-      <h2 className="font-bold text-3xl lg:text-4xl text-foreground text-center mb-10">
-        Who plays in the NCHC?
+      <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground text-center mb-10">
+        Teams
       </h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 items-center gap-12">
+      <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-8">
         {teams.map((team) => (
           <Link
             key={team.id}
@@ -78,13 +78,10 @@ export function LeagueTeamSpotlight() {
                 className="object-fill"
               />
             </div>
-            <div className="mt-3">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <div className="-mt-2">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
                 {team.name}
               </h3>
-              <p className="mt-1 text-gray-600 dark:text-neutral-400">
-                {team.region || "Location TBA"}
-              </p>
             </div>
           </Link>
         ))}

@@ -16,10 +16,10 @@ export function LeagueFeatures() {
       {/* Grid */}
       <div className="grid md:grid-cols-2 gap-12">
         <div className="lg:w-3/4">
-          <h2 className="text-3xl font-bold lg:text-4xl text-foreground">
-            Enhanced League Experience
+          <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground text-center sm:text-left">
+            More than just games
           </h2>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-3 text-muted-foreground text-center sm:text-left">
             Get more than just basketball games with our comprehensive league
             features and services.
           </p>

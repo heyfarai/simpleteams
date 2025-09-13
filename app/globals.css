@@ -5,7 +5,7 @@
 
 :root {
   --background: oklch(1 0 0); /* #ffffff - white */
-  --foreground: oklch(0.35 0 0); /* #131211 - dark gray */
+  --foreground: #131211; /* #131211 - dark gray */
   --card: #ffffff; /* #fffbeb - light cream */
   --card-foreground: oklch(0.35 0 0); /* #4b5563 - dark gray */
   --popover: oklch(1 0 0); /* #ffffff - white */
@@ -123,5 +123,9 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  h1, h2 {
+    font-family: var(--font-hanken-grotesk), sans-serif;
+    font-weight: 900; /* Black weight */
   }
 }

@@ -18,7 +18,7 @@ export function Navigation() {
 
   return (
     <header className="flex flex-wrap lg:justify-start lg:flex-nowrap z-50 w-full py-7">
-      <nav className="relative max-w-7xl w-full flex flex-wrap lg:grid lg:grid-cols-[1fr_auto_1fr] basis-full items-center px-4 md:px-6 lg:px-8 mx-auto">
+      <nav className="relative max-w-7xl w-full flex flex-wrap lg:grid lg:grid-cols-[1fr_auto_1fr] basis-full items-center px-8 lg:px-8 mx-auto">
         <div className="flex items-center">
           <Link
             href="/"
@@ -70,10 +70,10 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`py-0.5 md:py-3 px-4 md:px-1 border-s-2 md:border-s-0 md:border-b-2 ${
+                className={`py-0.5 md:py-3 px-4 md:px-1 border-s-2 tracking-wide md:border-s-0 md:border-b-2 font-bold ${
                   pathname === item.href
-                    ? "border-gray-800 font-medium text-gray-800"
-                    : "border-transparent text-gray-500 hover:text-gray-800"
+                    ? "border-primary  text-primary"
+                    : "border-transparent text-foreground hover:text-gray-800"
                 } focus:outline-none dark:border-neutral-200 dark:text-neutral-200 dark:hover:text-neutral-200`}
               >
                 {item.label}

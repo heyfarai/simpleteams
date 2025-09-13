@@ -14,7 +14,7 @@ export function HeroSection() {
               src="/img/hero-season-2.png"
               alt="Basketball Court"
               fill
-              className="object-contain mt-8 p-6"
+              className="object-contain mt-8 p-8"
             />
             <div className="hidden text max-w-2xl">
               <h1 className="text-3xl md:text-5xl font-bold mb-3 text-balance">

@@ -50,7 +50,7 @@ export interface Team {
   division?: Division;
   season?: Season;
   coach: string;
-  region?: string;
+  location?: string;
   description?: string;
   homeVenue?: string;
   awards: string[];

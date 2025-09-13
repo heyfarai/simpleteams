@@ -20,7 +20,7 @@ export function PlayerSpotlight() {
   return (
     <section className="space-y-6 py-24">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-foreground mb-2">
+        <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tighter  text-foreground mb-2">
           Player Spotlight
         </h2>
         <p className="text-muted-foreground">Featuring our top performers</p>

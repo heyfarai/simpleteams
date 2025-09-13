@@ -58,22 +58,9 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
       {/* Team Header */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 mb-6">
-          <div className="flex-1">
-            <TeamHeader
-              team={team}
-              isFollowing={isFollowing}
-              onToggleFollow={toggleFollow}
-            />
+          <div className="">
+            <TeamHeader team={team} />
           </div>
-
-          {/* Season Filters - only show if team has rosters */}
-          {hasRosters && (
-            <SeasonFilters
-              selectedSeason={selectedSeason}
-              availableSeasons={availableSeasons}
-              onSeasonChange={setSelectedSeason}
-            />
-          )}
         </div>
 
         {/* Team Stats Overview */}

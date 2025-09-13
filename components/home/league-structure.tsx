@@ -5,8 +5,8 @@ import { Trophy, Users2, CalendarDays, CheckCircle2 } from "lucide-react";
 
 export function LeagueStructure() {
   return (
-    <div className="max-w-[85rem] md:min-h-screen md:max-h-[600px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto flex justify-center items-center">
-      <div className="lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
+    <div className="max-w-[85rem] min-h-screen md:max-h-[600px] px-4 sm:px-6 lg:px-8 mx-auto flex justify-center items-center">
+      <div className="w-full lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
         <div className="lg:col-span-7">
           <div className="grid grid-cols-12 gap-2 sm:gap-6 items-center lg:-translate-x-10">
             <div className="col-span-3">
@@ -51,7 +51,7 @@ export function LeagueStructure() {
           <div className="space-y-6 sm:space-y-8">
             {/* Title */}
             <div className="space-y-2 md:space-y-4">
-              <h2 className="font-bold text-3xl lg:text-4xl text-foreground">
+              <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground">
                 Circuit Format
               </h2>
             </div>
@@ -63,7 +63,7 @@ export function LeagueStructure() {
                 <span className="mt-0.5 h-5 w-5 flex justify-center items-center rounded-full bg-primary/10 text-primary">
                   <CheckCircle2 />
                 </span>
-                <span className="text-sm sm:text-base text-foreground">
+                <span className=" sm:text-base text-foreground">
                   <span className="font-normal">12 games per season</span>
                 </span>
               </li>
@@ -71,9 +71,9 @@ export function LeagueStructure() {
                 <span className="mt-0.5 h-5 w-5 flex justify-center items-center rounded-full bg-primary/10 text-primary">
                   <CheckCircle2 />
                 </span>
-                <span className="text-sm sm:text-base text-foreground">
+                <span className=" sm:text-base text-foreground">
                   <span className="font-normal">
-                    5 game sessions per season (Monthly)
+                    5 game sessions per season
                   </span>
                 </span>
               </li>
@@ -81,7 +81,7 @@ export function LeagueStructure() {
                 <span className="mt-0.5 h-5 w-5 flex justify-center items-center rounded-full bg-primary/10 text-primary">
                   <CheckCircle2 />
                 </span>
-                <span className="text-sm sm:text-base text-foreground">
+                <span className=" sm:text-base text-foreground">
                   <span className="font-normal">
                     Teams play at any 3 sessions
                   </span>
@@ -92,7 +92,7 @@ export function LeagueStructure() {
                 <span className="mt-0.5 h-5 w-5 flex justify-center items-center rounded-full bg-primary/10 text-primary">
                   <CheckCircle2 />
                 </span>
-                <span className="text-sm sm:text-base text-foreground">
+                <span className=" sm:text-base text-foreground">
                   <span className="font-normal">Playoffs included</span>
                 </span>
               </li>
@@ -100,7 +100,7 @@ export function LeagueStructure() {
                 <span className="mt-0.5 h-5 w-5 flex justify-center items-center rounded-full bg-primary/10 text-primary">
                   <CheckCircle2 />
                 </span>
-                <span className="text-sm sm:text-base text-foreground">
+                <span className=" sm:text-base text-foreground">
                   <span className="font-normal">
                     Teams play at any 3 sessions
                   </span>

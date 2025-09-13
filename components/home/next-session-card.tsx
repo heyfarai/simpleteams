@@ -45,8 +45,8 @@ export function NextSessionCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="text-center">
-          Starts in:
+        <div className="text-center text-sm uppercase ">
+          <span className="font-medium text-gray-400">NEXT TIP OFF</span>
           {/* Countdown Timer */}
           <div className="flex flex-row gap-1 items-center justify-center text-center">
             {Object.entries(timeLeft)

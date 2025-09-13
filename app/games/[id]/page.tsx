@@ -81,7 +81,7 @@ export default async function GamePage({ params }: GamePageProps) {
               </Badge>
             )}
           </div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tighter flex items-center gap-2">
             {game.homeTeam.name} vs {game.awayTeam.name}
           </h1>
         </div>
@@ -110,7 +110,7 @@ export default async function GamePage({ params }: GamePageProps) {
 
                 <div className="text-center">
                   <div className="font-medium">{game.homeTeam.name}</div>
-                  <div className="text-3xl font-bold text-primary">
+                  <div className="text-3xl font-black text-primary">
                     {game.score?.homeScore ?? "-"}
                   </div>
                 </div>

@@ -20,7 +20,7 @@ export default function HomePage() {
         <PlayerSpotlight />
         <LeagueFeatures />
       </div>
-      <EnhancedSponsorStrip />
+      {/* <EnhancedSponsorStrip /> */}
     </main>
   );
 }
