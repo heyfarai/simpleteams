@@ -81,7 +81,7 @@ export default async function GamePage({ params }: GamePageProps) {
               </Badge>
             )}
           </div>
-          <h1 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tighter flex items-center gap-2">
+          <h1 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight flex items-center gap-2">
             {game.homeTeam.name} vs {game.awayTeam.name}
           </h1>
         </div>

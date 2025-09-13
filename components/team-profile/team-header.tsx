@@ -28,7 +28,7 @@ export function TeamHeader({ team }: TeamHeaderProps) {
       </div>
 
       <div className="">
-        <h1 className="pageTitle mt-8 lg:mt-24 font-black lg:text-8xl md:text-6xl text-5xl tracking-tighter text-foreground mb-2">
+        <h1 className="pageTitle mt-8 lg:mt-24 font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground mb-2">
           {team.name}
         </h1>
         <p className="text-muted-foreground max-w-2xl">{team.description}</p>

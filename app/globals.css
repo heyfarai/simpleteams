@@ -128,5 +128,6 @@
   h2 {
     font-family: var(--font-schibsted-grotesk), sans-serif;
     font-weight: 900; /* Black weight */
+    color: var(--color-primary);
   }
 }

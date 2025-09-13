@@ -175,9 +175,7 @@ export function TeamStandingsView({
                       <tr
                         key={team.id}
                         className={`border-b hover:bg-muted/30 transition-colors ${
-                          index < playoffCutoff
-                            ? "bg-green-50 dark:bg-green-950/20"
-                            : ""
+                          index < playoffCutoff ? " dark:bg-green-950/20" : ""
                         }`}
                       >
                         <td className="p-4">
@@ -185,7 +183,7 @@ export function TeamStandingsView({
                             <span className="font-semibold">{index + 1}</span>
                             {index < playoffCutoff && (
                               <Badge
-                                variant="outline"
+                                variant="secondary"
                                 className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                               >
                                 Playoff
@@ -199,7 +197,7 @@ export function TeamStandingsView({
                             className="flex items-center gap-3 hover:text-primary transition-colors"
                           >
                             <img
-                              src={getTeamLogoUrl(team.logo, 'thumbnail')}
+                              src={getTeamLogoUrl(team.logo, "thumbnail")}
                               alt={`${team.name} logo`}
                               className="w-8 h-8 rounded-full object-cover"
                             />
