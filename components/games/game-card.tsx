@@ -106,8 +106,8 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                     <Image
                       src={getTeamLogoUrl(game.homeTeam.logo, "thumbnail")}
                       alt={game.homeTeam.name || "Home Team"}
-                      width={54}
-                      height={54}
+                      width={72}
+                      height={72}
                       className=""
                     />
                     <div className="flex flex-col">
@@ -142,8 +142,8 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                     <Image
                       src={getTeamLogoUrl(game.awayTeam.logo, "thumbnail")}
                       alt={game.awayTeam.name || "Away Team"}
-                      width={54}
-                      height={54}
+                      width={72}
+                      height={72}
                       className="md:order-2"
                     />
                     <div className="flex flex-col md:items-end gap-0">

@@ -16,12 +16,16 @@ export function LeagueFeatures() {
       {/* Grid */}
       <div className="grid md:grid-cols-2 gap-12">
         <div className="lg:w-3/4">
-          <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground text-center sm:text-left">
-            More than just games
+          <h1 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground text-center sm:text-left">
+            Greatness Lives Here.
+          </h1>
+          <h2 className="text-3xl font-semibold text-gray-400 tracking mt-4">
+            Elite Features. <br />
+            Feels Pro.
           </h2>
           <p className="mt-3 text-muted-foreground text-center sm:text-left">
-            Get more than just basketball games with our comprehensive league
-            features and services.
+            Championship-level basketball deserves championship-level
+            production.
           </p>
         </div>
         {/* End Col */}
@@ -35,11 +39,11 @@ export function LeagueFeatures() {
             </span>
             <div className="grow">
               <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                Live Streams & Broadcasts
+                Live On Camera. Every Play Counts.
               </h3>
               <p className="mt-1 text-muted-foreground">
-                Watch games live on NCHC TV with professional commentary and
-                replays.
+                Professional broadcasts. Real-time highlights. Your moments
+                amplified.
               </p>
             </div>
           </div>
@@ -53,10 +57,10 @@ export function LeagueFeatures() {
             </span>
             <div className="grow">
               <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                Live Advanced Statistics
+                Data Doesn't Lie. Your Stats Matter.
               </h3>
               <p className="mt-1 text-muted-foreground">
-                Real-time game stats and advanced analytics powered by SWISH.
+                Advanced analytics. Real-time insights. Performance unleashed.
               </p>
             </div>
           </div>
@@ -70,11 +74,10 @@ export function LeagueFeatures() {
             </span>
             <div className="grow">
               <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                Enhanced Social Media Presence
+                Be Seen. Be Heard. Be Legendary.
               </h3>
               <p className="mt-1 text-muted-foreground">
-                Increased exposure through our active social media channels and
-                content.
+                Maximum exposure. Viral moments. Your story amplified.
               </p>
             </div>
           </div>
@@ -88,11 +91,10 @@ export function LeagueFeatures() {
             </span>
             <div className="grow">
               <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                Community Partnerships
+                Together We Rise. United We Win.
               </h3>
               <p className="mt-1 text-muted-foreground">
-                Collaborations with local organizations and basketball
-                communities.
+                Community partnerships. Shared excellence. Collective greatness.
               </p>
             </div>
           </div>

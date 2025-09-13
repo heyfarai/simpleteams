@@ -18,10 +18,13 @@ export function HeroSection() {
             />
             <div className="hidden text max-w-2xl">
               <h1 className="text-3xl md:text-5xl font-bold mb-3 text-balance">
-                National Capital Hoops Circuit
+                Just Do It.
               </h1>
+              <h2 className="text-xl md:text-2xl font-semibold mb-2 text-gray-800">
+                National Capital Hoops Circuit
+              </h2>
               <p className="text-lg md:text-xl mb-6 text-pretty opacity-90">
-                Where champions will rise in the Capital.
+                Champions rise here. Legends are forged in the Capital.
               </p>
             </div>
           </div>

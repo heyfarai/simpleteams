@@ -71,11 +71,19 @@ export function LeagueDivisions() {
   };
 
   return (
-    <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+    <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto mt-24">
+      <div className="text-center mb-24 space-y-4">
+        <h1 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground">
+          Find Your Level.
+        </h1>
+        <h2 className="text-3xl font-semibold text-gray-400 tracking mt-4">
+          4 Divisions. Every Player's Journey.
+        </h2>
+      </div>
       <div className="relative p-6 md:p-16 ">
         {/* Grid */}
         <div className="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
-          <div className="lg:col-span-6 order-1 lg:order-2">
+          <div className="lg:col-span-7 order-1 lg:order-2">
             <div className="relative">
               {/* Tab Content */}
               <div>
@@ -262,10 +270,6 @@ export function LeagueDivisions() {
             </div>
           </div>
           <div className="mb-10 lg:mb-0 lg:col-span-6 lg:col-start-8 md:col-start-7 order-2  text-white">
-            <h2 className=" text-5xl font-black text-white sm:text-3xl mt-8 md:mt-0">
-              4 Divisions
-            </h2>
-
             {/* Tab Navs */}
             <nav
               className="grid gap-4 mt-5 md:mt-10"

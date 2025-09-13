@@ -19,11 +19,13 @@ export function PlayerSpotlight() {
 
   return (
     <section className="space-y-6 py-24">
-      <div className="text-center">
+      <div className="text-center mb-24">
         <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight mb-2 text-foreground ">
-          Player Spotlight
+          Legends Start Here.
         </h2>
-        <p className="text-muted-foreground">Featuring our top performers</p>
+        <h2 className="text-3xl font-semibold text-gray-400 tracking mt-4">
+          Elite Players. Unstoppable Moments.
+        </h2>
       </div>
 
       {isLoading ? (
@@ -150,7 +152,7 @@ export function PlayerSpotlight() {
       ) : (
         <div className="text-center py-12">
           <p className="text-lg text-muted-foreground">
-            No featured players available
+            New legends are being forged. Check back soon.
           </p>
         </div>
       )}

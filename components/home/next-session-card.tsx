@@ -41,12 +41,12 @@ export function NextSessionCard() {
     <Card className="border-0 shadow-none bg-none">
       <CardHeader>
         <CardTitle className="hidden md:text-2xl text-xl font-bold text-center">
-          Season 2: <span className="font-light">Session #1</span>
+          Game Time. <span className="font-light">Session #1</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-center text-sm uppercase ">
-          <span className="font-medium text-gray-400">NEXT TIP OFF</span>
+          <span className="font-medium text-gray-400">YOUR MOMENT ARRIVES IN</span>
           {/* Countdown Timer */}
           <div className="flex flex-row gap-1 items-center justify-center text-center">
             {Object.entries(timeLeft)

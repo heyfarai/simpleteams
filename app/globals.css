@@ -117,6 +117,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@font-face {
+  font-family: "Old School Grotesk";
+  src: url("/fonts/OldschoolGrotesk-ExtraBold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: extra-bold;
+  font-display: swap;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -124,10 +132,15 @@
   body {
     @apply bg-background text-foreground;
   }
-  h1,
+  h1 {
+    font-family: "Old School Grotesk", sans-serif;
+    font-weight: 800; /* ExtraBold weight */
+    color: var(--color-primary);
+    letter-spacing: -0.02px;
+  }
   h2 {
-    font-family: var(--font-schibsted-grotesk), sans-serif;
-    font-weight: 900; /* Black weight */
+    font-family: "Old School Grotesk", sans-serif;
+    font-weight: 800; /* ExtraBold weight */
     color: var(--color-primary);
   }
 }

@@ -59,10 +59,15 @@ export function LeagueTeamSpotlight() {
 
   return (
     <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-      <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground text-center mb-10">
-        Teams
-      </h2>
-      <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-8">
+      <div className="text-center mb-24 space-y-4">
+        <h1 className="font-black text-center lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground">
+          Represent Your City.
+        </h1>
+        <h2 className="text-3xl font-semibold text-gray-400 tracking">
+          Champions Compete Here.
+        </h2>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-center gap-8">
         {teams.map((team) => (
           <Link
             key={team.id}

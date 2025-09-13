@@ -27,12 +27,15 @@ export function SuccessStep({ formData, onStartOver }: SuccessStepProps) {
       </div>
 
       {/* Success Message */}
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Registration Complete!
+      <div className="space-y-3">
+        <h1 className="text-3xl font-black text-gray-900">
+          Just Do It.
+        </h1>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Your Team Is In The Game
         </h2>
         <p className="text-lg text-gray-600">
-          Welcome to the 2025-26 Regular Season
+          2025-26 Regular Season • Ready to Compete
         </p>
       </div>
 
