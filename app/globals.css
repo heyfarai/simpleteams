@@ -124,8 +124,9 @@
   body {
     @apply bg-background text-foreground;
   }
-  h1, h2 {
-    font-family: var(--font-hanken-grotesk), sans-serif;
+  h1,
+  h2 {
+    font-family: var(--font-schibsted-grotesk), sans-serif;
     font-weight: 900; /* Black weight */
   }
 }
