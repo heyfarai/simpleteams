@@ -3,7 +3,14 @@
     "allow": [
       "Bash(pnpm run lint:*)",
       "Bash(pnpm list:*)",
-      "Bash(pnpm run build:*)"
+      "Bash(pnpm run build:*)",
+      "WebSearch",
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(env)",
+      "Bash(node:*)",
+      "Bash(pnpm run:*)"
     ],
     "deny": [],
     "ask": []

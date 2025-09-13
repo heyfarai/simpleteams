@@ -1,11 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase/client-safe";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const FULL_PRICE = 379500; // $3,795.00
@@ -15,52 +10,88 @@ export async function POST(request: Request) {
     const { formData } = await request.json();
     console.log("Processing registration:", formData);
 
-    // Create registration record
-    if (!formData.teamName) {
+    // Validate required fields
+    if (!formData.teamName || !formData.contactEmail || !formData.city || !formData.province) {
       return NextResponse.json(
-        { error: "Team name is required" },
+        { error: "Missing required team information" },
         { status: 400 }
       );
     }
 
-    const registrationData = {
-      season_id: process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID!,
-      team_name: formData.teamName,
+    // Create team record in our new structure
+    const teamData = {
+      name: formData.teamName,
+      city: formData.city,
+      region: formData.province,
       contact_email: formData.contactEmail,
+      phone: formData.phone || null,
+      primary_color: formData.primaryColors?.[0] || '#1e40af',
+      secondary_color: formData.primaryColors?.[1] || '#fbbf24',
+      accent_color: formData.primaryColors?.[2] || null,
       primary_contact_name: formData.primaryContactName,
       primary_contact_email: formData.primaryContactEmail,
-      primary_contact_phone: formData.primaryContactPhone || "",
+      primary_contact_phone: formData.primaryContactPhone || null,
       primary_contact_role: formData.primaryContactRole,
-      head_coach_name: formData.headCoachName,
-      head_coach_email: formData.headCoachEmail,
-      head_coach_phone: formData.headCoachPhone || "",
-      head_coach_certifications: formData.headCoachCertifications || "",
+      head_coach_name: formData.headCoachName || null,
+      head_coach_email: formData.headCoachEmail || null,
+      head_coach_phone: formData.headCoachPhone || null,
+      head_coach_certifications: formData.headCoachCertifications || null,
       division_preference: formData.divisionPreference,
-      payment_plan: "full",
+      registration_notes: formData.registrationNotes || null,
+      status: 'pending',
+      payment_status: 'pending'
     };
 
-    console.log("Creating registration with:", registrationData);
+    console.log("Creating team with:", teamData);
 
-    const { data: registration, error: regError } = await supabase
-      .from("team_registrations")
-      .insert(registrationData)
-      .select()
-      .single();
-
-    if (regError) {
-      console.error("Registration error:", regError);
-      return NextResponse.json({ error: regError.message }, { status: 500 });
-    }
-
-    if (!registration) {
-      console.error("No registration data returned");
+    if (!supabaseAdmin) {
       return NextResponse.json(
-        { error: "Failed to create registration" },
+        { error: "Database not configured" },
         { status: 500 }
       );
     }
 
-    console.log("Registration created:", registration);
+    const { data: team, error: teamError } = await supabaseAdmin
+      .from("teams")
+      .insert(teamData)
+      .select()
+      .single();
+
+    if (teamError) {
+      console.error("Team creation error:", teamError);
+      return NextResponse.json({ error: teamError.message }, { status: 500 });
+    }
+
+    if (!team) {
+      console.error("No team data returned");
+      return NextResponse.json(
+        { error: "Failed to create team" },
+        { status: 500 }
+      );
+    }
+
+    console.log("Team created:", team);
+
+    // Create initial payment record
+    const paymentData = {
+      team_id: team.id,
+      amount: FULL_PRICE,
+      currency: 'USD',
+      description: '2025-26 Season Registration',
+      payment_type: 'registration',
+      status: 'pending'
+    };
+
+    const { data: payment, error: paymentError } = await supabaseAdmin
+      .from("team_payments")
+      .insert(paymentData)
+      .select()
+      .single();
+
+    if (paymentError) {
+      console.error("Payment creation error:", paymentError);
+      // Don't fail the registration if payment record creation fails
+    }
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -71,7 +102,7 @@ export async function POST(request: Request) {
             currency: "usd",
             product_data: {
               name: "Team Registration",
-              description: "2025 Summer Series Registration",
+              description: `${formData.teamName} - 2025-26 Season Registration`,
             },
             unit_amount: FULL_PRICE,
           },
@@ -82,17 +113,25 @@ export async function POST(request: Request) {
       success_url: `${process.env.NEXT_PUBLIC_URL}/register?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/register`,
       metadata: {
-        registrationId: registration.id,
+        teamId: team.id,
+        paymentId: payment?.id || '',
+        contactEmail: formData.contactEmail,
+        teamName: formData.teamName
       },
     });
 
-    // Update registration with checkout session ID
-    await supabase
-      .from("team_registrations")
-      .update({ stripe_checkout_session_id: session.id })
-      .eq("id", registration.id);
+    // Update payment record with Stripe session ID
+    if (payment) {
+      await supabaseAdmin
+        .from("team_payments")
+        .update({ stripe_session_id: session.id })
+        .eq("id", payment.id);
+    }
 
-    return NextResponse.json({ checkoutUrl: session.url });
+    return NextResponse.json({ 
+      checkoutUrl: session.url,
+      teamId: team.id 
+    });
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
