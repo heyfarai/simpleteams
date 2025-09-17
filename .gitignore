@@ -32,3 +32,4 @@ next-env.d.ts
 .windsurf
 /.claude
 *.code-workspace
+Claude.md
