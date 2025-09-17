@@ -10,9 +10,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { SelectedPackageDisplay } from "./selected-package-display";
+import { Card, CardContent } from "@/components/ui/card";
+import { Building, MapPin, Mail, Trophy } from "lucide-react";
+import { useEffect } from "react";
 
 interface ContactStepProps {
   formData: {
+    selectedPackage: string;
+    teamName: string;
+    city: string;
+    province: string;
+    contactEmail: string;
+    divisionPreference: string;
     primaryContactName: string;
     primaryContactEmail: string;
     primaryContactPhone: string;
@@ -23,11 +33,75 @@ interface ContactStepProps {
     headCoachCertifications: string;
   };
   onInputChange: (field: string, value: any) => void;
+  onGoToPrevious?: () => void;
 }
 
-export function ContactStep({ formData, onInputChange }: ContactStepProps) {
+export function ContactStep({ formData, onInputChange, onGoToPrevious }: ContactStepProps) {
+  // Auto-fill mock data in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && (!formData.primaryContactName || !formData.headCoachName)) {
+      onInputChange('primaryContactName', 'John Smith');
+      onInputChange('primaryContactEmail', 'john.smith@thunderhawks.com');
+      onInputChange('primaryContactPhone', '416-555-0123');
+      onInputChange('primaryContactRole', 'manager');
+      onInputChange('headCoachName', 'Sarah Johnson');
+      onInputChange('headCoachEmail', 'coach.sarah@thunderhawks.com');
+      onInputChange('headCoachPhone', '416-555-0124');
+      onInputChange('headCoachCertifications', 'NCCP Level 2, First Aid CPR');
+    }
+  }, [formData.primaryContactName, formData.headCoachName, onInputChange]);
+
   return (
     <div className="space-y-6">
+      {/* Selected Package Display */}
+      {formData.selectedPackage && (
+        <SelectedPackageDisplay
+          selectedPackage={formData.selectedPackage}
+          onChangePackage={onGoToPrevious}
+          showChangeButton={false}
+        />
+      )}
+
+      {/* Team Summary */}
+      {(formData.teamName || formData.city || formData.contactEmail || formData.divisionPreference) && (
+        <Card className="bg-gray-50 border-gray-200">
+          <CardContent className="p-4">
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <Building className="w-4 h-4" />
+              Team Summary
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              {formData.teamName && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-600">Team Name:</span>
+                  <span className="text-gray-900">{formData.teamName}</span>
+                </div>
+              )}
+              {(formData.city || formData.province) && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gray-500" />
+                  <span className="font-medium text-gray-600">Location:</span>
+                  <span className="text-gray-900">{formData.city}{formData.province && `, ${formData.province}`}</span>
+                </div>
+              )}
+              {formData.contactEmail && (
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-gray-500" />
+                  <span className="font-medium text-gray-600">Contact:</span>
+                  <span className="text-gray-900">{formData.contactEmail}</span>
+                </div>
+              )}
+              {formData.divisionPreference && (
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-gray-500" />
+                  <span className="font-medium text-gray-600">Division:</span>
+                  <span className="text-gray-900">{formData.divisionPreference}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           Contact Information

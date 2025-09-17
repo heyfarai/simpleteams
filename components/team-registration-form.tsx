@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 // Import step components
 import { ProgressSteps } from "./registration/progress-steps";
+import { PackageSelectionStep } from "./registration/package-selection-step";
 import { TeamInfoStep } from "./registration/team-info-step";
 import { ContactStep } from "./registration/contact-step";
 import { ReviewStep } from "./registration/review-step";
@@ -17,6 +18,7 @@ import { SuccessStep } from "./registration/success-step";
 
 
 interface FormData {
+  selectedPackage: string;
   teamName: string;
   city: string;
   province: string;
@@ -43,9 +45,10 @@ export function TeamRegistrationForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   const [formData, setFormData] = useState<FormData>({
+    selectedPackage: "",
     teamName: "",
     city: "",
     province: "",
@@ -103,6 +106,8 @@ export function TeamRegistrationForm() {
   const validateStep = (step: number) => {
     switch (step) {
       case 1:
+        return formData.selectedPackage !== "";
+      case 2:
         return (
           formData.teamName &&
           formData.city &&
@@ -110,16 +115,16 @@ export function TeamRegistrationForm() {
           formData.contactEmail &&
           formData.divisionPreference
         );
-      case 2:
+      case 3:
         return (
           formData.primaryContactName &&
           formData.primaryContactEmail &&
           formData.headCoachName &&
           formData.headCoachEmail
         );
-      case 3:
-        return true; // Review step
       case 4:
+        return true; // Review step
+      case 5:
         return true; // Success step
       default:
         return false;
@@ -141,6 +146,7 @@ export function TeamRegistrationForm() {
   const handleStartOver = () => {
     setCurrentStep(1);
     setFormData({
+      selectedPackage: "",
       teamName: "",
       city: "",
       province: "",
@@ -210,18 +216,18 @@ export function TeamRegistrationForm() {
     const sessionId = urlParams.get('session_id');
     if (sessionId) {
       // User returned from successful payment
-      setCurrentStep(4);
+      setCurrentStep(5);
       // Clear the URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
-  // Load cart when email changes
-  useEffect(() => {
-    if (formData.contactEmail) {
-      loadCart(formData.contactEmail);
-    }
-  }, [formData.contactEmail]);
+  // Load cart when email changes - DISABLED to prevent navigation issues
+  // useEffect(() => {
+  //   if (formData.contactEmail) {
+  //     loadCart(formData.contactEmail);
+  //   }
+  // }, [formData.contactEmail]);
 
   // Debounced cart save
   useEffect(() => {
@@ -251,6 +257,7 @@ export function TeamRegistrationForm() {
         divisionPreference: formData.divisionPreference,
         city: formData.city,
         province: formData.province,
+        selectedPackage: formData.selectedPackage,
         paymentPlan,
       };
 
@@ -282,6 +289,14 @@ export function TeamRegistrationForm() {
     switch (currentStep) {
       case 1:
         return (
+          <PackageSelectionStep
+            selectedPackage={formData.selectedPackage}
+            onPackageSelect={(packageId) => handleInputChange("selectedPackage", packageId)}
+            onNext={handleNext}
+          />
+        );
+      case 2:
+        return (
           <TeamInfoStep
             formData={formData}
             logoPreview={logoPreview}
@@ -290,16 +305,18 @@ export function TeamRegistrationForm() {
             onColorChange={handleColorChange}
             onAddColor={addColor}
             onRemoveColor={removeColor}
+            onGoToPrevious={handlePrevious}
           />
         );
-      case 2:
+      case 3:
         return (
           <ContactStep
             formData={formData}
             onInputChange={handleInputChange}
+            onGoToPrevious={handlePrevious}
           />
         );
-      case 3:
+      case 4:
         return (
           <ReviewStep
             formData={formData}
@@ -307,9 +324,10 @@ export function TeamRegistrationForm() {
             onPaymentPlanChange={setPaymentPlan}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            onGoToPrevious={handlePrevious}
           />
         );
-      case 4:
+      case 5:
         return (
           <SuccessStep
             formData={formData}
@@ -334,7 +352,7 @@ export function TeamRegistrationForm() {
           {renderCurrentStep()}
 
           {/* Navigation Buttons */}
-          {currentStep < 3 && (
+          {currentStep > 1 && currentStep < 4 && (
             <div className="flex justify-between pt-6">
               <Button
                 type="button"

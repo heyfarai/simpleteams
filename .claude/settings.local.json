@@ -12,7 +12,19 @@
       "Bash(node:*)",
       "Bash(pnpm run:*)",
       "Bash(npm run build:*)",
-      "Read(//Users/farai/Downloads/**)"
+      "Read(//Users/farai/Downloads/**)",
+      "Bash(stripe auth)",
+      "Bash(stripe login:*)",
+      "Bash(stripe config:*)",
+      "Bash(stripe products create:*)",
+      "Bash(stripe prices create:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(compgen:*)",
+      "Bash(supabase:*)",
+      "Bash(stripe events resend:*)",
+      "Read(//Users/farai/Dev/tryouts-next/**)",
+      "Bash(pnpm add:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

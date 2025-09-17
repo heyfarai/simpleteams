@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Users, MapPin } from "lucide-react";
+import { Check, Users, MapPin, Package } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface ProgressStepsProps {
@@ -18,10 +18,11 @@ export function ProgressSteps({ currentStep, totalSteps }: ProgressStepsProps) {
   };
 
   const steps = [
-    { step: 1, title: "Team Info", icon: Users },
-    { step: 2, title: "Contacts", icon: Users },
-    { step: 3, title: "Review", icon: Check },
-    { step: 4, title: "Success", icon: Check },
+    { step: 1, title: "Package", icon: Package },
+    { step: 2, title: "Team Info", icon: Users },
+    { step: 3, title: "Contacts", icon: Users },
+    { step: 4, title: "Review", icon: Check },
+    { step: 5, title: "Success", icon: Check },
   ];
 
   return (

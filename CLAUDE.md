@@ -55,7 +55,7 @@ This is a basketball league website built with Next.js 15, TypeScript, and Tailw
 - Dashboard with roster management and payments
 - Player and team profiles (data from Sanity)
 - Game scheduling and tracking
-- Registration system with Stripe payment integration
+- **Multi-step registration system** with package selection and Stripe payment integration
 - League divisions and structure display
 - Team management for registrants
 
@@ -75,3 +75,75 @@ This is a basketball league website built with Next.js 15, TypeScript, and Tailw
 - Basketball data, teams, and players managed in Sanity
 - Schema definitions in ~/Dev/nchc workspace
 - Use Sanity MCP tools for content development and management
+
+## Registration System Status
+
+### Current Implementation (December 2024)
+The registration system has been refactored into a **5-step multi-step flow**:
+
+#### Step 1: Package Selection
+- **3 package options**: Full Season ($3,495), Two Session Pack ($1,795), Pay Per Session ($795)
+- **Auto-advance on selection** - clicking a package automatically proceeds to Step 2
+- **Comprehensive comparison table** with all benefits and limitations
+- **Early bird pricing** displayed with strikethrough for full season
+- **No Next button** - selection triggers automatic progression
+
+#### Step 2: Team Information  
+- **Selected package display** at top with "Change Package" option
+- Team name, location, contact email, division preference
+- Logo upload and team colors selection
+- **Standard Next/Previous navigation**
+
+#### Step 3: Contact Information
+- **Package + team summary** displayed at top for context
+- Primary contact and head coach details
+- **Standard Next/Previous navigation**
+
+#### Step 4: Review & Payment
+- **Comprehensive summary** in organized card layout:
+  - Team Information, Primary Contact, Head Coach, Additional Notes
+- **Dynamic pricing** based on selected package
+- **Single payment option** (full amount only)
+- **Package-specific payment labels** and early bird discounts shown
+- **End-to-end ready** for Stripe integration
+
+#### Step 5: Success Confirmation
+- Registration completion and next steps
+
+### Technical Implementation
+- **Package selection component** with benefits comparison
+- **Selected package display component** reused across steps
+- **Form state management** with selectedPackage field
+- **Auto-save cart functionality** (debounced, email listener disabled)
+- **Progress indicator** updated for 5 steps
+
+### Outstanding Issues & Jankiness
+
+#### High Priority
+1. **Email cart loading disabled** - Abandoned cart recovery currently non-functional
+   - `loadCart` useEffect commented out to prevent navigation issues
+   - Need alternative approach for cart recovery
+   
+2. **Badge clipping issue** - Fixed but may need testing on different screen sizes
+
+#### Medium Priority  
+3. **Payment integration incomplete** - Currently shows UI but needs:
+   - Dynamic Stripe pricing based on selected package
+   - Package metadata passed to payment processing
+   - Success page integration with package details
+
+4. **Form validation edge cases**:
+   - Package selection validation may be bypassed
+   - Cross-step data consistency not fully validated
+
+#### Low Priority
+5. **TypeScript warnings** - Some unused imports and variables from refactoring
+6. **Mobile responsiveness** - Comparison table may need scrolling improvements
+7. **Loading states** - Package selection could use loading feedback
+
+### Next Steps
+1. **Complete Stripe integration** with dynamic package pricing
+2. **Implement proper abandoned cart recovery** without navigation conflicts
+3. **Add comprehensive form validation** across all steps
+4. **Mobile optimization** for comparison table
+5. **Error handling** for payment failures and edge cases

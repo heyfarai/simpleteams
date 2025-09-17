@@ -3,7 +3,28 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const FULL_PRICE = 379500; // $3,795.00
+
+// Package pricing configuration
+const PACKAGE_CONFIG = {
+  "full-season": {
+    priceId: "price_1S8P39IYuurzinGIpebnrU1W",
+    amount: 349500, // $3,495.00
+    name: "Full Season Team Registration",
+    description: "12+ games + playoffs - Pick any 3 season sessions × 4 games each"
+  },
+  "two-session": {
+    priceId: "price_1S8P48IYuurzinGI3U41qWWR",
+    amount: 179500, // $1,795.00
+    name: "Two Session Pack Registration",
+    description: "6 games max (3 per session)"
+  },
+  "pay-per-session": {
+    priceId: "price_1S8P4KIYuurzinGI2Yb8SpnS",
+    amount: 79500, // $795.00
+    name: "Pay Per Session Registration",
+    description: "3 games max per session"
+  }
+} as const;
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +38,16 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Validate selected package
+    if (!formData.selectedPackage || !(formData.selectedPackage in PACKAGE_CONFIG)) {
+      return NextResponse.json(
+        { error: "Invalid package selection" },
+        { status: 400 }
+      );
+    }
+
+    const packageConfig = PACKAGE_CONFIG[formData.selectedPackage as keyof typeof PACKAGE_CONFIG];
 
     // Create team record in our new structure
     const teamData = {
@@ -38,6 +69,7 @@ export async function POST(request: Request) {
       head_coach_certifications: formData.headCoachCertifications || null,
       division_preference: formData.divisionPreference,
       registration_notes: formData.registrationNotes || null,
+      selected_package: formData.selectedPackage,
       status: 'pending',
       payment_status: 'pending'
     };
@@ -75,9 +107,9 @@ export async function POST(request: Request) {
     // Create initial payment record
     const paymentData = {
       team_id: team.id,
-      amount: FULL_PRICE,
+      amount: packageConfig.amount,
       currency: 'USD',
-      description: '2025-26 Season Registration',
+      description: `${packageConfig.name} - 2025-26 Season`,
       payment_type: 'registration',
       status: 'pending'
     };
@@ -98,14 +130,7 @@ export async function POST(request: Request) {
       payment_method_types: ["card"],
       line_items: [
         {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "Team Registration",
-              description: `${formData.teamName} - 2025-26 Season Registration`,
-            },
-            unit_amount: FULL_PRICE,
-          },
+          price: packageConfig.priceId,
           quantity: 1,
         },
       ],
@@ -116,8 +141,11 @@ export async function POST(request: Request) {
         teamId: team.id,
         paymentId: payment?.id || '',
         contactEmail: formData.contactEmail,
-        teamName: formData.teamName
+        teamName: formData.teamName,
+        selectedPackage: formData.selectedPackage,
+        packageName: packageConfig.name
       },
+      customer_email: formData.contactEmail,
     });
 
     // Update payment record with Stripe session ID

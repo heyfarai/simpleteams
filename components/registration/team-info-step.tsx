@@ -9,6 +9,8 @@ import { Upload, Palette } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/sanity/client";
+import { SelectedPackageDisplay } from "./selected-package-display";
+import { useEffect } from "react";
 
 interface Division {
   _id: string;
@@ -34,6 +36,7 @@ const fetchDivisions = async () => {
 
 interface TeamInfoStepProps {
   formData: {
+    selectedPackage: string;
     teamName: string;
     city: string;
     province: string;
@@ -47,6 +50,7 @@ interface TeamInfoStepProps {
   onColorChange: (index: number, color: string) => void;
   onAddColor: () => void;
   onRemoveColor: (index: number) => void;
+  onGoToPrevious?: () => void;
 }
 
 export function TeamInfoStep({
@@ -57,14 +61,33 @@ export function TeamInfoStep({
   onColorChange,
   onAddColor,
   onRemoveColor,
+  onGoToPrevious,
 }: TeamInfoStepProps) {
   const { data: divisions = [], isLoading, error } = useQuery<Division[]>({
     queryKey: ["divisions"],
     queryFn: fetchDivisions,
   });
 
+  // Auto-fill mock data in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && (!formData.teamName || !formData.city)) {
+      onInputChange('teamName', 'Thunder Hawks');
+      onInputChange('city', 'Toronto');
+      onInputChange('province', 'Ontario');
+      onInputChange('contactEmail', 'team@thunderhawks.com');
+    }
+  }, [formData.teamName, formData.city, onInputChange]);
+
   return (
     <div className="space-y-6">
+      {/* Selected Package Display */}
+      {formData.selectedPackage && (
+        <SelectedPackageDisplay
+          selectedPackage={formData.selectedPackage}
+          onChangePackage={onGoToPrevious}
+          showChangeButton={true}
+        />
+      )}
       <div>
         <h4 className="text-md font-medium text-gray-900 mb-4">Division</h4>
         {isLoading ? (
