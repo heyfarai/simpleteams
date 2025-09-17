@@ -20,11 +20,11 @@ export function PlayerSpotlight() {
   return (
     <section className="space-y-6 py-24">
       <div className="text-center mb-24">
-        <h2 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight mb-2 text-foreground ">
+        <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
           Legends Start Here.
-        </h2>
-        <h2 className="text-3xl font-semibold text-gray-400 tracking mt-4">
-          Elite Players. Unstoppable Moments.
+        </h1>
+        <h2 className="text-2xl tracking mt-4 leading-7 font-normal text-gray-400">
+          Elite Players. <br /> Unstoppable Moments.
         </h2>
       </div>
 

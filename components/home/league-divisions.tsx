@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Trophy, Users2, CalendarDays, Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,13 @@ export function LeagueDivisions() {
     "tab-3": null,
     "tab-4": null,
   });
+
+  // Set random tab on component mount
+  useEffect(() => {
+    const tabs: TabId[] = ["tab-1", "tab-2", "tab-3", "tab-4"];
+    const randomTab = tabs[Math.floor(Math.random() * tabs.length)];
+    setActiveTab(randomTab);
+  }, []);
   const [playingStates, setPlayingStates] = useState({
     "tab-1": true,
     "tab-2": true,
@@ -73,14 +80,14 @@ export function LeagueDivisions() {
   return (
     <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto mt-24">
       <div className="text-center mb-24 space-y-4">
-        <h1 className="font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground">
+        <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
           Find Your Level.
         </h1>
-        <h2 className="text-3xl font-semibold text-gray-400 tracking mt-4">
-          4 Divisions. Every Player's Journey.
+        <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
+          4 Divisions. A Journey for Every Player.
         </h2>
       </div>
-      <div className="relative p-6 md:p-16 ">
+      <div className="relative p-6 md:p-16 mb-24">
         {/* Grid */}
         <div className="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
           <div className="lg:col-span-7 order-1 lg:order-2">
@@ -285,7 +292,7 @@ export function LeagueDivisions() {
                   "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-primary/20",
                   "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
                   activeTab === "tab-1" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800"
+                    "md:bg-white md:text-black md:shadow-md md:dark:bg-neutral-800"
                 )}
                 id="tab-1"
                 role="tab"
@@ -293,9 +300,9 @@ export function LeagueDivisions() {
                 aria-controls="tab-panel-1"
               >
                 <span className="flex gap-x-6">
-                  <Trophy className="h-5 w-5 mt-0.5" />
+                  <Trophy className="iconDivision hidden h-5 w-5 mt-0.5" />
                   <span className="grow">
-                    <span className="block text-lg font-semibold ">
+                    <span className="block text-xl font-semibold ">
                       Diamond Division
                     </span>
                     <div className=" mt-1 text-sm  grid grid-cols-2">
@@ -316,7 +323,7 @@ export function LeagueDivisions() {
                   "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-primary/20",
                   "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
                   activeTab === "tab-2" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800"
+                    "md:bg-white md:text-black md:shadow-md md:dark:bg-neutral-800"
                 )}
                 id="tab-2"
                 role="tab"
@@ -324,9 +331,9 @@ export function LeagueDivisions() {
                 aria-controls="tab-panel-2"
               >
                 <span className="flex gap-x-6">
-                  <Users2 className="h-5 w-5 mt-0.5" />
+                  <Users2 className="iconDivision hidden h-5 w-5 mt-0.5" />
                   <span className="grow">
-                    <span className="block text-lg font-semibold ">
+                    <span className="block text-xl font-semibold ">
                       Premier Division
                     </span>
                     <div className=" mt-1 text-sm  grid grid-cols-2">
@@ -347,7 +354,7 @@ export function LeagueDivisions() {
                   "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-950/20",
                   "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
                   activeTab === "tab-3" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800 border-2 border-primary"
+                    "md:bg-white md:text-black md:shadow-md md:dark:bg-neutral-800 md:border-2 md:border-primary"
                 )}
                 id="tab-3"
                 role="tab"
@@ -355,9 +362,9 @@ export function LeagueDivisions() {
                 aria-controls="tab-panel-3"
               >
                 <span className="flex gap-x-6">
-                  <CalendarDays className="h-5 w-5 mt-0.5" />
+                  <CalendarDays className="iconDivision hidden h-5 w-5 mt-0.5" />
                   <span className="grow">
-                    <span className="block text-lg font-semibold ">
+                    <span className="block text-xl font-semibold ">
                       Supreme Division
                     </span>
                     <div className=" mt-1 text-sm  grid grid-cols-2">
@@ -378,7 +385,7 @@ export function LeagueDivisions() {
                   "hover:bg-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-950/20",
                   "dark:hover:bg-neutral-800 dark:focus:bg-neutral-800",
                   activeTab === "tab-4" &&
-                    "bg-white text-black shadow-md dark:bg-neutral-800"
+                    "md:bg-white md:text-black md:shadow-md md:dark:bg-neutral-800"
                 )}
                 id="tab-4"
                 role="tab"
@@ -386,11 +393,13 @@ export function LeagueDivisions() {
                 aria-controls="tab-panel-4"
               >
                 <span className="flex gap-x-6">
-                  <CalendarDays className="mt-0.5 h-5 w-5" />
+                  <CalendarDays className="iconDivision hidden mt-0.5 h-5 w-5" />
                   <span className="grow ">
                     <span className="flex flex-row items-center mb-3  font-semibold ">
                       Ascent Division
-                      <Badge className="ml-2">New</Badge>
+                      <Badge className="ml-2 bg-amber-200 text-amber-950">
+                        New
+                      </Badge>
                     </span>
                     <div className=" mt-1 text-sm  grid grid-cols-2">
                       <div>U15 AAA</div>

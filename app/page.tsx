@@ -17,7 +17,7 @@ export default function HomePage() {
         <LeagueDivisions />
         <LeagueStructure />
         <LeagueTeamSpotlight />
-        <PlayerSpotlight />
+        {/* <PlayerSpotlight /> */}
         <LeagueFeatures />
       </div>
       {/* <EnhancedSponsorStrip /> */}

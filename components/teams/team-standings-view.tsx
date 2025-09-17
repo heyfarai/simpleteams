@@ -160,7 +160,7 @@ export function TeamStandingsView({
                 >
                   <thead key={`${division._id}-thead`}>
                     <tr className="border-b bg-muted/50">
-                      <th className="text-left p-4 font-semibold">Rank</th>
+                      <th className="text-left p-4 font-semibold"></th>
                       <th className="text-left p-4 font-semibold">Team</th>
                       <th className="text-center p-4 font-semibold">W</th>
                       <th className="text-center p-4 font-semibold">L</th>
@@ -184,7 +184,7 @@ export function TeamStandingsView({
                             {index < playoffCutoff && (
                               <Badge
                                 variant="secondary"
-                                className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                className="hidden text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                               >
                                 Playoff
                               </Badge>
@@ -202,34 +202,31 @@ export function TeamStandingsView({
                               className="w-8 h-8 rounded-full object-cover"
                             />
                             <div>
-                              <div className="font-semibold text-foreground">
+                              <div className="font-semibold text-foreground text-sm leading-4">
                                 {team.name}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {team.coach}
                               </div>
                             </div>
                           </Link>
                         </td>
-                        <td className="p-4 text-center font-semibold text-green-600">
+                        <td className="p-4 text-sm text-center font-semibold text-green-600">
                           {team.stats?.wins ?? "-"}
                         </td>
-                        <td className="p-4 text-center font-semibold text-red-600">
+                        <td className="p-4 text-sm text-center font-semibold text-red-600">
                           {team.stats?.losses ?? "-"}
                         </td>
-                        <td className="p-4 text-center font-semibold">
+                        <td className="p-4 text-sm text-center font-semibold">
                           {team.winPercentage != null
                             ? `${team.winPercentage.toFixed(1)}%`
                             : "-"}
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-4 text-sm text-center">
                           {team.ppg != null ? team.ppg.toFixed(1) : "-"}
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-4 text-sm text-center">
                           {team.oppPpg != null ? team.oppPpg.toFixed(1) : "-"}
                         </td>
                         <td
-                          className={`p-4 text-center font-semibold ${
+                          className={`p-4 text-sm text-center font-semibold ${
                             team.pointsDiff != null
                               ? team.pointsDiff >= 0
                                 ? "text-green-600"

@@ -38,15 +38,15 @@ export function NextSessionCard() {
   }, []);
 
   return (
-    <Card className="border-0 shadow-none bg-none">
+    <Card className="border-0 shadow-none bg-none -mt-12 md:mt-0">
       <CardHeader>
         <CardTitle className="hidden md:text-2xl text-xl font-bold text-center">
           Game Time. <span className="font-light">Session #1</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <div className="text-center text-sm uppercase ">
-          <span className="font-medium text-gray-400">YOUR MOMENT ARRIVES IN</span>
+          <span className="font-medium text-xs text-gray-400">TIP OFF IN</span>
           {/* Countdown Timer */}
           <div className="flex flex-row gap-1 items-center justify-center text-center">
             {Object.entries(timeLeft)
@@ -56,8 +56,12 @@ export function NextSessionCard() {
                   key={unit}
                   className=" rounded-lg p-2 text-center"
                 >
-                  <div className="lg:text-4xl text-2xl font-bold ">{value}</div>
-                  <div className="lg:text-sm text-xs capitalize">{unit}</div>
+                  <div className="lg:text-4xl text-3xl font-extrabold text-gray-600">
+                    {value}
+                  </div>
+                  <div className="lg:text-sm text-xs capitalize -mt-0.5 text-gray-400">
+                    {unit}
+                  </div>
                 </div>
               ))}
           </div>
@@ -66,7 +70,7 @@ export function NextSessionCard() {
         <div className="flex justify-center">
           <Link
             href="/register"
-            className="whitespace-nowrap py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-transparent bg-primary text-white hover:bg-gray-900 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+            className="whitespace-nowrap py-2 px-4 rounded-full  inline-flex justify-center items-center gap-x-2 text-sm font-medium  border border-transparent bg-primary text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
           >
             Register your Team
           </Link>

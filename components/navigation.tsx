@@ -13,12 +13,13 @@ export function Navigation() {
   const navItems = [
     { href: "/games", label: "Schedule" },
     { href: "/teams", label: "Teams" },
-    { href: "/players", label: "Players" },
+    // { href: "/players", label: "Players" },
+    { href: "/about", label: "About" },
   ];
 
   return (
-    <header className="flex flex-wrap lg:justify-start lg:flex-nowrap z-50 w-full py-7">
-      <nav className="relative max-w-7xl w-full flex flex-wrap lg:grid lg:grid-cols-[1fr_auto_1fr] basis-full items-center px-8 lg:px-8 mx-auto">
+    <header className="flex flex-wrap lg:justify-start lg:flex-nowrap z-40 w-full py-7">
+      <nav className="absolute top-0 p-4 md:relative max-w-7xl w-full flex flex-wrap md:grid md:grid-cols-[1fr_auto_1fr] basis-full items-center px-8 lg:px-8 md:mx-auto bg-white z-50  ">
         <div className="flex items-center">
           <Link
             href="/"
@@ -36,10 +37,10 @@ export function Navigation() {
           <div className="ms-1 sm:ms-2"></div>
         </div>
 
-        <div className="flex items-center gap-x-1 lg:gap-x-2 ms-auto py-1 lg:ps-6 lg:order-3">
+        <div className="flex items-center gap-x-1 lg:gap-x-2 ms-auto py-1 lg:ps-6 md:order-3">
           <Link
             href="/register"
-            className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-transparent bg-gray-800 text-white hover:bg-gray-900 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+            className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm  rounded-full border border-transparent bg-gray-800 font-bold text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
           >
             Register
           </Link>
@@ -63,13 +64,14 @@ export function Navigation() {
         <div
           className={`${
             isOpen ? "block" : "hidden"
-          } md:block overflow-hidden transition-all duration-300 basis-full grow lg:block lg:w-auto lg:basis-auto lg:order-2 lg:col-start-2 lg:col-end-3`}
+          } md:block overflow-hidden transition-all duration-300 basis-full md:basis-auto grow md:grow-0 md:w-auto md:order-2 md:col-start-2 md:col-end-3`}
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-3 mt-3 md:mt-0 py-2 md:py-0 md:ps-7 lg:ps-0 lg:whitespace-nowrap">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setIsOpen(false)}
                 className={`py-0.5 md:py-3 px-4 md:px-1 border-s-2 tracking-wide md:border-s-0 md:border-b-2 font-bold ${
                   pathname === item.href
                     ? "border-primary  text-primary"

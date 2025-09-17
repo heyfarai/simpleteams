@@ -60,10 +60,10 @@ export function LeagueTeamSpotlight() {
   return (
     <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
       <div className="text-center mb-24 space-y-4">
-        <h1 className="font-black text-center lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground">
-          Represent Your City.
+        <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
+          Rep Your City.
         </h1>
-        <h2 className="text-3xl font-semibold text-gray-400 tracking">
+        <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
           Champions Compete Here.
         </h2>
       </div>

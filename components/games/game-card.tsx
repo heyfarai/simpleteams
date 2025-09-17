@@ -80,7 +80,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
       className="block"
     >
       <Card className="hover:shadow-md transition-shadow duration-300 cursor-pointer">
-        <CardContent className="md:p-4 lg:p-6">
+        <CardContent className="p-4 lg:p-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1">
               {/* Status and Session */}
@@ -100,27 +100,27 @@ export function GameCard({ game, loading = false }: GameCardProps) {
               </div>
 
               {/* Teams and Score */}
-              <div className="flex flex-col md:flex-row justify-center md:gap-4 mb-4">
+              <div className="flex flex-col md:flex-row justify-center gap-4 mb-4">
                 <div className="flex justify-between flex-1 items-center">
-                  <div className="team-lockup flex items-center gap-2 p-2">
+                  <div className="team-lockup flex items-center gap-6 p-0">
                     <Image
                       src={getTeamLogoUrl(game.homeTeam.logo, "thumbnail")}
                       alt={game.homeTeam.name || "Home Team"}
                       width={72}
                       height={72}
-                      className=""
+                      className="w-10 h-10 md:w-20 md:h-20"
                     />
                     <div className="flex flex-col">
-                      <span className="font-semibold text-lg">
+                      <span className="font-semibold text-sm">
                         {game.homeTeam?.name || "Home Team"}
                       </span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground -mt-1">
                         Home
                       </span>
                     </div>
                   </div>
                   {game.score && (
-                    <span className="text-4xl font-bold text-primary">
+                    <span className="text-4xl font-extrabold grotesk text-primary">
                       {game.score.homeScore}
                     </span>
                   )}
@@ -134,23 +134,23 @@ export function GameCard({ game, loading = false }: GameCardProps) {
 
                 <div className="flex justify-between flex-1 items-center">
                   {game.score && (
-                    <span className="text-4xl font-bold text-primary order-2 md:order-1">
+                    <span className="text-4xl font-extrabold text-primary order-2 md:order-1 grotesk">
                       {game.score.awayScore}
                     </span>
                   )}
-                  <div className="team-lockup md:p-2 p-0 flex items-center  gap-2 order-1 md:order-2">
+                  <div className="team-lockup md:p-2 p-0 flex items-center justify-end  gap-6 order-1 md:order-2">
                     <Image
                       src={getTeamLogoUrl(game.awayTeam.logo, "thumbnail")}
                       alt={game.awayTeam.name || "Away Team"}
                       width={72}
                       height={72}
-                      className="md:order-2"
+                      className="md:order-2 w-10 h-10 md:w-20 md:h-20"
                     />
-                    <div className="flex flex-col md:items-end gap-0">
-                      <span className="font-semibold text-lg">
+                    <div className="flex flex-col md:items-end md:text-right gap-0">
+                      <span className="font-semibold text-sm">
                         {game.awayTeam?.name || "Away Team"}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground -mt-1">
                         Away
                       </span>
                     </div>
@@ -159,7 +159,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
               </div>
 
               {/* Game Details */}
-              <div className="flex md:justify-center flex-wrap gap-4 text-sm text-muted-foreground">
+              <div className="flex justify-center flex-wrap gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span>{formatGameDate(game.gameDate)}</span>

@@ -10,7 +10,7 @@ export default function PartnersPage() {
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             We're proud to partner with these amazing organizations who support
-            our basketball league and help make our community stronger.
+            our basketball circuit and help make our community stronger.
           </p>
         </div>
         <PartnersShowcase />

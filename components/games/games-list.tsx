@@ -16,6 +16,45 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UpcomingSeason } from "./upcoming-season";
+import { useSticky } from "@/hooks/use-sticky";
+
+interface DateSectionProps {
+  date: string;
+  relativeDate: string;
+  formattedDate: string;
+  gamesCount: number;
+  children: React.ReactNode;
+}
+
+function DateSection({
+  date,
+  relativeDate,
+  formattedDate,
+  gamesCount,
+  children,
+}: DateSectionProps) {
+  const { ref, isSticky } = useSticky();
+
+  return (
+    <div className="space-y-4 mt-8">
+      <div
+        ref={ref}
+        className={cn(
+          "sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-2 transition-all duration-200",
+          isSticky ? "border-b" : ""
+        )}
+      >
+        <h2 className="text-lg font-semibold tracking-tight">
+          {relativeDate ? `${relativeDate} - ${formattedDate}` : formattedDate}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {gamesCount} game{gamesCount !== 1 ? "s" : ""}
+        </p>
+      </div>
+      {children}
+    </div>
+  );
+}
 
 interface GamesListProps {
   filterData: {
@@ -53,13 +92,15 @@ export function GamesList({ filterData }: GamesListProps) {
     [searchParams]
   );
 
-  // Find 2025 Summer Series season
+  // Select the first active season as default
   const defaultSeason =
-    filterData.seasons.find((s) => s.name === "2025 Summer Series")?._id ||
-    "all";
+    filterData.seasons.find((s) => s.isActive)?._id ||
+    (filterData.seasons.length > 0 ? filterData.seasons[0]._id : "all");
 
   // Get filter values from URL or use defaults
-  const season = searchParams.get("season") || defaultSeason;
+  const season =
+    searchParams.get("season") ||
+    (defaultSeason !== "all" ? defaultSeason : "all");
   const session = searchParams.get("session") || "all";
   const division = searchParams.get("division") || "all";
   const status = searchParams.get("status") || "all";
@@ -74,7 +115,7 @@ export function GamesList({ filterData }: GamesListProps) {
       defaultSeason !== "all"
     ) {
       const queryString = createQueryString({ season: defaultSeason });
-      router.push(`${pathname}?${queryString}`);
+      router.replace(`${pathname}?${queryString}`);
     }
   }, [defaultSeason, pathname, router, createQueryString, searchParams]);
 
@@ -97,13 +138,6 @@ export function GamesList({ filterData }: GamesListProps) {
     division: division === "all" ? undefined : division,
     status: status === "all" ? undefined : status,
   });
-
-  const activeFiltersCount = [
-    season !== "all",
-    session !== "all",
-    division !== "all",
-    status !== "all",
-  ].filter(Boolean).length;
 
   const allGames = gamesData?.games || [];
 
@@ -158,19 +192,14 @@ export function GamesList({ filterData }: GamesListProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Season Tabs */}
-      <div className="flex items-center justify-between gap-4">
-        <SeasonTabs
-          selectedSeason={season === "all" ? "" : season}
-          seasons={availableSeasons}
-          onSeasonChange={(value) =>
-            handleFilterChange("season", value || "all")
-          }
-        />
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6">
+    <div className="h-full flex flex-col">
+      {/* Season Tabs with content */}
+      <SeasonTabs
+        selectedSeason={season === "all" ? "" : season}
+        seasons={availableSeasons}
+        onSeasonChange={(value) => handleFilterChange("season", value || "all")}
+        className="flex-1 p-2"
+      >
         <div className="flex-1">
           {season === "01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad" ? (
             <UpcomingSeason />
@@ -250,21 +279,13 @@ export function GamesList({ filterData }: GamesListProps) {
                       }).format(gameDate);
 
                       return (
-                        <div
+                        <DateSection
                           key={date}
-                          className="space-y-4"
+                          date={date}
+                          relativeDate={relativeDate}
+                          formattedDate={formattedDate}
+                          gamesCount={gamesForDate.length}
                         >
-                          <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-2 border-b">
-                            <h2 className="text-lg font-semibold tracking-tight">
-                              {relativeDate
-                                ? `${relativeDate} - ${formattedDate}`
-                                : formattedDate}
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                              {gamesForDate.length} game
-                              {gamesForDate.length !== 1 ? "s" : ""}
-                            </p>
-                          </div>
                           <div className="grid gap-4">
                             {gamesForDate
                               .sort((a, b) => {
@@ -281,7 +302,7 @@ export function GamesList({ filterData }: GamesListProps) {
                                 />
                               ))}
                           </div>
-                        </div>
+                        </DateSection>
                       );
                     })}
                 </div>
@@ -289,7 +310,7 @@ export function GamesList({ filterData }: GamesListProps) {
             </Hydrate>
           )}
         </div>
-      </div>
+      </SeasonTabs>
     </div>
   );
 }

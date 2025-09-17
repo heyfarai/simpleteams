@@ -58,7 +58,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                       {/* Team Logo */}
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                         <img
-                          src={getTeamLogoUrl(team.logo, 'small')}
+                          src={getTeamLogoUrl(team.logo, "small")}
                           alt={`${team.name} logo`}
                           className="w-full h-full object-cover"
                         />
@@ -76,9 +76,6 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                             {team.division.name}
                           </Badge>
                         )}
-                        <p className="text-sm text-muted-foreground">
-                          {team.region}
-                        </p>
                       </div>
                     </div>
 
@@ -111,7 +108,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                     {/* Team Stats */}
                     <div className="grid grid-cols-3 gap-4 mb-4 text-center">
                       <div>
-                        <div className="text-lg font-bold text-primary">
+                        <div className="text-xl font-bold text-primary">
                           {team.stats?.wins || 0}-{team.stats?.losses || 0}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -119,7 +116,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                         </div>
                       </div>
                       <div>
-                        <div className="text-lg font-bold text-primary">
+                        <div className="text-xl font-bold text-primary">
                           {team.stats?.gamesPlayed || 0}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -127,7 +124,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                         </div>
                       </div>
                       <div>
-                        <div className="text-lg font-bold text-primary">
+                        <div className="text-xl font-bold text-primary">
                           {team.stats?.gamesPlayed && team.stats.gamesPlayed > 0
                             ? (
                                 (team.stats.wins / team.stats.gamesPlayed) *
@@ -143,7 +140,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                     </div>
 
                     {/* Coach Info */}
-                    <div>
+                    <div className="hidden">
                       <p className="text-sm text-muted-foreground">Coach</p>
                       <p className="font-medium text-foreground">
                         {team.coach}

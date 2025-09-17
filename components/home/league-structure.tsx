@@ -7,11 +7,11 @@ export function LeagueStructure() {
   return (
     <div className="max-w-[85rem] min-h-screen md:max-h-[600px] px-4 sm:px-6 lg:px-8 mx-auto flex flex-col justify-center items-center">
       {/* Title */}
-      <div className="space-y-2 md:space-y-4 mb-24">
-        <h1 className="font-black text-center lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground">
+      <div className="text-center space-y-2 md:space-y-4 mb-24">
+        <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
           Play Hard.
         </h1>
-        <h2 className="text-3xl font-semibold text-gray-400 tracking">
+        <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
           Circuit Format Built For Champions
         </h2>
       </div>

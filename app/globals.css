@@ -10,9 +10,9 @@
   --card-foreground: oklch(0.35 0 0); /* #4b5563 - dark gray */
   --popover: oklch(1 0 0); /* #ffffff - white */
   --popover-foreground: oklch(0.35 0 0); /* #4b5563 - dark gray */
-  --primary: #fc7114; /* #ea580c - orange-600 */
+  --primary: #9f0f1c; /* #ea580c - orange-600 */
   --primary-foreground: oklch(1 0 0); /* #ffffff - white */
-  --secondary: oklch(0.7 0.17 40); /* #f97316 - brighter orange */
+  --secondary: #e89619; /* #f97316 - brighter orange */
   --secondary-foreground: oklch(1 0 0); /* #ffffff - white */
   --muted: oklch(0.98 0.005 85); /* #f9fafb - very light gray */
   --muted-foreground: oklch(0.35 0 0); /* #4b5563 - dark gray */
@@ -132,15 +132,27 @@
   body {
     @apply bg-background text-foreground;
   }
-  h1 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: "Old School Grotesk", sans-serif;
     font-weight: 800; /* ExtraBold weight */
-    color: var(--color-primary);
     letter-spacing: -0.02px;
   }
-  h2 {
+  grotestk {
     font-family: "Old School Grotesk", sans-serif;
-    font-weight: 800; /* ExtraBold weight */
-    color: var(--color-primary);
+  }
+
+  h2.normal {
+    font-weight: 400; /* Normal weight */
+  }
+}
+
+@layer components {
+  .display-heading {
+    @apply font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground;
   }
 }
