@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/sanity/client";
 import { SelectedPackageDisplay } from "./selected-package-display";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 interface Division {
   _id: string;
@@ -69,6 +70,18 @@ export function TeamInfoStep({
     retry: 3,
     retryDelay: 1000,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    onError: (error) => {
+      if (error.message.includes('fetch failed')) {
+        toast.error('Sanity CMS Unavailable', {
+          description: 'Unable to load divisions. Please refresh the page or try again later.',
+          duration: 8000,
+          action: {
+            label: 'Refresh',
+            onClick: () => window.location.reload()
+          }
+        });
+      }
+    }
   });
 
   // Auto-fill mock data in development

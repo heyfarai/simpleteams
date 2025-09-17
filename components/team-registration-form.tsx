@@ -7,6 +7,8 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useServiceStatus } from "@/hooks/use-service-status";
+import { toast } from "sonner";
 
 // Import step components
 import { ProgressSteps } from "./registration/progress-steps";
@@ -44,6 +46,9 @@ export function TeamRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  // Service status monitoring
+  useServiceStatus();
 
   const totalSteps = 5;
 
