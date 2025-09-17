@@ -24,7 +24,8 @@
       "Bash(stripe events resend:*)",
       "Read(//Users/farai/Dev/tryouts-next/**)",
       "Bash(pnpm add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []

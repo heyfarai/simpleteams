@@ -66,6 +66,9 @@ export function TeamInfoStep({
   const { data: divisions = [], isLoading, error } = useQuery<Division[]>({
     queryKey: ["divisions"],
     queryFn: fetchDivisions,
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Auto-fill mock data in development
@@ -93,12 +96,19 @@ export function TeamInfoStep({
         {isLoading ? (
           <div className="text-gray-500">Loading divisions...</div>
         ) : error ? (
-          <div className="text-red-500">
-            Error loading divisions: {error.message}
+          <div className="text-red-500 bg-red-50 p-3 rounded-md">
+            <p className="font-medium">Unable to load divisions</p>
+            <p className="text-sm mt-1">
+              {error.message.includes('fetch failed') ?
+                'Service temporarily unavailable. Please refresh the page or try again later.' :
+                `Error: ${error.message}`
+              }
+            </p>
           </div>
         ) : divisions.length === 0 ? (
-          <div className="text-yellow-600">
-            No divisions found for active season
+          <div className="text-yellow-600 bg-yellow-50 p-3 rounded-md">
+            <p className="font-medium">No divisions found</p>
+            <p className="text-sm mt-1">No divisions are configured for the active season.</p>
           </div>
         ) : (
           <RadioGroup
