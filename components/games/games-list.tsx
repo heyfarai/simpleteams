@@ -11,7 +11,7 @@ import { fetchGames } from "@/lib/data/fetch-games";
 import { useToast } from "@/hooks/use-toast";
 import { SeasonTabs } from "@/components/filters/season-tabs";
 import { Season } from "@/lib/utils/season-filters";
-import type { Game } from "@/types/schema";
+import type { Game } from "@/lib/sanity/display-types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

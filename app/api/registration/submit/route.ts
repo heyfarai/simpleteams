@@ -1,8 +1,9 @@
-import { supabaseAdmin } from "@/lib/supabase/client-safe";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import Stripe from "stripe";
+import type { Database } from "@/lib/supabase/database.types";
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -50,12 +51,18 @@ export async function POST(request: Request) {
 
     const packageConfig = PACKAGE_CONFIG[formData.selectedPackage as keyof typeof PACKAGE_CONFIG];
 
-    if (!supabaseAdmin) {
+    // Create properly typed Supabase admin client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
       return NextResponse.json(
         { error: "Database not configured" },
         { status: 500 }
       );
     }
+
+    const supabase = createClient<Database>(supabaseUrl, serviceRoleKey);
 
     // Get user from session if authenticated
     const cookieStore = await cookies();
@@ -67,10 +74,10 @@ export async function POST(request: Request) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(_name: string, _value: string, _options: any) {
             // Required for SSR but not used in API routes
           },
-          remove(name: string, options: any) {
+          remove(_name: string, _options: any) {
             // Required for SSR but not used in API routes
           },
         },
@@ -78,7 +85,7 @@ export async function POST(request: Request) {
     );
 
     // Try server-side auth first, fallback to client-provided user ID
-    const { data: { user: currentUser }, error: authError } = await supabaseServer.auth.getUser();
+    const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
     let userId: string;
 
     if (currentUser) {
@@ -99,8 +106,8 @@ export async function POST(request: Request) {
     }
 
     // Create team record in our new structure
-    const teamData = {
-      user_id: userId, // Link team to user account
+    const teamData: Database['public']['Tables']['teams']['Insert'] = {
+      user_id: userId,
       name: formData.teamName,
       city: formData.city,
       region: formData.province,
@@ -112,7 +119,7 @@ export async function POST(request: Request) {
       primary_contact_name: formData.primaryContactName,
       primary_contact_email: formData.primaryContactEmail,
       primary_contact_phone: formData.primaryContactPhone || null,
-      primary_contact_role: formData.primaryContactRole,
+      primary_contact_role: formData.primaryContactRole || 'Team Manager',
       head_coach_name: formData.headCoachName || null,
       head_coach_email: formData.headCoachEmail || null,
       head_coach_phone: formData.headCoachPhone || null,
@@ -124,15 +131,7 @@ export async function POST(request: Request) {
       payment_status: 'pending'
     };
 
-
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: "Database not configured" },
-        { status: 500 }
-      );
-    }
-
-    const { data: team, error: teamError } = await supabaseAdmin
+    const { data: team, error: teamError } = await supabase
       .from("teams")
       .insert(teamData)
       .select()
@@ -152,9 +151,9 @@ export async function POST(request: Request) {
 
 
     // Create initial payment record
-    const paymentData = {
+    const paymentData: Database['public']['Tables']['team_payments']['Insert'] = {
       team_id: team.id,
-      user_id: userId, // Link payment to user account
+      user_id: userId,
       amount: packageConfig.amount,
       currency: 'USD',
       description: `${packageConfig.name} - 2025-26 Season`,
@@ -162,7 +161,7 @@ export async function POST(request: Request) {
       status: 'pending'
     };
 
-    const { data: payment, error: paymentError } = await supabaseAdmin
+    const { data: payment, error: paymentError } = await supabase
       .from("team_payments")
       .insert(paymentData)
       .select()
@@ -198,7 +197,7 @@ export async function POST(request: Request) {
 
     // Update payment record with Stripe session ID
     if (payment) {
-      await supabaseAdmin
+      await supabase
         .from("team_payments")
         .update({ stripe_session_id: session.id })
         .eq("id", payment.id);

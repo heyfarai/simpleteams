@@ -13,7 +13,7 @@ import {
 import { Play, Menu, X } from "lucide-react";
 import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 import { fetchTeams } from "@/lib/data/fetch-teams";
-import type { Team } from "@/types/schema";
+import type { Team } from "@/lib/sanity/display-types";
 
 interface Video {
   id: string;

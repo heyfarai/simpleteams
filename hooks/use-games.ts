@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchGames, fetchGameById } from '@/lib/data/fetch-games'
-import type { Game } from '@/types/schema'
+import type { Game } from '@/lib/sanity/display-types'
 
 interface UseGamesOptions {
   season?: string

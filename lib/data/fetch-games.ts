@@ -1,6 +1,6 @@
 import { client } from "@/lib/sanity/client";
 import { groq } from "next-sanity";
-import type { Game, PaginatedGames } from "@/types/schema";
+import type { Game, PaginatedGames } from "@/lib/sanity/display-types";
 import { handleFetchError } from "@/lib/utils/errors";
 
 interface GameFilters {

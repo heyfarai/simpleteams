@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Clock, MapPin, Plus, Trophy } from "lucide-react";
-import type { Game } from "@/types/schema";
+import type { Game } from "@/lib/sanity/display-types";
 import { formatGameDate, formatGameTime } from "@/lib/utils/date";
 import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 
