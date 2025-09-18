@@ -30,6 +30,6 @@ next-env.d.ts
 
 .DS_Store
 .windsurf
-/.claude
+/.claude/
 *.code-workspace
 Claude.md
