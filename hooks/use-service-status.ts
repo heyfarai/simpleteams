@@ -55,8 +55,8 @@ export function useServiceStatus() {
       checkServices();
     }, 2000);
 
-    // Check every 30 seconds
-    intervalRef.current = setInterval(checkServices, 30000);
+    // Check every 2 minutes
+    intervalRef.current = setInterval(checkServices, 120000);
 
     return () => {
       clearTimeout(mountTimer);

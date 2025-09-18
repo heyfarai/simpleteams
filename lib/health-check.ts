@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function checkSanityConnection(): Promise<{ connected: boolean; error?: string }> {
   try {
-    await client.fetch('*[_type == "season"][0]', {}, { timeout: 5000 });
+    await client.fetch('*[_type == "season"][0]', {}, { timeout: 2000 });
     return { connected: true };
   } catch (error) {
     return {
@@ -20,7 +20,7 @@ export async function checkSanityConnection(): Promise<{ connected: boolean; err
 
 export async function checkSupabaseConnection(): Promise<{ connected: boolean; error?: string }> {
   try {
-    const { error } = await supabase.from('teams').select('id').limit(1);
+    const { error } = await supabase.from('registration_carts').select('id').limit(1);
     if (error) throw error;
     return { connected: true };
   } catch (error) {
