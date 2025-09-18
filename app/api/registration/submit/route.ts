@@ -1,5 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase/client-safe";
 import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -29,7 +31,6 @@ const PACKAGE_CONFIG = {
 export async function POST(request: Request) {
   try {
     const { formData } = await request.json();
-    console.log("Processing registration:", formData);
 
     // Validate required fields
     if (!formData.teamName || !formData.contactEmail || !formData.city || !formData.province) {
@@ -49,8 +50,79 @@ export async function POST(request: Request) {
 
     const packageConfig = PACKAGE_CONFIG[formData.selectedPackage as keyof typeof PACKAGE_CONFIG];
 
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Database not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Get user from session if authenticated
+    const cookieStore = await cookies();
+    const supabaseServer = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            // Required for SSR but not used in API routes
+          },
+          remove(name: string, options: any) {
+            // Required for SSR but not used in API routes
+          },
+        },
+      }
+    );
+
+    // Try server-side auth first, fallback to client-provided user ID
+    const { data: { user: currentUser }, error: authError } = await supabaseServer.auth.getUser();
+    let userId: string;
+
+    if (currentUser) {
+      // User is authenticated via server-side session
+      userId = currentUser.id;
+    } else if (formData.userId) {
+      // User is authenticated but session not detected server-side, use client-provided ID
+      userId = formData.userId;
+    } else {
+      // Create new user account using admin client
+
+      const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
+        email: formData.contactEmail,
+        email_confirm: true, // Auto-confirm the email for registration
+        user_metadata: {
+          first_registration: true,
+          primary_contact_name: formData.primaryContactName
+        }
+      });
+
+      if (userError || !newUser.user) {
+        console.error("User creation error:", userError);
+
+        // Handle case where user already exists
+        if (userError?.code === 'email_exists') {
+          return NextResponse.json({
+            error: "duplicate_email",
+            message: "This email is already registered. Please sign in to add another team to your account.",
+            suggestion: "login_required"
+          }, { status: 409 });
+        }
+
+        return NextResponse.json(
+          { error: "Failed to create user account" },
+          { status: 500 }
+        );
+      }
+
+      userId = newUser.user.id;
+    }
+
     // Create team record in our new structure
     const teamData = {
+      user_id: userId, // Link team to user account
       name: formData.teamName,
       city: formData.city,
       region: formData.province,
@@ -74,7 +146,6 @@ export async function POST(request: Request) {
       payment_status: 'pending'
     };
 
-    console.log("Creating team with:", teamData);
 
     if (!supabaseAdmin) {
       return NextResponse.json(
@@ -91,32 +162,21 @@ export async function POST(request: Request) {
 
     if (teamError) {
       console.error("Team creation error:", teamError);
-
-      // Handle duplicate email constraint violation
-      if (teamError.code === '23505' && teamError.message.includes('teams_contact_email_key')) {
-        return NextResponse.json({
-          error: "duplicate_email",
-          message: "This email is already registered with another team. Please sign in to manage multiple teams or use a different email address.",
-          suggestion: "login_required"
-        }, { status: 409 });
-      }
-
       return NextResponse.json({ error: teamError.message }, { status: 500 });
     }
 
     if (!team) {
-      console.error("No team data returned");
       return NextResponse.json(
         { error: "Failed to create team" },
         { status: 500 }
       );
     }
 
-    console.log("Team created:", team);
 
     // Create initial payment record
     const paymentData = {
       team_id: team.id,
+      user_id: userId, // Link payment to user account
       amount: packageConfig.amount,
       currency: 'USD',
       description: `${packageConfig.name} - 2025-26 Season`,
@@ -145,8 +205,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_URL}/register?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/register`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/register/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/register/checkout`,
       metadata: {
         teamId: team.id,
         paymentId: payment?.id || '',

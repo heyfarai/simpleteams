@@ -2,6 +2,6 @@
 
 import { CheckoutForm } from "@/components/registration/checkout-form";
 
-export default function RegistrationStepPage() {
+export default function CheckoutPage() {
   return <CheckoutForm />;
 }

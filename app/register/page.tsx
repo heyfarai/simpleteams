@@ -7,8 +7,8 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const handlePackageSelect = (packageId: string) => {
-    // Navigate to Step 1 with selected package
-    router.push(`/register/step/1?package=${packageId}`);
+    // Navigate to checkout with selected package
+    router.push(`/register/checkout?package=${packageId}`);
   };
 
   return (
@@ -22,6 +22,7 @@ export default function RegisterPage() {
             Select the registration package that works best for your team, then complete your registration.
           </p>
         </div>
+
 
         <div className="max-w-6xl mx-auto">
           <PackageSelectionStep

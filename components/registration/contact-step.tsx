@@ -14,6 +14,7 @@ import { SelectedPackageDisplay } from "./selected-package-display";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building, MapPin, Mail, Trophy } from "lucide-react";
 import { useEffect } from "react";
+import { useActiveDivisions } from "@/hooks/use-active-divisions";
 
 interface ContactStepProps {
   formData: {
@@ -37,6 +38,21 @@ interface ContactStepProps {
 }
 
 export function ContactStep({ formData, onInputChange, onGoToPrevious }: ContactStepProps) {
+  const { data: activeDivisions = [], isLoading, error } = useActiveDivisions();
+
+  console.log('ContactStep Debug:', {
+    activeDivisions,
+    divisionPreference: formData.divisionPreference,
+    isLoading,
+    error
+  });
+
+  const selectedDivision = activeDivisions.find(
+    (d) => d.division._id === formData.divisionPreference
+  );
+
+  console.log('selectedDivision:', selectedDivision);
+
   // Auto-fill mock data in development
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && (!formData.primaryContactName || !formData.headCoachName)) {
@@ -95,13 +111,47 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-gray-500" />
                   <span className="font-medium text-gray-600">Division:</span>
-                  <span className="text-gray-900">{formData.divisionPreference}</span>
+                  <span className="text-gray-900">
+                    {selectedDivision
+                      ? `${selectedDivision.division.name} - ${selectedDivision.division.ageGroup}`
+                      : 'Division selected'
+                    }
+                  </span>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Division Details */}
+      {selectedDivision && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-blue-600" />
+              Division Details
+            </h4>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-600">Division:</span>
+                <span className="text-gray-900">{selectedDivision.division.name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-600">Age Group:</span>
+                <span className="text-gray-900">{selectedDivision.division.ageGroup}</span>
+              </div>
+              {selectedDivision.division.description && (
+                <div className="pt-2">
+                  <span className="font-medium text-gray-600">Description:</span>
+                  <p className="text-sm text-gray-700 mt-1">{selectedDivision.division.description}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           Contact Information

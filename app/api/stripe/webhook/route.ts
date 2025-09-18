@@ -347,6 +347,13 @@ async function handleNewTeamRegistration(session: Stripe.Checkout.Session, teamI
       );
     }
 
+    // Get team info to get user_id
+    const { data: teamInfo } = await supabase
+      .from("teams")
+      .select("user_id")
+      .eq("id", teamId)
+      .single();
+
     // Update payment status
     const { error: paymentError } = await supabase
       .from("team_payments")
@@ -354,7 +361,8 @@ async function handleNewTeamRegistration(session: Stripe.Checkout.Session, teamI
         status: "completed",
         stripe_payment_intent_id: session.payment_intent as string,
         paid_at: new Date().toISOString(),
-        stripe_session_id: session.id
+        stripe_session_id: session.id,
+        user_id: teamInfo?.user_id // Ensure user_id is populated
       })
       .eq("id", paymentId);
 

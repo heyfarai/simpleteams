@@ -1,17 +1,22 @@
 import { supabase, isSupabaseConfigured } from './client-safe'
 import { DEV_SANITY_TEAM_ID, DEV_USER, isDev } from '../dev-context'
 
-export async function signInWithEmail(email: string) {
+export async function signInWithEmail(email: string, returnTo?: string) {
   if (!supabase || !isSupabaseConfigured()) {
     throw new Error('Supabase is not properly configured')
   }
 
   try {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_URL;
+    const redirectUrl = returnTo
+      ? `${baseUrl}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
+      : `${baseUrl}/auth/callback`;
+
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_URL}/auth/callback`
+        emailRedirectTo: redirectUrl
       }
     })
 

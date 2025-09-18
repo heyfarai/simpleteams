@@ -2,11 +2,6 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Upload, Palette } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/sanity/client";
@@ -42,27 +37,15 @@ interface TeamInfoStepProps {
     city: string;
     province: string;
     contactEmail: string;
-    primaryColors: string[];
     divisionPreference: string;
-    registrationNotes: string;
   };
-  logoPreview: string | null;
   onInputChange: (field: string, value: any) => void;
-  onLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onColorChange: (index: number, color: string) => void;
-  onAddColor: () => void;
-  onRemoveColor: (index: number) => void;
   onGoToPrevious?: () => void;
 }
 
 export function TeamInfoStep({
   formData,
-  logoPreview,
   onInputChange,
-  onLogoUpload,
-  onColorChange,
-  onAddColor,
-  onRemoveColor,
   onGoToPrevious,
 }: TeamInfoStepProps) {
   const { data: divisions = [], isLoading, error } = useQuery<Division[]>({
@@ -210,124 +193,6 @@ export function TeamInfoStep({
         )}
       </div>
 
-      <Separator />
-
-      <div>
-        <h4 className="text-md font-medium text-gray-900 mb-4">
-          Additional Information
-        </h4>
-        <div className="space-y-2">
-          <Label htmlFor="registrationNotes">Registration Notes</Label>
-          <Textarea
-            id="registrationNotes"
-            value={formData.registrationNotes}
-            onChange={(e) => onInputChange("registrationNotes", e.target.value)}
-            placeholder="Any special requests or information we should know about your team?"
-            rows={3}
-          />
-          <p className="text-xs text-gray-500">
-            Optional: Share any special requirements, questions, or information about your team
-          </p>
-        </div>
-      </div>
-
-      <Separator />
-
-      <div>
-        <h4 className="text-md font-medium text-gray-900 mb-4">
-          Team Branding
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Logo Upload */}
-          <div className="space-y-2">
-            <Label htmlFor="logo">Team Logo</Label>
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage
-                  src={logoPreview || "/placeholder.svg"}
-                  alt="Team logo"
-                />
-                <AvatarFallback>
-                  {formData.teamName.substring(0, 2) || "TM"}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <Input
-                  id="logo"
-                  type="file"
-                  accept="image/*"
-                  onChange={onLogoUpload}
-                  className="hidden"
-                />
-                <Label
-                  htmlFor="logo"
-                  className="cursor-pointer"
-                >
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    asChild
-                  >
-                    <span>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Logo
-                    </span>
-                  </Button>
-                </Label>
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Primary Colors */}
-          <div className="space-y-2">
-            <Label>Primary Colors</Label>
-            <div className="space-y-3">
-              {formData.primaryColors.map((color, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-3"
-                >
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => onColorChange(index, e.target.value)}
-                    className="w-10 h-10 rounded border border-gray-300 cursor-pointer"
-                  />
-                  <Input
-                    value={color}
-                    onChange={(e) => onColorChange(index, e.target.value)}
-                    placeholder="#000000"
-                    className="flex-1"
-                  />
-                  {formData.primaryColors.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onRemoveColor(index)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </div>
-              ))}
-              {formData.primaryColors.length < 3 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={onAddColor}
-                >
-                  <Palette className="h-4 w-4 mr-2" />
-                  Add Color
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

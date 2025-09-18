@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useServiceStatus } from "@/hooks/use-service-status";
 import { toast } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 
 // Import step components
 import { ProgressSteps } from "./registration/progress-steps";
@@ -26,10 +26,7 @@ interface FormData {
   city: string;
   province: string;
   contactEmail: string;
-  logo: File | null;
-  primaryColors: string[];
   divisionPreference: string;
-  registrationNotes: string;
   primaryContactName: string;
   primaryContactEmail: string;
   primaryContactPhone: string;
@@ -43,19 +40,16 @@ interface FormData {
 export function TeamRegistrationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
 
   const [paymentPlan, setPaymentPlan] = useState<
     "full" | "deposit_plus_payments"
   >("full");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
-  // Get step from URL, default to 1
-  const urlStep = parseInt(searchParams.get('step') || '1');
+  // Get step from URL route parameter, default to 1
+  const urlStep = parseInt((params.step as string) || '1');
   const [currentStep, setCurrentStep] = useState(Math.max(1, Math.min(4, urlStep)));
-
-  // Get selected package from URL params
-  const urlPackage = searchParams.get('package') || '';
 
   // Service status monitoring
   useServiceStatus();
@@ -64,10 +58,18 @@ export function TeamRegistrationForm() {
 
   // Sync URL changes with component state
   useEffect(() => {
-    const newStep = parseInt(searchParams.get('step') || '1');
+    const newStep = parseInt((params.step as string) || '1');
     const validStep = Math.max(1, Math.min(4, newStep));
     if (validStep !== currentStep) {
       setCurrentStep(validStep);
+    }
+  }, [params.step, currentStep]);
+
+  // Handle package parameter separately to avoid circular dependency
+  useEffect(() => {
+    const urlPackage = searchParams.get('package') || '';
+    if (urlPackage && !formData.selectedPackage) {
+      setFormData(prev => ({ ...prev, selectedPackage: urlPackage }));
     }
   }, [searchParams]);
 
@@ -75,7 +77,9 @@ export function TeamRegistrationForm() {
   useEffect(() => {
     const handlePopState = () => {
       // URL has already changed, just sync the component state
-      const newStep = parseInt(new URL(window.location.href).searchParams.get('step') || '1');
+      const pathSegments = window.location.pathname.split('/');
+      const stepFromPath = pathSegments[pathSegments.length - 1];
+      const newStep = parseInt(stepFromPath || '1');
       const validStep = Math.max(1, Math.min(4, newStep));
       setCurrentStep(validStep);
     };
@@ -120,15 +124,12 @@ export function TeamRegistrationForm() {
   }, [currentStep]);
 
   const [formData, setFormData] = useState<FormData>({
-    selectedPackage: urlPackage,
+    selectedPackage: "",
     teamName: "",
     city: "",
     province: "",
     contactEmail: "",
-    logo: null,
-    primaryColors: ["#1e40af", "#fbbf24"],
     divisionPreference: "",
-    registrationNotes: "",
     primaryContactName: "",
     primaryContactEmail: "",
     primaryContactPhone: "",
@@ -162,42 +163,11 @@ export function TeamRegistrationForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, logo: file }));
-      const reader = new FileReader();
-      reader.onload = (e) => setLogoPreview(e.target?.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleColorChange = (index: number, color: string) => {
-    const newColors = [...formData.primaryColors];
-    newColors[index] = color;
-    setFormData((prev) => ({ ...prev, primaryColors: newColors }));
-  };
-
-  const addColor = () => {
-    if (formData.primaryColors.length < 3) {
-      setFormData((prev) => ({
-        ...prev,
-        primaryColors: [...prev.primaryColors, "#000000"],
-      }));
-    }
-  };
-
-  const removeColor = (index: number) => {
-    if (formData.primaryColors.length > 1) {
-      const newColors = formData.primaryColors.filter((_, i) => i !== index);
-      setFormData((prev) => ({ ...prev, primaryColors: newColors }));
-    }
-  };
 
   const validateStep = (step: number) => {
     switch (step) {
       case 1:
-        return (
+        return !!(
           formData.contactEmail &&
           formData.teamName &&
           formData.city &&
@@ -205,7 +175,7 @@ export function TeamRegistrationForm() {
           formData.divisionPreference
         );
       case 2:
-        return (
+        return !!(
           formData.primaryContactName &&
           formData.primaryContactEmail &&
           formData.headCoachName &&
@@ -223,13 +193,49 @@ export function TeamRegistrationForm() {
   // Update URL when step changes
   const updateStep = (newStep: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    router.push(`/register/step/${newStep}?${params.toString()}`, { scroll: false });
+    // Preserve package in URL to prevent data loss
+    if (formData.selectedPackage && !params.get('package')) {
+      params.set('package', formData.selectedPackage);
+    }
+
+    const newUrl = `/register/step/${newStep}?${params.toString()}`;
+    console.log('updateStep called', {
+      currentStep,
+      newStep,
+      newUrl,
+      formData: { selectedPackage: formData.selectedPackage }
+    });
+
+    router.push(newUrl, { scroll: false });
     setCurrentStep(newStep);
+
+    console.log('After updateStep - currentStep should be:', newStep);
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep) && currentStep < totalSteps) {
+    const isValid = validateStep(currentStep);
+    const canProceed = currentStep < totalSteps;
+
+    console.log('handleNext called', {
+      currentStep,
+      isValid,
+      canProceed,
+      totalSteps,
+      condition: isValid && canProceed,
+      formData: {
+        contactEmail: formData.contactEmail,
+        teamName: formData.teamName,
+        city: formData.city,
+        province: formData.province,
+        divisionPreference: formData.divisionPreference
+      }
+    });
+
+    if (isValid && canProceed) {
+      console.log('Navigation proceeding to step', currentStep + 1);
       updateStep(currentStep + 1);
+    } else {
+      console.log('Navigation blocked', { isValid, canProceed });
     }
   };
 
@@ -247,10 +253,7 @@ export function TeamRegistrationForm() {
       city: "",
       province: "",
       contactEmail: "",
-      logo: null,
-      primaryColors: ["#1e40af", "#fbbf24"],
       divisionPreference: "",
-      registrationNotes: "",
       primaryContactName: "",
       primaryContactEmail: "",
       primaryContactPhone: "",
@@ -260,7 +263,6 @@ export function TeamRegistrationForm() {
       headCoachPhone: "",
       headCoachCertifications: "",
     });
-    setLogoPreview(null);
     setIsSubmitting(false);
   };
 
@@ -398,21 +400,20 @@ export function TeamRegistrationForm() {
   };
 
   const renderCurrentStep = () => {
+    console.log('renderCurrentStep called with currentStep:', currentStep);
+
     switch (currentStep) {
       case 1:
+        console.log('Rendering Step 1 - TeamInfoStep');
         return (
           <TeamInfoStep
             formData={formData}
-            logoPreview={logoPreview}
             onInputChange={handleInputChange}
-            onLogoUpload={handleLogoUpload}
-            onColorChange={handleColorChange}
-            onAddColor={addColor}
-            onRemoveColor={removeColor}
             onGoToPrevious={handlePrevious}
           />
         );
       case 2:
+        console.log('Rendering Step 2 - ContactStep');
         return (
           <ContactStep
             formData={formData}
@@ -421,6 +422,7 @@ export function TeamRegistrationForm() {
           />
         );
       case 3:
+        console.log('Rendering Step 3 - ReviewStep');
         return (
           <ReviewStep
             formData={formData}
@@ -433,6 +435,7 @@ export function TeamRegistrationForm() {
           />
         );
       case 4:
+        console.log('Rendering Step 4 - SuccessStep');
         return (
           <SuccessStep
             formData={formData}
@@ -440,6 +443,7 @@ export function TeamRegistrationForm() {
           />
         );
       default:
+        console.log('Rendering default (null) for step:', currentStep);
         return null;
     }
   };
