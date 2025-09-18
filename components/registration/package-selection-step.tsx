@@ -33,15 +33,13 @@ export function PackageSelectionStep({
 }: PackageSelectionStepProps) {
   
   const handlePackageSelect = (packageId: string) => {
-    // Only auto-advance if the package is actually changing
-    const isChanging = selectedPackage !== packageId;
     onPackageSelect(packageId);
-    
-    // Auto-advance to next step after a short delay to show selection
-    if (onNext && isChanging) {
+
+    // Always auto-advance to next step after a short delay to show selection
+    if (onNext) {
       setTimeout(() => {
         onNext();
-      }, 500);
+      }, 300);
     }
   };
   const packages: PackageOption[] = [
@@ -195,21 +193,6 @@ export function PackageSelectionStep({
                     </div>
                   ))}
                 </div>
-
-                <Button
-                  className={`w-full ${
-                    selectedPackage === pkg.id
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : pkg.isRecommended
-                      ? "bg-yellow-500 hover:bg-yellow-400 text-black"
-                      : "bg-gray-600 hover:bg-gray-700"
-                  }`}
-                  onClick={() => handlePackageSelect(pkg.id)}
-                >
-                  {selectedPackage === pkg.id
-                    ? "Selected"
-                    : `Select ${pkg.name}`}
-                </Button>
               </CardContent>
             </Card>
           </div>

@@ -91,6 +91,16 @@ export async function POST(request: Request) {
 
     if (teamError) {
       console.error("Team creation error:", teamError);
+
+      // Handle duplicate email constraint violation
+      if (teamError.code === '23505' && teamError.message.includes('teams_contact_email_key')) {
+        return NextResponse.json({
+          error: "duplicate_email",
+          message: "This email is already registered with another team. Please sign in to manage multiple teams or use a different email address.",
+          suggestion: "login_required"
+        }, { status: 409 });
+      }
+
       return NextResponse.json({ error: teamError.message }, { status: 500 });
     }
 

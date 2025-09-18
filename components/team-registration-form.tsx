@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useServiceStatus } from "@/hooks/use-service-status";
 import { toast } from "sonner";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Import step components
 import { ProgressSteps } from "./registration/progress-steps";
@@ -40,17 +41,80 @@ interface FormData {
 }
 
 export function TeamRegistrationForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [paymentPlan, setPaymentPlan] = useState<
     "full" | "deposit_plus_payments"
   >("full");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  // Get step from URL, default to 1
+  const urlStep = parseInt(searchParams.get('step') || '1');
+  const [currentStep, setCurrentStep] = useState(Math.max(1, Math.min(4, urlStep)));
 
   // Service status monitoring
   useServiceStatus();
 
-  const totalSteps = 5;
+  const totalSteps = 4;
+
+  // Sync URL changes with component state
+  useEffect(() => {
+    const newStep = parseInt(searchParams.get('step') || '1');
+    const validStep = Math.max(1, Math.min(4, newStep));
+    if (validStep !== currentStep) {
+      setCurrentStep(validStep);
+    }
+  }, [searchParams]);
+
+  // Browser back/forward handling
+  useEffect(() => {
+    const handlePopState = () => {
+      // URL has already changed, just sync the component state
+      const newStep = parseInt(new URL(window.location.href).searchParams.get('step') || '1');
+      const validStep = Math.max(1, Math.min(4, newStep));
+      setCurrentStep(validStep);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Update page title based on step
+  useEffect(() => {
+    const stepTitles = {
+      1: "Team Information",
+      2: "Contact Information",
+      3: "Review & Payment",
+      4: "Registration Complete"
+    };
+
+    document.title = `${stepTitles[currentStep as keyof typeof stepTitles]} - Basketball League Registration`;
+  }, [currentStep]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle if no input is focused
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        handlePrevious();
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (validateStep(currentStep)) {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStep]);
 
   const [formData, setFormData] = useState<FormData>({
     selectedPackage: "",
@@ -71,6 +135,25 @@ export function TeamRegistrationForm() {
     headCoachPhone: "",
     headCoachCertifications: "",
   });
+
+  // Prevent page leave if form has data
+  useEffect(() => {
+    const hasFormData = formData.teamName || formData.selectedPackage || formData.contactEmail;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasFormData && currentStep < 5) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    };
+
+    if (hasFormData && currentStep < 5) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    }
+
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [formData.teamName, formData.selectedPackage, formData.contactEmail, currentStep]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -111,45 +194,51 @@ export function TeamRegistrationForm() {
   const validateStep = (step: number) => {
     switch (step) {
       case 1:
-        return formData.selectedPackage !== "";
-      case 2:
         return (
+          formData.contactEmail &&
           formData.teamName &&
           formData.city &&
           formData.province &&
-          formData.contactEmail &&
           formData.divisionPreference
         );
-      case 3:
+      case 2:
         return (
           formData.primaryContactName &&
           formData.primaryContactEmail &&
           formData.headCoachName &&
           formData.headCoachEmail
         );
+      case 3:
+        return formData.selectedPackage !== ""; // Review step now includes package selection
       case 4:
-        return true; // Review step
-      case 5:
         return true; // Success step
       default:
         return false;
     }
   };
 
+  // Update URL when step changes
+  const updateStep = (newStep: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('step', newStep.toString());
+    router.push(`/register?${params.toString()}`, { scroll: false });
+    setCurrentStep(newStep);
+  };
+
   const handleNext = () => {
     if (validateStep(currentStep) && currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+      updateStep(currentStep + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      updateStep(currentStep - 1);
     }
   };
 
   const handleStartOver = () => {
-    setCurrentStep(1);
+    updateStep(1);
     setFormData({
       selectedPackage: "",
       teamName: "",
@@ -221,7 +310,7 @@ export function TeamRegistrationForm() {
     const sessionId = urlParams.get('session_id');
     if (sessionId) {
       // User returned from successful payment
-      setCurrentStep(5);
+      setCurrentStep(4);
       // Clear the URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -275,6 +364,22 @@ export function TeamRegistrationForm() {
 
       const data = await res.json();
       if (!res.ok) {
+        // Handle specific error types
+        if (data.error === "duplicate_email") {
+          toast.error("Email Already Registered", {
+            description: data.message,
+            duration: 10000,
+            action: {
+              label: "Need help?",
+              onClick: () => {
+                // You could redirect to login or show contact info here
+                console.log("User needs help with existing account");
+              }
+            }
+          });
+          return; // Don't throw, just show the toast and return
+        }
+
         throw new Error(data.error || "Failed to submit registration");
       }
 
@@ -294,14 +399,6 @@ export function TeamRegistrationForm() {
     switch (currentStep) {
       case 1:
         return (
-          <PackageSelectionStep
-            selectedPackage={formData.selectedPackage}
-            onPackageSelect={(packageId) => handleInputChange("selectedPackage", packageId)}
-            onNext={handleNext}
-          />
-        );
-      case 2:
-        return (
           <TeamInfoStep
             formData={formData}
             logoPreview={logoPreview}
@@ -313,7 +410,7 @@ export function TeamRegistrationForm() {
             onGoToPrevious={handlePrevious}
           />
         );
-      case 3:
+      case 2:
         return (
           <ContactStep
             formData={formData}
@@ -321,7 +418,7 @@ export function TeamRegistrationForm() {
             onGoToPrevious={handlePrevious}
           />
         );
-      case 4:
+      case 3:
         return (
           <ReviewStep
             formData={formData}
@@ -330,9 +427,10 @@ export function TeamRegistrationForm() {
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
             onGoToPrevious={handlePrevious}
+            onPackageSelect={(packageId) => handleInputChange("selectedPackage", packageId)}
           />
         );
-      case 5:
+      case 4:
         return (
           <SuccessStep
             formData={formData}
@@ -357,7 +455,7 @@ export function TeamRegistrationForm() {
           {renderCurrentStep()}
 
           {/* Navigation Buttons */}
-          {currentStep > 1 && currentStep < 4 && (
+          {currentStep > 1 && currentStep < 3 && (
             <div className="flex justify-between pt-6">
               <Button
                 type="button"

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useActiveDivisions } from "@/hooks/use-active-divisions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SelectedPackageDisplay } from "./selected-package-display";
+import { PackageSelectionStep } from "./package-selection-step";
 import { Building, MapPin, Mail, Trophy, User, Phone, Users, Palette, FileText } from "lucide-react";
 
 interface ReviewStepProps {
@@ -31,6 +32,7 @@ interface ReviewStepProps {
   onSubmit: () => void;
   isSubmitting: boolean;
   onGoToPrevious?: () => void;
+  onPackageSelect: (packageId: string) => void;
 }
 
 export function ReviewStep({
@@ -40,6 +42,7 @@ export function ReviewStep({
   onSubmit,
   isSubmitting,
   onGoToPrevious,
+  onPackageSelect,
 }: ReviewStepProps) {
   const { data: activeDivisions } = useActiveDivisions();
   
@@ -49,12 +52,31 @@ export function ReviewStep({
 
   return (
     <div className="space-y-6">
-      {/* Selected Package Display */}
-      {formData.selectedPackage && (
+      <div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Review & Payment
+        </h2>
+        <p className="text-gray-600">
+          Choose your package and review your team information before completing registration
+        </p>
+      </div>
+
+      {/* Package Selection */}
+      {!formData.selectedPackage ? (
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Choose Your Package
+          </h3>
+          <PackageSelectionStep
+            selectedPackage={formData.selectedPackage}
+            onPackageSelect={onPackageSelect}
+          />
+        </div>
+      ) : (
         <SelectedPackageDisplay
           selectedPackage={formData.selectedPackage}
-          onChangePackage={onGoToPrevious}
-          showChangeButton={false}
+          onChangePackage={() => onPackageSelect("")}
+          showChangeButton={true}
         />
       )}
 
@@ -186,9 +208,10 @@ export function ReviewStep({
         </div>
       </div>
 
-      {/* Payment */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Payment</h3>
+      {/* Payment - only show when package is selected */}
+      {formData.selectedPackage && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900">Payment</h3>
 
         {(() => {
           const getPackagePrice = () => {
@@ -247,7 +270,8 @@ export function ReviewStep({
         >
           {isSubmitting ? "Processing..." : "Complete Registration & Pay"}
         </Button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

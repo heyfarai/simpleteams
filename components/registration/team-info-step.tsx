@@ -5,11 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { Upload, Palette } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/sanity/client";
-import { SelectedPackageDisplay } from "./selected-package-display";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -44,6 +44,7 @@ interface TeamInfoStepProps {
     contactEmail: string;
     primaryColors: string[];
     divisionPreference: string;
+    registrationNotes: string;
   };
   logoPreview: string | null;
   onInputChange: (field: string, value: any) => void;
@@ -96,14 +97,70 @@ export function TeamInfoStep({
 
   return (
     <div className="space-y-6">
-      {/* Selected Package Display */}
-      {formData.selectedPackage && (
-        <SelectedPackageDisplay
-          selectedPackage={formData.selectedPackage}
-          onChangePackage={onGoToPrevious}
-          showChangeButton={true}
-        />
-      )}
+      <div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Team Information
+        </h2>
+        <p className="text-gray-600">
+          Tell us about your team and we'll save your progress
+        </p>
+      </div>
+
+      {/* Contact Email Section - First */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="text-md font-medium text-gray-900 mb-4">Contact Email</h4>
+        <div className="space-y-2">
+          <Label htmlFor="contactEmail">Contact Email *</Label>
+          <Input
+            id="contactEmail"
+            type="email"
+            value={formData.contactEmail}
+            onChange={(e) => onInputChange("contactEmail", e.target.value)}
+            placeholder="Enter contact email for updates"
+            required
+          />
+          <p className="text-xs text-gray-500">
+            We'll use this to save your progress and send updates about your registration
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-md font-medium text-gray-900 mb-4">Team Details</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="teamName">Team Name *</Label>
+            <Input
+              id="teamName"
+              value={formData.teamName}
+              onChange={(e) => onInputChange("teamName", e.target.value)}
+              placeholder="Enter team name"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="city">City *</Label>
+            <Input
+              id="city"
+              value={formData.city}
+              onChange={(e) => onInputChange("city", e.target.value)}
+              placeholder="Enter city"
+              required
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="province">Province *</Label>
+            <Input
+              id="province"
+              value={formData.province}
+              onChange={(e) => onInputChange("province", e.target.value)}
+              placeholder="Enter province"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
       <div>
         <h4 className="text-md font-medium text-gray-900 mb-4">Division</h4>
         {isLoading ? (
@@ -152,53 +209,25 @@ export function TeamInfoStep({
           </RadioGroup>
         )}
       </div>
+
       <Separator />
+
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="teamName">Team Name *</Label>
-            <Input
-              id="teamName"
-              value={formData.teamName}
-              onChange={(e) => onInputChange("teamName", e.target.value)}
-              placeholder="Enter team name"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City *</Label>
-            <Input
-              id="city"
-              value={formData.city}
-              onChange={(e) => onInputChange("city", e.target.value)}
-              placeholder="Enter city"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="province">Province *</Label>
-            <Input
-              id="province"
-              value={formData.province}
-              onChange={(e) => onInputChange("province", e.target.value)}
-              placeholder="Enter province"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="contactEmail">Contact Email *</Label>
-            <Input
-              id="contactEmail"
-              type="email"
-              value={formData.contactEmail}
-              onChange={(e) => onInputChange("contactEmail", e.target.value)}
-              placeholder="Enter contact email for updates"
-              required
-            />
-            <p className="text-xs text-gray-500">
-              We'll use this to save your progress and send updates
-            </p>
-          </div>
+        <h4 className="text-md font-medium text-gray-900 mb-4">
+          Additional Information
+        </h4>
+        <div className="space-y-2">
+          <Label htmlFor="registrationNotes">Registration Notes</Label>
+          <Textarea
+            id="registrationNotes"
+            value={formData.registrationNotes}
+            onChange={(e) => onInputChange("registrationNotes", e.target.value)}
+            placeholder="Any special requests or information we should know about your team?"
+            rows={3}
+          />
+          <p className="text-xs text-gray-500">
+            Optional: Share any special requirements, questions, or information about your team
+          </p>
         </div>
       </div>
 
