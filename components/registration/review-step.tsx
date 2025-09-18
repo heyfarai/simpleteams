@@ -61,21 +61,11 @@ export function ReviewStep({
         </p>
       </div>
 
-      {/* Package Selection */}
-      {!formData.selectedPackage ? (
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Choose Your Package
-          </h3>
-          <PackageSelectionStep
-            selectedPackage={formData.selectedPackage}
-            onPackageSelect={onPackageSelect}
-          />
-        </div>
-      ) : (
+      {/* Selected Package Display */}
+      {formData.selectedPackage && (
         <SelectedPackageDisplay
           selectedPackage={formData.selectedPackage}
-          onChangePackage={() => onPackageSelect("")}
+          onChangePackage={() => window.location.href = "/register"}
           showChangeButton={true}
         />
       )}

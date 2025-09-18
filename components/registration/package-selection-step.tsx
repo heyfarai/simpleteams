@@ -35,7 +35,7 @@ export function PackageSelectionStep({
   const handlePackageSelect = (packageId: string) => {
     onPackageSelect(packageId);
 
-    // Always auto-advance to next step after a short delay to show selection
+    // Auto-advance to next step after a short delay to show selection (only if onNext is provided)
     if (onNext) {
       setTimeout(() => {
         onNext();
@@ -119,12 +119,12 @@ export function PackageSelectionStep({
             className="relative"
           >
             <Card
-              className={`cursor-pointer transition-all hover:shadow-lg ${
+              className={`cursor-pointer transition-all duration-200 ${
                 pkg.isRecommended ? "mt-0" : ""
               } ${
                 selectedPackage === pkg.id
                   ? "ring-2 ring-blue-500 shadow-lg"
-                  : "hover:shadow-md"
+                  : "hover:shadow-xl hover:scale-105"
               } ${
                 pkg.isRecommended ? "border-2 border-red-500 shadow-lg" : ""
               }`}

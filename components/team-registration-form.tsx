@@ -54,6 +54,9 @@ export function TeamRegistrationForm() {
   const urlStep = parseInt(searchParams.get('step') || '1');
   const [currentStep, setCurrentStep] = useState(Math.max(1, Math.min(4, urlStep)));
 
+  // Get selected package from URL params
+  const urlPackage = searchParams.get('package') || '';
+
   // Service status monitoring
   useServiceStatus();
 
@@ -117,7 +120,7 @@ export function TeamRegistrationForm() {
   }, [currentStep]);
 
   const [formData, setFormData] = useState<FormData>({
-    selectedPackage: "",
+    selectedPackage: urlPackage,
     teamName: "",
     city: "",
     province: "",
@@ -220,8 +223,7 @@ export function TeamRegistrationForm() {
   // Update URL when step changes
   const updateStep = (newStep: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('step', newStep.toString());
-    router.push(`/register?${params.toString()}`, { scroll: false });
+    router.push(`/register/step/${newStep}?${params.toString()}`, { scroll: false });
     setCurrentStep(newStep);
   };
 
@@ -455,6 +457,19 @@ export function TeamRegistrationForm() {
           {renderCurrentStep()}
 
           {/* Navigation Buttons */}
+          {currentStep === 1 && (
+            <div className="flex justify-end pt-6">
+              <Button
+                type="button"
+                onClick={handleNext}
+                disabled={!validateStep(currentStep)}
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Add team contacts →
+              </Button>
+            </div>
+          )}
           {currentStep > 1 && currentStep < 3 && (
             <div className="flex justify-between pt-6">
               <Button
