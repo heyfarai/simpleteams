@@ -84,40 +84,18 @@ export async function POST(request: Request) {
     if (currentUser) {
       // User is authenticated via server-side session
       userId = currentUser.id;
+      console.log("Using server-side authenticated user:", userId);
     } else if (formData.userId) {
       // User is authenticated but session not detected server-side, use client-provided ID
       userId = formData.userId;
+      console.log("Using client-provided authenticated user:", userId);
     } else {
-      // Create new user account using admin client
-
-      const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
-        email: formData.contactEmail,
-        email_confirm: true, // Auto-confirm the email for registration
-        user_metadata: {
-          first_registration: true,
-          primary_contact_name: formData.primaryContactName
-        }
-      });
-
-      if (userError || !newUser.user) {
-        console.error("User creation error:", userError);
-
-        // Handle case where user already exists
-        if (userError?.code === 'email_exists') {
-          return NextResponse.json({
-            error: "duplicate_email",
-            message: "This email is already registered. Please sign in to add another team to your account.",
-            suggestion: "login_required"
-          }, { status: 409 });
-        }
-
-        return NextResponse.json(
-          { error: "Failed to create user account" },
-          { status: 500 }
-        );
-      }
-
-      userId = newUser.user.id;
+      // No authenticated user - this should require sign-in first
+      return NextResponse.json({
+        error: "authentication_required",
+        message: "Please sign in to register your team. We'll send you a magic link to complete authentication.",
+        suggestion: "login_required"
+      }, { status: 401 });
     }
 
     // Create team record in our new structure

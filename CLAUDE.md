@@ -149,3 +149,4 @@ The registration system has been refactored into a **5-step multi-step flow**:
 5. **Error handling** for payment failures and edge cases
 - Registration end to end and janky
 - Multiple teams per user MVP
+- reminder to improve UX for webhook errors
