@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client-safe'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, X } from 'lucide-react'
 
