@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { healthCheck } from '@/lib/health-check'
 
 let lastHealthCheck = 0;
 const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
@@ -8,10 +7,12 @@ const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 export async function middleware(req: NextRequest) {
   // In development, bypass all auth and allow direct access to dashboard
   if (process.env.NODE_ENV === 'development') {
-    // Periodic health check (every 30 seconds max)
+    // Periodic health check (every 30 seconds max) - only in development
     const now = Date.now();
     if (now - lastHealthCheck > HEALTH_CHECK_INTERVAL) {
       lastHealthCheck = now;
+      // Dynamic import to avoid Edge Runtime issues in production
+      const { healthCheck } = await import('@/lib/health-check');
       healthCheck().catch(console.error);
     }
     return NextResponse.next()

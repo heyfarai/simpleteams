@@ -628,7 +628,7 @@ async function sendConfirmationEmails(team: any, session: Stripe.Checkout.Sessio
             'Review league schedule',
             'Download league handbook'
           ],
-          dashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard/team/${team.id}`,
+          dashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
           supportEmail: 'support@yourleague.com'
         }
       },
@@ -654,7 +654,7 @@ async function sendConfirmationEmails(team: any, session: Stripe.Checkout.Sessio
           teamName: team.name,
           coachName: team.head_coach_name,
           packageName: packageDetails.name,
-          dashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard/team/${team.id}`,
+          dashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
           coachingResources: [
             'League coaching guidelines',
             'Player development resources',
@@ -675,7 +675,7 @@ async function sendConfirmationEmails(team: any, session: Stripe.Checkout.Sessio
           contactEmail: team.primary_contact_email,
           paymentAmount: (session.amount_total || 0) / 100,
           registrationId: team.id,
-          adminDashboardUrl: `${process.env.NEXT_PUBLIC_URL}/admin/teams/${team.id}`
+          adminDashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`
         }
       }
     };
