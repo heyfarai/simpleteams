@@ -11,7 +11,7 @@ import {
   getTeamNotificationHtml,
   type TeamRegistrationData,
   type CoachWelcomeData,
-  type AdminNotificationData
+  type AdminNotificationData,
 } from "@/lib/email/templates";
 
 // Use environment variables for security
@@ -63,7 +63,11 @@ export async function POST(request: Request) {
     const teamId = session.metadata?.teamId;
     const paymentId = session.metadata?.paymentId;
 
-    console.log("Processing completed checkout:", { registrationId, teamId, paymentId });
+    console.log("Processing completed checkout:", {
+      registrationId,
+      teamId,
+      paymentId,
+    });
 
     // Handle new team registration flow (with teamId and paymentId)
     if (teamId && paymentId) {
@@ -134,7 +138,8 @@ export async function POST(request: Request) {
 
       // Get season with configurable ID
       const seasonId =
-        process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID || "1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3";
+        process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID ||
+        "1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3";
       const season = await sanity.fetch(
         `
         *[_type == "season" && _id == $seasonId][0] {
@@ -176,36 +181,37 @@ export async function POST(request: Request) {
       const team = await sanity.create({
         _type: "team",
         name: registration.team_name || "Team Name Required",
-        shortName: registration.team_name
-          ?.split(" ")
-          .map((word: string) => word[0])
-          .join("")
-          .substring(0, 8) || "TBD",
+        shortName:
+          registration.team_name
+            ?.split(" ")
+            .map((word: string) => word[0])
+            .join("")
+            .substring(0, 8) || "TBD",
         location: {
           _key: `location-${Date.now()}`,
           city: "TBD",
-          region: ""
+          region: "",
         },
         staff: [
           {
             _key: `staff-${Date.now()}-1`,
             name: registration.primary_contact_name,
             role: registration.primary_contact_role,
-            email: registration.primary_contact_email
+            email: registration.primary_contact_email,
           },
           {
             _key: `staff-${Date.now()}-2`,
             name: registration.head_coach_name,
             role: "head-coach",
             email: registration.head_coach_email,
-            phone: registration.head_coach_phone
-          }
+            phone: registration.head_coach_phone,
+          },
         ],
         stats: {
           _key: `stats-${Date.now()}`,
           wins: 0,
           losses: 0,
-          ties: 0
+          ties: 0,
         },
         status: "pending",
         rosters: [
@@ -213,7 +219,7 @@ export async function POST(request: Request) {
             _key: `roster-${Date.now()}`,
             season: {
               _type: "reference",
-              _ref: seasonId
+              _ref: seasonId,
             },
             players: [],
             seasonStats: {
@@ -225,10 +231,10 @@ export async function POST(request: Request) {
               pointsAgainst: 0,
               homeRecord: "0-0",
               awayRecord: "0-0",
-              conferenceRecord: "0-0"
-            }
-          }
-        ]
+              conferenceRecord: "0-0",
+            },
+          },
+        ],
       });
 
       console.log("Team created in Sanity:", team);
@@ -265,8 +271,13 @@ export async function POST(request: Request) {
         );
 
         if (!targetActiveDivision) {
-          console.error("Active division not found for division:", registration.division_preference);
-          throw new Error(`Active division not found for division: ${registration.division_preference}`);
+          console.error(
+            "Active division not found for division:",
+            registration.division_preference
+          );
+          throw new Error(
+            `Active division not found for division: ${registration.division_preference}`
+          );
         }
 
         console.log("Target active division found:", targetActiveDivision);
@@ -278,20 +289,24 @@ export async function POST(request: Request) {
           _ref: team._id,
         };
 
-        const updatedTeams = [...(targetActiveDivision.teams || []), newTeamRef];
+        const updatedTeams = [
+          ...(targetActiveDivision.teams || []),
+          newTeamRef,
+        ];
 
         // Update the specific activeDivision by its _key
         await sanity
           .patch(seasonId)
           .set({
-            [`activeDivisions[_key=="${targetActiveDivision._key}"].teams`]: updatedTeams
+            [`activeDivisions[_key=="${targetActiveDivision._key}"].teams`]:
+              updatedTeams,
           })
           .commit();
 
         console.log("Team added to division successfully:", {
           teamId: team._id,
           divisionKey: targetActiveDivision._key,
-          divisionId: registration.division_preference
+          divisionId: registration.division_preference,
         });
       } catch (patchError) {
         console.error("Failed to add team to division:", patchError);
@@ -346,8 +361,15 @@ export async function POST(request: Request) {
   return NextResponse.json({ received: true });
 }
 
-async function handleNewTeamRegistration(session: Stripe.Checkout.Session, teamId: string, paymentId: string) {
-  console.log("Processing new team registration payment:", { teamId, paymentId });
+async function handleNewTeamRegistration(
+  session: Stripe.Checkout.Session,
+  teamId: string,
+  paymentId: string
+) {
+  console.log("Processing new team registration payment:", {
+    teamId,
+    paymentId,
+  });
 
   try {
     // Update team status to active
@@ -355,7 +377,7 @@ async function handleNewTeamRegistration(session: Stripe.Checkout.Session, teamI
       .from("teams")
       .update({
         status: "active",
-        payment_status: "paid"
+        payment_status: "paid",
       })
       .eq("id", teamId);
 
@@ -382,7 +404,7 @@ async function handleNewTeamRegistration(session: Stripe.Checkout.Session, teamI
         stripe_payment_intent_id: session.payment_intent as string,
         paid_at: new Date().toISOString(),
         stripe_session_id: session.id,
-        user_id: teamInfo?.user_id // Ensure user_id is populated
+        user_id: teamInfo?.user_id, // Ensure user_id is populated
       })
       .eq("id", paymentId);
 
@@ -417,7 +439,6 @@ async function handleNewTeamRegistration(session: Stripe.Checkout.Session, teamI
 
     console.log(`Team ${teamId} payment completed successfully`);
     return NextResponse.json({ received: true, teamId });
-
   } catch (error) {
     console.error("Error processing new team registration:", error);
     return NextResponse.json(
@@ -428,7 +449,9 @@ async function handleNewTeamRegistration(session: Stripe.Checkout.Session, teamI
 }
 
 async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
-  const seasonId = process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID || "1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3";
+  const seasonId =
+    process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID ||
+    "1e418ea3-4b0a-40fd-87b8-96fcf1e89ac3";
 
   try {
     // Get season
@@ -462,21 +485,22 @@ async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
     const sanityTeam = await sanity.create({
       _type: "team",
       name: team.name || "Team Name Required",
-      shortName: team.name
-        ?.split(" ")
-        .map((word: string) => word[0])
-        .join("")
-        .substring(0, 8) || "TBD",
+      shortName:
+        team.name
+          ?.split(" ")
+          .map((word: string) => word[0])
+          .join("")
+          .substring(0, 8) || "TBD",
       location: {
         _key: `location-${Date.now()}`,
         city: team.city || "TBD",
-        region: team.region || ""
+        region: team.region || "",
       },
       colors: {
         _key: `colors-${Date.now()}`,
         primary: team.primary_color || "#1e40af",
         secondary: team.secondary_color || "#fbbf24",
-        accent: team.accent_color || null
+        accent: team.accent_color || null,
       },
       staff: [
         {
@@ -484,21 +508,25 @@ async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
           name: team.primary_contact_name,
           role: team.primary_contact_role || "manager",
           email: team.primary_contact_email,
-          phone: team.primary_contact_phone
+          phone: team.primary_contact_phone,
         },
-        ...(team.head_coach_name ? [{
-          _key: `staff-${Date.now()}-2`,
-          name: team.head_coach_name,
-          role: "head-coach",
-          email: team.head_coach_email,
-          phone: team.head_coach_phone
-        }] : [])
+        ...(team.head_coach_name
+          ? [
+              {
+                _key: `staff-${Date.now()}-2`,
+                name: team.head_coach_name,
+                role: "head-coach",
+                email: team.head_coach_email,
+                phone: team.head_coach_phone,
+              },
+            ]
+          : []),
       ],
       stats: {
         _key: `stats-${Date.now()}`,
         wins: 0,
         losses: 0,
-        ties: 0
+        ties: 0,
       },
       status: "active",
       rosters: [
@@ -506,7 +534,7 @@ async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
           _key: `roster-${Date.now()}`,
           season: {
             _type: "reference",
-            _ref: seasonId
+            _ref: seasonId,
           },
           players: [],
           seasonStats: {
@@ -518,11 +546,11 @@ async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
             pointsAgainst: 0,
             homeRecord: "0-0",
             awayRecord: "0-0",
-            conferenceRecord: "0-0"
-          }
-        }
+            conferenceRecord: "0-0",
+          },
+        },
       ],
-      supabaseTeamId: team.id // Add reference to Supabase team
+      supabaseTeamId: team.id, // Add reference to Supabase team
     });
 
     console.log("Team created in Sanity:", sanityTeam);
@@ -537,14 +565,17 @@ async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
       .eq("id", team.id);
 
     console.log("Team successfully added to Sanity and division");
-
   } catch (error) {
     console.error("Error creating team in Sanity:", error);
     throw error;
   }
 }
 
-async function addTeamToDivision(seasonId: string, divisionId: string, teamId: string) {
+async function addTeamToDivision(
+  seasonId: string,
+  divisionId: string,
+  teamId: string
+) {
   try {
     // Get season with divisions
     const seasonWithDivisions = await sanity.fetch(
@@ -588,25 +619,30 @@ async function addTeamToDivision(seasonId: string, divisionId: string, teamId: s
     await sanity
       .patch(seasonId)
       .set({
-        [`activeDivisions[_key=="${targetActiveDivision._key}"].teams`]: updatedTeams
+        [`activeDivisions[_key=="${targetActiveDivision._key}"].teams`]:
+          updatedTeams,
       })
       .commit();
 
     console.log("Team added to division successfully:", {
       teamId,
       divisionKey: targetActiveDivision._key,
-      divisionId
+      divisionId,
     });
-
   } catch (error) {
     console.error("Failed to add team to division:", error);
     throw error;
   }
 }
 
-async function sendConfirmationEmails(team: any, session: Stripe.Checkout.Session) {
+async function sendConfirmationEmails(
+  team: any,
+  session: Stripe.Checkout.Session
+) {
   try {
-    const packageDetails = getPackageDetails(session.metadata?.selectedPackage || '');
+    const packageDetails = getPackageDetails(
+      session.metadata?.selectedPackage || ""
+    );
 
     // Email data structure for future email service integration
     const emailData = {
@@ -614,7 +650,7 @@ async function sendConfirmationEmails(team: any, session: Stripe.Checkout.Sessio
       primaryContact: {
         to: team.primary_contact_email,
         subject: `Registration Confirmed - ${team.name}`,
-        template: 'team-registration-confirmation',
+        template: "team-registration-confirmation",
         data: {
           teamName: team.name,
           contactName: team.primary_contact_name,
@@ -623,51 +659,56 @@ async function sendConfirmationEmails(team: any, session: Stripe.Checkout.Sessio
           paymentAmount: (session.amount_total || 0) / 100,
           registrationId: team.id,
           nextSteps: [
-            'Access your team dashboard',
-            'Complete roster submission',
-            'Review league schedule',
-            'Download league handbook'
+            "Access your team dashboard",
+            "Complete roster submission",
+            "Review league schedule",
+            "Download league handbook",
           ],
           dashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
-          supportEmail: 'support@yourleague.com'
-        }
+          supportEmail: "support@yourleague.com",
+        },
       },
 
       // Team contact email (if different)
-      teamContact: team.contact_email !== team.primary_contact_email ? {
-        to: team.contact_email,
-        subject: `Registration Confirmed - ${team.name}`,
-        template: 'team-registration-notification',
-        data: {
-          teamName: team.name,
-          packageName: packageDetails.name,
-          registrationId: team.id
-        }
-      } : null,
+      teamContact:
+        team.contact_email !== team.primary_contact_email
+          ? {
+              to: team.contact_email,
+              subject: `Registration Confirmed - ${team.name}`,
+              template: "team-registration-notification",
+              data: {
+                teamName: team.name,
+                packageName: packageDetails.name,
+                registrationId: team.id,
+              },
+            }
+          : null,
 
       // Head coach email (if provided)
-      headCoach: team.head_coach_email ? {
-        to: team.head_coach_email,
-        subject: `Welcome Coach - ${team.name}`,
-        template: 'coach-welcome',
-        data: {
-          teamName: team.name,
-          coachName: team.head_coach_name,
-          packageName: packageDetails.name,
-          dashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
-          coachingResources: [
-            'League coaching guidelines',
-            'Player development resources',
-            'Game strategy materials'
-          ]
-        }
-      } : null,
+      headCoach: team.head_coach_email
+        ? {
+            to: team.head_coach_email,
+            subject: `Welcome Coach - ${team.name}`,
+            template: "coach-welcome",
+            data: {
+              teamName: team.name,
+              coachName: team.head_coach_name,
+              packageName: packageDetails.name,
+              dashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
+              coachingResources: [
+                "League coaching guidelines",
+                "Player development resources",
+                "Game strategy materials",
+              ],
+            },
+          }
+        : null,
 
       // Admin notification
       adminNotification: {
-        to: process.env.ADMIN_EMAIL || 'admin@yourleague.com',
+        to: process.env.ADMIN_EMAIL || "admin@yourleague.com",
         subject: `New Team Registration - ${team.name}`,
-        template: 'admin-new-registration',
+        template: "admin-new-registration",
         data: {
           teamName: team.name,
           packageName: packageDetails.name,
@@ -675,80 +716,91 @@ async function sendConfirmationEmails(team: any, session: Stripe.Checkout.Sessio
           contactEmail: team.primary_contact_email,
           paymentAmount: (session.amount_total || 0) / 100,
           registrationId: team.id,
-          adminDashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`
-        }
-      }
+          adminDashboardUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
+        },
+      },
     };
 
     // Send emails using Postmark
-    console.log('Sending confirmation emails for team:', team.name);
+    console.log("Sending confirmation emails for team:", team.name);
 
     // 1. Send primary contact confirmation email
-    const primaryContactHtml = getTeamRegistrationConfirmationHtml(emailData.primaryContact.data as TeamRegistrationData);
+    const primaryContactHtml = getTeamRegistrationConfirmationHtml(
+      emailData.primaryContact.data as TeamRegistrationData
+    );
     await sendEmail({
       to: emailData.primaryContact.to,
       subject: emailData.primaryContact.subject,
-      html: primaryContactHtml
+      html: primaryContactHtml,
     });
 
     // 2. Send team contact notification (if different email)
     if (emailData.teamContact) {
-      const teamContactHtml = getTeamNotificationHtml(emailData.teamContact.data);
+      const teamContactHtml = getTeamNotificationHtml(
+        emailData.teamContact.data
+      );
       await sendEmail({
         to: emailData.teamContact.to,
         subject: emailData.teamContact.subject,
-        html: teamContactHtml
+        html: teamContactHtml,
       });
     }
 
     // 3. Send head coach welcome email (if provided)
     if (emailData.headCoach) {
-      const coachHtml = getCoachWelcomeHtml(emailData.headCoach.data as CoachWelcomeData);
+      const coachHtml = getCoachWelcomeHtml(
+        emailData.headCoach.data as CoachWelcomeData
+      );
       await sendEmail({
         to: emailData.headCoach.to,
         subject: emailData.headCoach.subject,
-        html: coachHtml
+        html: coachHtml,
       });
     }
 
     // 4. Send admin notification
-    const adminHtml = getAdminNotificationHtml(emailData.adminNotification.data as AdminNotificationData);
+    const adminHtml = getAdminNotificationHtml(
+      emailData.adminNotification.data as AdminNotificationData
+    );
     await sendEmail({
       to: emailData.adminNotification.to,
       subject: emailData.adminNotification.subject,
-      html: adminHtml
+      html: adminHtml,
     });
 
-    console.log(`All confirmation emails sent successfully for team: ${team.name}`);
-
+    console.log(
+      `All confirmation emails sent successfully for team: ${team.name}`
+    );
   } catch (error) {
-    console.error('Error preparing confirmation emails:', error);
+    console.error("Error preparing confirmation emails:", error);
     // Don't throw - email failures shouldn't break registration completion
   }
 }
 
 function getPackageDetails(packageId: string) {
   const packages = {
-    'full-season': {
-      name: 'Full Season Team Registration',
-      price: '$3,495',
-      description: '12+ games + playoffs'
+    "full-season": {
+      name: "Full Season Team Registration",
+      price: "$3,495",
+      description: "12+ games + playoffs",
     },
-    'two-session': {
-      name: 'Two Session Pack Registration',
-      price: '$1,795',
-      description: '6 games max (3 per session)'
+    "two-session": {
+      name: "Two Session Pack Registration",
+      price: "$1,795",
+      description: "6 games max (3 per session)",
     },
-    'pay-per-session': {
-      name: 'Pay Per Session Registration',
-      price: '$795',
-      description: '3 games max per session'
-    }
+    "pay-per-session": {
+      name: "Pay Per Session Registration",
+      price: "$895",
+      description: "3 games max per session",
+    },
   };
 
-  return packages[packageId as keyof typeof packages] || {
-    name: 'Team Registration',
-    price: 'TBD',
-    description: 'Basketball league registration'
-  };
+  return (
+    packages[packageId as keyof typeof packages] || {
+      name: "Team Registration",
+      price: "TBD",
+      description: "Basketball league registration",
+    }
+  );
 }

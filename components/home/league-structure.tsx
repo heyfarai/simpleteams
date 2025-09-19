@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Trophy, Users2, CalendarDays, CheckCircle2 } from "lucide-react";
+import { DivisionCTA } from "./league-divisions/division-cta";
 
 export function LeagueStructure() {
   return (
@@ -111,8 +113,34 @@ export function LeagueStructure() {
                   </span>
                 </span>
               </li>
+              <li className="flex gap-x-3">
+                <span className="mt-0.5 h-5 w-5 flex justify-center items-center rounded-full bg-primary/10 text-primary">
+                  <CheckCircle2 />
+                </span>
+                <span className=" sm:text-base text-foreground">
+                  <span className="font-semibold">
+                    FIBA rules with 24 sec shot clocks (14 sec reset).
+                  </span>
+                </span>
+              </li>
+              <li className="flex gap-x-3">
+                <span className="mt-0.5 h-5 w-5 flex justify-center items-center rounded-full bg-primary/10 text-primary">
+                  <CheckCircle2 />
+                </span>
+                <span className=" sm:text-base text-foreground">
+                  <span className="font-semibold">
+                    4 x 10 minute quarters (stop time) + adequate warmup.
+                  </span>
+                </span>
+              </li>
             </ul>
             {/* End List */}
+            <Link
+              href="/pdf/NCHC-Season-2-Full-details.pdf"
+              className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm  rounded-full border border-transparent bg-gray-800 font-bold text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+            >
+              Learn more (PDF)
+            </Link>
           </div>
         </div>
         {/* End Col */}

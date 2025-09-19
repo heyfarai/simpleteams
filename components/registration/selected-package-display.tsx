@@ -38,7 +38,7 @@ export function SelectedPackageDisplay({
       case "pay-per-session":
         return {
           name: "Pay Per Session",
-          price: "$795",
+          price: "$895",
           games: "3 games max per session",
           description: "Individual sessions • Various deadlines",
           isRecommended: false,

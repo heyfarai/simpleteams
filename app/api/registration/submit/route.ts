@@ -7,27 +7,33 @@ import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-// Package pricing configuration
-const PACKAGE_CONFIG = {
-  "full-season": {
-    priceId: "price_1S8P39IYuurzinGIpebnrU1W",
-    amount: 349500, // $3,495.00
-    name: "Full Season Team Registration",
-    description: "12+ games + playoffs - Pick any 3 season sessions × 4 games each"
-  },
-  "two-session": {
-    priceId: "price_1S8P48IYuurzinGI3U41qWWR",
-    amount: 179500, // $1,795.00
-    name: "Two Session Pack Registration",
-    description: "6 games max (3 per session)"
-  },
-  "pay-per-session": {
-    priceId: "price_1S8P4KIYuurzinGI2Yb8SpnS",
-    amount: 79500, // $795.00
-    name: "Pay Per Session Registration",
-    description: "3 games max per session"
-  }
-} as const;
+// Package pricing configuration with early bird logic
+const EARLY_BIRD_DEADLINE = new Date('2025-09-24T23:59:59'); // Sep 24, 2025
+
+const getPackageConfig = () => {
+  const isEarlyBird = new Date() <= EARLY_BIRD_DEADLINE;
+
+  return {
+    "full-season": {
+      priceId: isEarlyBird ? "price_1S9BXfIYuurzinGInwQywYOM" : "price_1S9BYNIYuurzinGIb7m1VWBK",
+      amount: isEarlyBird ? 349500 : 379500, // $3,495 CAD early bird / $3,795 CAD regular
+      name: `Full Season Team Registration${isEarlyBird ? ' (Early Bird)' : ''}`,
+      description: "12+ games + playoffs - Pick any 3 season sessions × 4 games each"
+    },
+    "two-session": {
+      priceId: "price_1S9BYVIYuurzinGISFMHrpHB",
+      amount: 179500, // $1,795.00 CAD
+      name: "Two Session Pack Registration",
+      description: "6 games max (3 per session)"
+    },
+    "pay-per-session": {
+      priceId: "price_1S9BXkIYuurzinGIg6NX0B6n",
+      amount: 89500, // $895.00 CAD
+      name: "Pay Per Session Registration",
+      description: "3 games max per session"
+    }
+  } as const;
+};
 
 export async function POST(request: Request) {
   try {
@@ -40,6 +46,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Get current package configuration (with early bird logic)
+    const PACKAGE_CONFIG = getPackageConfig();
 
     // Validate selected package
     if (!formData.selectedPackage || !(formData.selectedPackage in PACKAGE_CONFIG)) {
@@ -155,7 +164,7 @@ export async function POST(request: Request) {
       team_id: team.id,
       user_id: userId,
       amount: packageConfig.amount,
-      currency: 'USD',
+      currency: 'CAD',
       description: `${packageConfig.name} - 2025-26 Season`,
       payment_type: 'registration',
       status: 'pending'

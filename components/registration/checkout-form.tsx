@@ -187,7 +187,7 @@ export function CheckoutForm() {
       case "pay-per-session":
         return {
           name: "Pay Per Session Registration",
-          amount: 795,
+          amount: 895,
           description: "Flexible pay-as-you-go registration",
         };
       default:
@@ -290,9 +290,9 @@ export function CheckoutForm() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-6 py-8">
         {/* Mobile Summary Accordion */}
-        <div className="lg:hidden mb-6 mx-auto max-w-2xl lg:max-w-none">
+        <div className="lg:hidden mb-6 max-w-2xl mx-auto">
           <Button
             variant="outline"
             className="w-full justify-between"
@@ -389,23 +389,23 @@ export function CheckoutForm() {
           )}
         </div>
 
-        <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 xl:gap-x-16">
+        <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-12 lg:gap-x-12 xl:gap-x-16">
           {/* Main Form Column */}
           <div className="lg:col-span-7">
-            <div className="mx-auto max-w-2xl lg:max-w-none">
+            <div className="max-w-2xl mx-auto lg:max-w-none">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSubmit();
                 }}
               >
-                <div className="space-y-8">
+                <div className="space-y-6 md:space-y-8">
                   {/* Team Information */}
                   <div>
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">
+                    <h2 className="text-lg md:text-xl font-medium text-gray-900 mb-4">
                       Team Information
                     </h2>
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border">
                       <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
                         <div className="sm:col-span-2">
                           <div className="flex justify-between items-center">
@@ -492,10 +492,10 @@ export function CheckoutForm() {
 
                   {/* Division Selection */}
                   <div>
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">
+                    <h2 className="text-lg md:text-xl font-medium text-gray-900 mb-4">
                       Division
                     </h2>
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border">
                       {divisionsLoading ? (
                         <div className="text-gray-500">
                           Loading divisions...
@@ -548,10 +548,10 @@ export function CheckoutForm() {
 
                   {/* Contact Information */}
                   <div>
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">
+                    <h2 className="text-lg md:text-xl font-medium text-gray-900 mb-4">
                       Contact Information
                     </h2>
-                    <div className="bg-white p-6 rounded-lg shadow-sm border space-y-6">
+                    <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border space-y-4 md:space-y-6">
                       {/* Primary Contact */}
                       <div>
                         <h3 className="text-base font-medium text-gray-900 mb-4">
@@ -725,7 +725,7 @@ export function CheckoutForm() {
                     Order Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 md:space-y-6">
                   {/* Package Details */}
                   {formData.selectedPackage && (
                     <div className="space-y-3">

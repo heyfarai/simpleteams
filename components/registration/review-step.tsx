@@ -211,7 +211,7 @@ export function ReviewStep({
               case "two-session":
                 return { amount: 1795, label: "Two Session Pack Registration" };
               case "pay-per-session":
-                return { amount: 795, label: "Pay Per Session Registration" };
+                return { amount: 895, label: "Pay Per Session Registration" };
               default:
                 return { amount: 3495, label: "Registration Fee" };
             }

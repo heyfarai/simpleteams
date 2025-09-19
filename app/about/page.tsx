@@ -50,7 +50,7 @@ export default function AboutPage() {
       <section className="py-44 px-16">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl md:text-3xl font-normal mb-0 text-center text-foreground">
-            Season 1 was a "W"
+            <span className="text-primary">Season 1</span> By the Numbers
           </h1>
           <p className="text-lg font-medium md:text-normal mb-16 text-center">
             The stats don't lie
