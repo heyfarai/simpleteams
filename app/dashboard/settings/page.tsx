@@ -16,7 +16,7 @@ import {
   Phone,
   MapPin
 } from 'lucide-react'
-import { getCurrentUser, getUserSanityTeamId } from '@/lib/supabase/auth'
+import { useSelectedTeam } from '@/components/dashboard/team-selector'
 import { supabase } from '@/lib/supabase/client-safe'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -44,6 +44,7 @@ interface TeamSettingsForm {
 }
 
 export default function TeamSettingsPage() {
+  const selectedTeamId = useSelectedTeam()
   const [team, setTeam] = useState<Team | null>(null)
   const [formData, setFormData] = useState<TeamSettingsForm | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -54,12 +55,23 @@ export default function TeamSettingsPage() {
 
   useEffect(() => {
     const loadTeamData = async () => {
-      try {
-        const user = await getCurrentUser()
-        if (!user) return
+      if (!selectedTeamId || !supabase) {
+        setIsLoading(false)
+        return
+      }
 
-        const userTeam = await getUserPrimaryTeam(user.id)
-        if (!userTeam) return
+      try {
+        // Load team data from Supabase
+        const { data: userTeam, error } = await supabase
+          .from('teams')
+          .select('*')
+          .eq('id', selectedTeamId)
+          .single()
+
+        if (error || !userTeam) {
+          console.error('Error loading team:', error)
+          return
+        }
 
         setTeam(userTeam)
         
@@ -96,7 +108,7 @@ export default function TeamSettingsPage() {
     }
 
     loadTeamData()
-  }, [])
+  }, [selectedTeamId])
 
   const handleInputChange = (field: keyof TeamSettingsForm, value: string) => {
     if (!formData) return

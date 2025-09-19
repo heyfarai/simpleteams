@@ -172,7 +172,7 @@ export async function POST(request: Request) {
         );
       }
 
-      // Create team in Sanity with proper error handling
+      // Create team in Sanity with proper error handling and initial roster
       const team = await sanity.create({
         _type: "team",
         name: registration.team_name || "Team Name Required",
@@ -208,7 +208,27 @@ export async function POST(request: Request) {
           ties: 0
         },
         status: "pending",
-        rosters: []
+        rosters: [
+          {
+            _key: `roster-${Date.now()}`,
+            season: {
+              _type: "reference",
+              _ref: seasonId
+            },
+            players: [],
+            seasonStats: {
+              _key: `season-stats-${Date.now()}`,
+              wins: 0,
+              losses: 0,
+              ties: 0,
+              pointsFor: 0,
+              pointsAgainst: 0,
+              homeRecord: "0-0",
+              awayRecord: "0-0",
+              conferenceRecord: "0-0"
+            }
+          }
+        ]
       });
 
       console.log("Team created in Sanity:", team);
@@ -438,7 +458,7 @@ async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
       throw new Error("Division not found");
     }
 
-    // Create team in Sanity
+    // Create team in Sanity with initial roster for the active season
     const sanityTeam = await sanity.create({
       _type: "team",
       name: team.name || "Team Name Required",
@@ -481,7 +501,28 @@ async function createTeamInSanity(team: any, session: Stripe.Checkout.Session) {
         ties: 0
       },
       status: "active",
-      rosters: []
+      rosters: [
+        {
+          _key: `roster-${Date.now()}`,
+          season: {
+            _type: "reference",
+            _ref: seasonId
+          },
+          players: [],
+          seasonStats: {
+            _key: `season-stats-${Date.now()}`,
+            wins: 0,
+            losses: 0,
+            ties: 0,
+            pointsFor: 0,
+            pointsAgainst: 0,
+            homeRecord: "0-0",
+            awayRecord: "0-0",
+            conferenceRecord: "0-0"
+          }
+        }
+      ],
+      supabaseTeamId: team.id // Add reference to Supabase team
     });
 
     console.log("Team created in Sanity:", sanityTeam);

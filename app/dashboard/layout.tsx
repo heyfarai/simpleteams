@@ -4,76 +4,38 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { 
-  Users, 
-  CreditCard, 
-  Settings, 
-  Home,
+import {
+  Users,
+  CreditCard,
+  Settings,
   LogOut,
   Menu,
   X
 } from 'lucide-react'
-import { getCurrentUser, signOut, getUserSanityTeamId } from '@/lib/supabase/auth'
-import { client } from '@/lib/sanity/client'
-import { teamDetailsQuery } from '@/lib/sanity/team-queries'
-
-interface Team {
-  _id: string
-  name: string
-  shortName?: string
-  region?: string
-}
+import { signOut } from '@/lib/supabase/auth'
+import { useAuth } from '@/hooks/use-auth'
+import { TeamSelector } from '@/components/dashboard/team-selector'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Roster', href: '/dashboard/roster', icon: Users },
   { name: 'Payments', href: '/dashboard/payments', icon: CreditCard },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [team, setTeam] = useState<Team | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
+  const { user, loading } = useAuth()
 
   useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const user = await getCurrentUser()
-        if (!user) {
-          router.push('/login')
-          return
-        }
-
-        const userSanityTeamId = await getUserSanityTeamId(user.id)
-        if (!userSanityTeamId) {
-          router.push('/register')
-          return
-        }
-
-        // Fetch team details from Sanity
-        const teamData = await client.fetch(teamDetailsQuery, { teamId: userSanityTeamId })
-        if (!teamData) {
-          router.push('/register')
-          return
-        }
-
-        setTeam(teamData)
-      } catch (error) {
-        console.error('Error loading user data:', error)
-        router.push('/login')
-      } finally {
-        setIsLoading(false)
-      }
+    if (!loading && !user) {
+      router.push('/login')
     }
-
-    loadUserData()
-  }, [router])
+  }, [user, loading, router])
 
   const handleSignOut = async () => {
     try {
@@ -84,16 +46,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
     )
-  }
-
-  if (!team) {
-    return null
   }
 
   return (
@@ -113,7 +71,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <X className="h-6 w-6" />
               </Button>
             </div>
-            <SidebarContent team={team} onSignOut={handleSignOut} />
+            <SidebarContent user={user} onSignOut={handleSignOut} />
           </div>
         </div>
       )}
@@ -121,7 +79,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:flex-shrink-0">
         <div className="flex flex-col w-64">
-          <SidebarContent team={team} onSignOut={handleSignOut} />
+          <SidebarContent user={user} onSignOut={handleSignOut} />
         </div>
       </div>
 
@@ -141,7 +99,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex-1 px-4 flex justify-between">
               <div className="flex-1 flex">
                 <div className="w-full flex items-center">
-                  <h1 className="text-lg font-semibold text-gray-900">{team.name}</h1>
+                  <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
                 </div>
               </div>
             </div>
@@ -157,21 +115,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   )
 }
 
-function SidebarContent({ team, onSignOut }: { team: Team; onSignOut: () => void }) {
+function SidebarContent({ user, onSignOut }: { user: any; onSignOut: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white shadow-sm">
-      {/* Logo/Team Info */}
+      {/* Team Selector */}
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-        <div className="flex items-center flex-shrink-0 px-4">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">
-              {team.name.charAt(0)}
-            </span>
-          </div>
-          <div className="ml-3">
-            <h2 className="text-lg font-semibold text-gray-900">{team.name}</h2>
-            <p className="text-sm text-gray-500">{team.region || 'No region'}</p>
-          </div>
+        <div className="flex items-center flex-shrink-0">
+          <TeamSelector />
         </div>
 
         {/* Navigation */}
@@ -192,22 +142,32 @@ function SidebarContent({ team, onSignOut }: { team: Team; onSignOut: () => void
         </nav>
       </div>
 
-      {/* Sign out */}
-      <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-        <Button
-          variant="ghost"
-          onClick={onSignOut}
-          className="flex-shrink-0 w-full group block"
-        >
-          <div className="flex items-center">
-            <LogOut className="inline-block h-5 w-5 text-gray-400 group-hover:text-gray-500" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                Sign out
-              </p>
-            </div>
+      {/* User Email & Sign out */}
+      <div className="flex-shrink-0 border-t border-gray-200">
+        {/* User Email */}
+        {user?.email && (
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-xs text-gray-500 truncate">{user.email}</p>
           </div>
-        </Button>
+        )}
+
+        {/* Sign out */}
+        <div className="p-4">
+          <Button
+            variant="ghost"
+            onClick={onSignOut}
+            className="flex-shrink-0 w-full group block"
+          >
+            <div className="flex items-center">
+              <LogOut className="inline-block h-5 w-5 text-gray-400 group-hover:text-gray-500" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                  Sign out
+                </p>
+              </div>
+            </div>
+          </Button>
+        </div>
       </div>
     </div>
   )

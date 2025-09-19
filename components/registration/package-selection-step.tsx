@@ -31,7 +31,6 @@ export function PackageSelectionStep({
   onPackageSelect,
   onNext,
 }: PackageSelectionStepProps) {
-  
   const handlePackageSelect = (packageId: string) => {
     onPackageSelect(packageId);
 
@@ -103,14 +102,6 @@ export function PackageSelectionStep({
       </div>
 
       {/* Value Proposition Banner */}
-      <div className="hidden bg-gradient-to-r from-red-600 to-red-800 rounded-lg p-4 text-center text-white">
-        <h3 className="text-lg font-bold mb-1">
-          🏆 EXCLUSIVE LEAGUE TEAM PERKS INCLUDED
-        </h3>
-        <p className="text-sm">
-          Teams who commit to full seasons get rewards other leagues can't match
-        </p>
-      </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
         {packages.map((pkg) => (

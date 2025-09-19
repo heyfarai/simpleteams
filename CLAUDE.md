@@ -150,3 +150,5 @@ The registration system has been refactored into a **5-step multi-step flow**:
 - Registration end to end and janky
 - Multiple teams per user MVP
 - reminder to improve UX for webhook errors
+- team, player, season, divisions, game, and roster data is only in sanity. NOT supabase
+- no dummy data on this project. Ask permission before using and dummy data

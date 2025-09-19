@@ -35,9 +35,11 @@ export default function RootLayout({
         className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${schibstedGrotesk.variable}`}
       >
         <Providers>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Navigation />
-          </Suspense>
+          {!isAdminPage && (
+            <Suspense fallback={<div>Loading...</div>}>
+              <Navigation />
+            </Suspense>
+          )}
           {children}
           {!isAdminPage && <Footer />}
           <Analytics />

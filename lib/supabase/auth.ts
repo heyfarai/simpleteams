@@ -1,5 +1,4 @@
 import { supabase, isSupabaseConfigured } from './client-safe'
-import { DEV_SANITY_TEAM_ID, DEV_USER, isDev } from '../dev-context'
 
 export async function signInWithEmail(email: string, returnTo?: string) {
   if (!supabase || !isSupabaseConfigured()) {
@@ -43,11 +42,6 @@ export async function signOut() {
 }
 
 export async function getCurrentUser() {
-  // Development bypass
-  if (isDev) {
-    return DEV_USER as any
-  }
-
   if (!supabase || !isSupabaseConfigured()) {
     return null
   }
@@ -61,6 +55,25 @@ export async function getCurrentUser() {
     return user
   } catch (error) {
     console.warn('Error getting user:', error)
+    return null
+  }
+}
+
+// Get current user directly from database (bypasses dev context)
+export async function getCurrentUserFromDB() {
+  if (!supabase || !isSupabaseConfigured()) {
+    return null
+  }
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) {
+      console.warn('Error getting user from DB:', error)
+      return null
+    }
+    return user
+  } catch (error) {
+    console.warn('Error getting user from DB:', error)
     return null
   }
 }
@@ -85,11 +98,6 @@ export async function getSession() {
 
 // Get user's Sanity team ID
 export async function getUserSanityTeamId(userId: string): Promise<string | null> {
-  // Development bypass
-  if (isDev) {
-    return DEV_SANITY_TEAM_ID
-  }
-
   if (!supabase || !isSupabaseConfigured()) {
     return null
   }
@@ -117,11 +125,6 @@ export async function getUserSanityTeamId(userId: string): Promise<string | null
 
 // Check if user can perform action (for future use)
 export async function canUserAccessTeam(userId: string, sanityTeamId: string, permission?: 'can_manage_roster' | 'can_view_payments' | 'can_edit_team_info'): Promise<boolean> {
-  // Development bypass
-  if (isDev) {
-    return true
-  }
-
   if (!supabase || !isSupabaseConfigured()) {
     return false
   }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, User, Upload } from "lucide-react";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import { useSelectedTeamInfo } from "@/components/dashboard/team-selector";
 
 interface PlayerForm {
   firstName: string;
@@ -55,16 +54,67 @@ const positions = [
   { value: "C", label: "Center (C)" },
 ];
 
-function AddPlayerForm() {
+function EditPlayerForm() {
   const [formData, setFormData] = useState<PlayerForm>(initialFormData);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const selectedTeamInfo = useSelectedTeamInfo();
-  const seasonId = searchParams.get("season");
+  const params = useParams();
+  const teamId = params.id as string;
+  const playerId = params.playerId as string;
+
+  // Load player data for editing
+  useEffect(() => {
+    const loadPlayerData = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          setError('Not authenticated');
+          return;
+        }
+
+        // Fetch player data from API
+        const response = await fetch(`/api/players?id=${playerId}`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch player: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to load player');
+        }
+
+        const player = result.player;
+
+        // Populate form with player data
+        setFormData({
+          firstName: player.firstName || '',
+          lastName: player.lastName || '',
+          gradYear: player.personalInfo?.gradYear?.toString() || '',
+          hometown: player.personalInfo?.hometown || '',
+          position: player.personalInfo?.position || '',
+          jerseyNumber: player.jerseyNumber?.toString() || '',
+          dateOfBirth: player.personalInfo?.dateOfBirth || '',
+          height: player.personalInfo?.height || '',
+          weight: player.personalInfo?.weight?.toString() || '',
+          bio: player.bio || '',
+          status: 'active' // Default status - roster status will be handled separately
+        });
+
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to load player data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPlayerData();
+  }, [playerId]);
 
   const handleInputChange = (field: keyof PlayerForm, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -83,15 +133,6 @@ function AddPlayerForm() {
     }
   };
 
-  // TODO: Implement photo upload to Sanity
-  const uploadPhotoToSanity = async (
-    file: File,
-    playerId: string
-  ): Promise<string | null> => {
-    // This will be implemented later when we add Sanity asset upload
-    return null;
-  };
-
   const validateForm = (): string | null => {
     if (!formData.firstName.trim()) return "First name is required";
     if (!formData.lastName.trim()) return "Last name is required";
@@ -107,7 +148,6 @@ function AddPlayerForm() {
       return "Graduation year must be a number";
     }
 
-    // Only validate graduation year if it's provided
     if (formData.gradYear) {
       const currentYear = new Date().getFullYear();
       const gradYear = Number(formData.gradYear);
@@ -132,13 +172,8 @@ function AddPlayerForm() {
     setError(null);
 
     try {
-      // Check if user is authenticated
       const user = await getCurrentUser();
       if (!user) throw new Error("Not authenticated");
-
-      // Check if team is selected
-      if (!selectedTeamInfo?.sanityId) throw new Error("No team selected");
-
 
       // Prepare player data for API
       const playerData = {
@@ -158,33 +193,26 @@ function AddPlayerForm() {
         bio: formData.bio.trim() || undefined,
       };
 
-      // Prepare roster data if adding to roster
+      // Prepare roster data if needed (for jersey number and position updates)
       let rosterData = null;
-
-      if (
-        formData.jerseyNumber.trim() !== "" &&
-        formData.position &&
-        selectedTeamInfo?.sanityId &&
-        seasonId
-      ) {
+      if (formData.jerseyNumber.trim() !== "" && formData.position) {
         rosterData = {
-          sanityTeamId: selectedTeamInfo.sanityId,
-          seasonId: seasonId,
+          teamId: teamId,
+          seasonId: null, // TODO: Get current season ID if needed
           jerseyNumber: Number(formData.jerseyNumber),
           position: formData.position,
           status: formData.status,
         };
-
-      } else {
       }
 
-      // Call API to create player
+      // Call API to update player
       const response = await fetch("/api/players", {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          playerId,
           playerData,
           rosterData,
         }),
@@ -193,46 +221,53 @@ function AddPlayerForm() {
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "Failed to create player");
+        throw new Error(result.error || "Failed to update player");
       }
 
       // TODO: Handle photo upload to Sanity if needed
       if (photoFile) {
-        // await uploadPhotoToSanity(photoFile, result.player._id)
+        // await uploadPhotoToSanity(photoFile, playerId)
       }
 
-      router.push("/dashboard/roster");
+      router.push(`/dashboard/roster/${teamId}`);
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to create player"
-      );
+      setError(error instanceof Error ? error.message : "Failed to update player");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-4xl">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-40 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-4xl">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center space-x-4">
-          <Link href="/dashboard/roster">
-            <Button
-              variant="outline"
-              size="sm"
-            >
+          <Link href={`/dashboard/roster/${teamId}`}>
+            <Button variant="outline" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Roster
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Add Player</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Edit Player</h1>
             <p className="mt-1 text-sm text-gray-500">
-              {selectedTeamInfo?.sanityId && seasonId
-                ? `Add a new player to your selected team roster for the current season`
-                : selectedTeamInfo?.sanityId
-                ? "Add a new player (season not specified)"
-                : "Please select a team first"}
+              Update player information and roster details
             </p>
           </div>
         </div>
@@ -244,18 +279,7 @@ function AddPlayerForm() {
         </div>
       )}
 
-      {!selectedTeamInfo?.sanityId && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-yellow-700 text-sm">
-            Please select a team from the sidebar before adding a player.
-          </p>
-        </div>
-      )}
-
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <Card>
           <CardHeader>
@@ -271,9 +295,7 @@ function AddPlayerForm() {
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) =>
-                    handleInputChange("firstName", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
                   placeholder="Enter first name"
                   required
                 />
@@ -283,9 +305,7 @@ function AddPlayerForm() {
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) =>
-                    handleInputChange("lastName", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
                   placeholder="Enter last name"
                   required
                 />
@@ -296,9 +316,7 @@ function AddPlayerForm() {
                   id="gradYear"
                   type="number"
                   value={formData.gradYear}
-                  onChange={(e) =>
-                    handleInputChange("gradYear", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("gradYear", e.target.value)}
                   placeholder="2025"
                 />
               </div>
@@ -307,9 +325,7 @@ function AddPlayerForm() {
                 <Input
                   id="hometown"
                   value={formData.hometown}
-                  onChange={(e) =>
-                    handleInputChange("hometown", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("hometown", e.target.value)}
                   placeholder="City, Province"
                 />
               </div>
@@ -319,9 +335,7 @@ function AddPlayerForm() {
                   id="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth}
-                  onChange={(e) =>
-                    handleInputChange("dateOfBirth", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
                 />
               </div>
             </div>
@@ -336,44 +350,29 @@ function AddPlayerForm() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <Label htmlFor="jerseyNumber">
-                  Jersey Number{" "}
-                  {seasonId && <span className="text-red-500">*</span>}
-                </Label>
+                <Label htmlFor="jerseyNumber">Jersey Number</Label>
                 <Input
                   id="jerseyNumber"
                   type="number"
                   min="0"
                   max="99"
                   value={formData.jerseyNumber}
-                  onChange={(e) =>
-                    handleInputChange("jerseyNumber", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("jerseyNumber", e.target.value)}
                   placeholder=""
                 />
-                {seasonId && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Required to add to roster
-                  </p>
-                )}
               </div>
               <div>
                 <Label htmlFor="position">Position *</Label>
                 <Select
                   value={formData.position}
-                  onValueChange={(value) =>
-                    handleInputChange("position", value)
-                  }
+                  onValueChange={(value) => handleInputChange("position", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select position" />
                   </SelectTrigger>
                   <SelectContent>
                     {positions.map((position) => (
-                      <SelectItem
-                        key={position.value}
-                        value={position.value}
-                      >
+                      <SelectItem key={position.value} value={position.value}>
                         {position.label}
                       </SelectItem>
                     ))}
@@ -466,11 +465,6 @@ function AddPlayerForm() {
         <Card>
           <CardHeader>
             <CardTitle>Player Status</CardTitle>
-            <p className="text-sm text-gray-500">
-              {seasonId
-                ? "Player status on the current season roster"
-                : "Default player status"}
-            </p>
           </CardHeader>
           <CardContent>
             <div className="max-w-xs">
@@ -496,27 +490,21 @@ function AddPlayerForm() {
 
         {/* Submit Button */}
         <div className="flex justify-end space-x-4">
-          <Link href="/dashboard/roster">
-            <Button
-              type="button"
-              variant="outline"
-            >
+          <Link href={`/dashboard/roster/${teamId}`}>
+            <Button type="button" variant="outline">
               Cancel
             </Button>
           </Link>
-          <Button
-            type="submit"
-            disabled={isSubmitting || !selectedTeamInfo?.sanityId}
-          >
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Adding Player...
+                Updating Player...
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Add Player
+                Update Player
               </>
             )}
           </Button>
@@ -526,7 +514,7 @@ function AddPlayerForm() {
   );
 }
 
-export default function AddPlayerPage() {
+export default function EditPlayerPage() {
   return (
     <Suspense
       fallback={
@@ -536,17 +524,14 @@ export default function AddPlayerPage() {
             <div className="h-10 bg-gray-200 rounded"></div>
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-40 bg-gray-200 rounded"
-                ></div>
+                <div key={i} className="h-40 bg-gray-200 rounded"></div>
               ))}
             </div>
           </div>
         </div>
       }
     >
-      <AddPlayerForm />
+      <EditPlayerForm />
     </Suspense>
   );
 }

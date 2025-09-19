@@ -412,13 +412,13 @@ export async function fetchTeamDetails(teamId: string) {
       ...team,
       id: team._id,
       rosters: (team.rosters || []).map((roster: SanityRoster) => {
-        if (!roster.season || !roster.players) {
-          console.warn(`Invalid roster data for team ${teamId}:`, roster);
+        if (!roster.season) {
+          console.warn(`Invalid roster data for team ${teamId}: missing season`, roster);
           return null;
         }
         return {
           season: roster.season,
-          players: roster.players.map(player => ({
+          players: (roster.players || []).map(player => ({
             player: player.player,
             jerseyNumber: player.jerseyNumber,
             position: player.position,

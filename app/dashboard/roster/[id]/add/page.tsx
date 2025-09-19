@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, User, Upload } from "lucide-react";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import { useSelectedTeamInfo } from "@/components/dashboard/team-selector";
 
 interface PlayerForm {
   firstName: string;
@@ -63,7 +62,8 @@ function AddPlayerForm() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedTeamInfo = useSelectedTeamInfo();
+  const params = useParams();
+  const teamId = params.id as string;
   const seasonId = searchParams.get("season");
 
   const handleInputChange = (field: keyof PlayerForm, value: string) => {
@@ -137,7 +137,7 @@ function AddPlayerForm() {
       if (!user) throw new Error("Not authenticated");
 
       // Check if team is selected
-      if (!selectedTeamInfo?.sanityId) throw new Error("No team selected");
+      if (!teamId) throw new Error("No team ID provided");
 
 
       // Prepare player data for API
@@ -164,11 +164,11 @@ function AddPlayerForm() {
       if (
         formData.jerseyNumber.trim() !== "" &&
         formData.position &&
-        selectedTeamInfo?.sanityId &&
+        teamId &&
         seasonId
       ) {
         rosterData = {
-          sanityTeamId: selectedTeamInfo.sanityId,
+          sanityTeamId: teamId,
           seasonId: seasonId,
           jerseyNumber: Number(formData.jerseyNumber),
           position: formData.position,
@@ -201,7 +201,7 @@ function AddPlayerForm() {
         // await uploadPhotoToSanity(photoFile, result.player._id)
       }
 
-      router.push("/dashboard/roster");
+      router.push(`/dashboard/roster/${teamId}`);
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to create player"
@@ -216,7 +216,7 @@ function AddPlayerForm() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center space-x-4">
-          <Link href="/dashboard/roster">
+          <Link href={`/dashboard/roster/${teamId}`}>
             <Button
               variant="outline"
               size="sm"
@@ -228,9 +228,9 @@ function AddPlayerForm() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Add Player</h1>
             <p className="mt-1 text-sm text-gray-500">
-              {selectedTeamInfo?.sanityId && seasonId
-                ? `Add a new player to your selected team roster for the current season`
-                : selectedTeamInfo?.sanityId
+              {teamId && seasonId
+                ? `Add a new player to your team roster for the current season`
+                : teamId
                 ? "Add a new player (season not specified)"
                 : "Please select a team first"}
             </p>
@@ -244,7 +244,7 @@ function AddPlayerForm() {
         </div>
       )}
 
-      {!selectedTeamInfo?.sanityId && (
+      {!teamId && (
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
           <p className="text-yellow-700 text-sm">
             Please select a team from the sidebar before adding a player.
@@ -496,7 +496,7 @@ function AddPlayerForm() {
 
         {/* Submit Button */}
         <div className="flex justify-end space-x-4">
-          <Link href="/dashboard/roster">
+          <Link href={`/dashboard/roster/${teamId}`}>
             <Button
               type="button"
               variant="outline"
@@ -506,7 +506,7 @@ function AddPlayerForm() {
           </Link>
           <Button
             type="submit"
-            disabled={isSubmitting || !selectedTeamInfo?.sanityId}
+            disabled={isSubmitting || !teamId}
           >
             {isSubmitting ? (
               <>
