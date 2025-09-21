@@ -25,7 +25,7 @@ export function LeagueStructure() {
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl">
                 <Image
                   className="object-cover"
-                  src="/basketball-game-action-shot-with-players-dunking.jpg"
+                  src="/img/action-shot-1.jpg"
                   alt="Game action shot"
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
@@ -37,7 +37,7 @@ export function LeagueStructure() {
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl">
                 <Image
                   className="object-cover"
-                  src="/basketball-player-marcus-thompson-action-shot.jpg"
+                  src="/img/action-shot-2.jpg"
                   alt="Player action shot"
                   fill
                   sizes="(max-width: 768px) 100vw, 25vw"
@@ -49,7 +49,7 @@ export function LeagueStructure() {
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl">
                 <Image
                   className="object-cover"
-                  src="/basketball-player-portrait-action-shot.png"
+                  src="/img/action-shot-3.jpg"
                   alt="Player portrait"
                   fill
                   sizes="(max-width: 768px) 100vw, 42vw"
