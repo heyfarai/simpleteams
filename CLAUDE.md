@@ -40,6 +40,7 @@ This is a basketball league website built with Next.js 15, TypeScript, and Tailw
 
 - TanStack Query for server state with custom retry logic
 - Custom query client configuration with 1-minute stale time
+- **Service/Repository Architecture** - Complete domain model with service and repository layers for database-agnostic data access
 
 ### Data & Content Management
 
@@ -54,18 +55,21 @@ This is a basketball league website built with Next.js 15, TypeScript, and Tailw
 - `app/` - Next.js App Router pages and layouts
 - `components/` - Organized by feature (home, games, teams, player-profile, etc.)
 - `lib/` - Utilities, types, and configuration
+  - `lib/data/` - Service and repository layers for data access
+  - `lib/services/` - Business logic services
+  - `lib/repositories/` - Data access repositories
 - `supabase/` - Authentication schemas and SQL files
 - `hooks/` - Custom React hooks
 - `middleware.ts` - Auth middleware (bypassed in development)
 
 ### Key Features
 
-- Dashboard with roster management and payments
+- **Dashboard** with roster management, payments, and team overview
 - Player and team profiles (data from Sanity)
 - Game scheduling and tracking
 - **Multi-step registration system** with package selection and Stripe payment integration
-- League divisions and structure display
-- Team management for registrants
+- League divisions and structure display with accurate team assignments
+- Team management for registrants with enhanced stats display (PF, PA, Win%, games played)
 
 ### Development Notes
 
@@ -135,16 +139,25 @@ The registration system has been refactored into a **5-step multi-step flow**:
 - **Auto-save cart functionality** (debounced, email listener disabled)
 - **Progress indicator** updated for 5 steps
 
-### Outstanding Issues & Jankiness
+### Registration System Updates & Fixes
 
-#### High Priority
+#### Recent Improvements (January 2025)
+
+- **Enhanced Package Selection** - Improved UI with better comparison table
+- **Form State Management** - Better handling of selectedPackage across steps
+- **Progress Indicator** - Updated for 5-step flow with visual feedback
+- **Dashboard Integration** - Registration connects seamlessly to team dashboard
+
+#### Outstanding Issues & Jankiness
+
+##### High Priority
 
 1. **Email cart loading disabled** - Abandoned cart recovery currently non-functional
    - `loadCart` useEffect commented out to prevent navigation issues
    - Need alternative approach for cart recovery
 2. **Badge clipping issue** - Fixed but may need testing on different screen sizes
 
-#### Medium Priority
+##### Medium Priority
 
 3. **Payment integration incomplete** - Currently shows UI but needs:
 
@@ -156,7 +169,7 @@ The registration system has been refactored into a **5-step multi-step flow**:
    - Package selection validation may be bypassed
    - Cross-step data consistency not fully validated
 
-#### Low Priority
+##### Low Priority
 
 5. **TypeScript warnings** - Some unused imports and variables from refactoring
 6. **Mobile responsiveness** - Comparison table may need scrolling improvements
@@ -175,6 +188,31 @@ The registration system has been refactored into a **5-step multi-step flow**:
 - reminder to improve UX for webhook errors
 - team, player, season, divisions, game, and roster data is only in sanity. NOT supabase
 - no dummy data on this project. Ask permission before using and dummy data
+
+## Recent Architecture Improvements (January 2025)
+
+### Service/Repository Pattern Implementation
+
+- **Complete domain model** with service and repository layers for database-agnostic data access
+- **Enhanced Team Repository** - Fetches divisions from `season.activeDivisions` structure
+- **Season-Specific Stats** - Retrieves stats from `rosters[].seasonStats` for accurate data
+- **Complete Transformers** - Include all required stats fields (PF, PA, Win%, gamesPlayed)
+- **Maintained Architecture** - Follows service/repository pattern for future migration readiness
+
+### Data Layer Improvements
+
+- **Division Assignments Fixed** - Teams no longer show as "Unassigned" by using correct season structure
+- **Accurate Stats Display** - Enhanced stats transformation includes:
+  - Points For (PF) and Points Against (PA)
+  - Win percentage calculations
+  - Games played tracking
+- **Database-Agnostic Design** - Service layer ready for future Sanity to Supabase migration
+
+### Dashboard Enhancements
+
+- **Team Overview** - Comprehensive dashboard with roster management
+- **Payment Integration** - Stripe payment status and management
+- **Enhanced Statistics** - Complete team stats display with proper calculations
 
 # Refactoring
 
