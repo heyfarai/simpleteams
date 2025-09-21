@@ -38,12 +38,6 @@ export function HowTheCircuitWorks() {
           </p>
         </div>
       </div>
-      <div className="mt-6 p-4 bg-primary/10 rounded-lg">
-        <p className="text-sm grotesk">
-          <strong>Playoffs:</strong> Top teams from each session advance to
-          Championship Weekend for the ultimate showdown
-        </p>
-      </div>
     </div>
   );
 }
