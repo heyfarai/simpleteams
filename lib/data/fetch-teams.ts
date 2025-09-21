@@ -17,18 +17,32 @@ function transformToLegacyTeam(domainTeam: DomainTeam): Team {
     awards: [], // Domain model doesn't have awards yet
     status: domainTeam.status,
     description: "", // Domain model doesn't have description yet
-    division: domainTeam.division,
-    season: domainTeam.season,
+    division: domainTeam.division ? {
+      _id: domainTeam.division.id,
+      name: domainTeam.division.name,
+      season: domainTeam.season ? {
+        _ref: domainTeam.season.id,
+      } : undefined,
+    } : undefined,
+    season: domainTeam.season ? {
+      _id: domainTeam.season.id,
+      name: domainTeam.season.name,
+      year: domainTeam.season.year,
+      isActive: Boolean(domainTeam.season.isActive),
+      status: domainTeam.season.status,
+    } : undefined,
     rosters: [], // Will be populated if needed
     stats: domainTeam.stats ? {
       wins: domainTeam.stats.wins,
       losses: domainTeam.stats.losses,
-      pointsFor: domainTeam.stats.pointsFor,
-      pointsAgainst: domainTeam.stats.pointsAgainst,
-      gamesPlayed: domainTeam.stats.gamesPlayed,
+      ties: domainTeam.stats.ties || 0,
+      pointsFor: domainTeam.stats.pointsFor || 0,
+      pointsAgainst: domainTeam.stats.pointsAgainst || 0,
+      gamesPlayed: (domainTeam.stats.wins + domainTeam.stats.losses + (domainTeam.stats.ties || 0)),
     } : {
       wins: 0,
       losses: 0,
+      ties: 0,
       pointsFor: 0,
       pointsAgainst: 0,
       gamesPlayed: 0,
@@ -108,18 +122,23 @@ export async function fetchTeamDetails(teamId: string) {
 
 export async function fetchTeamFilters() {
   try {
+    // Use the same data source as games page for consistency
     const filterOptions = await filterService.getFilterOptions();
-    const seasons = await seasonService.getAllSeasons();
 
     // Transform to legacy filter format
+    const transformedSeasons = filterOptions.seasons.map(season => ({
+      _id: season.id,
+      name: season.name,
+      year: season.year,
+      isActive: Boolean(season.isActive), // Use the explicit isActive field
+      status: season.status,
+      startDate: season.startDate,
+      endDate: season.endDate,
+      activeDivisions: [], // TODO: Get divisions for season
+    }));
+
     return {
-      seasons: seasons.map(season => ({
-        _id: season.id,
-        name: season.name,
-        year: season.year,
-        isActive: season.status === "active",
-        activeDivisions: [], // TODO: Get divisions for season
-      })),
+      seasons: transformedSeasons,
       divisions: filterOptions.divisions.map(division => ({
         _id: division.id,
         name: division.name,
