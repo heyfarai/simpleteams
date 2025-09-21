@@ -8,6 +8,12 @@ import { LeagueFeatures } from "@/components/home/league-features";
 import { LeagueTeamSpotlight } from "@/components/home/league-team-spotlight";
 import { NextSessionCard } from "@/components/home/next-session-card";
 import { HowTheCircuitWorks } from "@/components/games/how-the-circuit-works";
+import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
+
+export const metadata = generateSiteMetadata({
+  title: "Ottawa's Premier Basketball League",
+  description: "Join the National Capital Hoops Circuit - Ottawa's elite basketball league featuring competitive divisions, player development, and championship tournaments. Register your team today and compete at the highest level."
+});
 
 export default function HomePage() {
   return (

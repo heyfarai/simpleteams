@@ -2,11 +2,12 @@ import { Suspense } from "react";
 import { GamesList } from "@/components/games/games-list";
 import { GamesLoading } from "@/components/games/games-loading";
 import { fetchFilterData } from "@/lib/data/fetch-filters";
+import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  title: "Game Schedules | National Capital Hoops Circuit",
-  description: "View all games and tournaments",
-};
+export const metadata = generateSiteMetadata({
+  title: "Game Schedules & Tournaments",
+  description: "View all National Capital Hoops Circuit games, schedules, and tournament brackets. Follow your favorite teams and stay updated on game results, upcoming matches, and championship tournaments."
+});
 
 export default async function GamesPage() {
   const filterData = await fetchFilterData();

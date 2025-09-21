@@ -1,4 +1,10 @@
 import PlayersShowcase from "@/components/players-showcase";
+import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
+
+export const metadata = generateSiteMetadata({
+  title: "Player Showcase",
+  description: "Discover the talented athletes competing in the National Capital Hoops Circuit. View player profiles, stats, highlights, and achievements from Ottawa's premier basketball league."
+});
 
 export default function PlayersPage() {
   return (

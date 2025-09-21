@@ -1,5 +1,11 @@
 import Image from "next/image";
 import { PDFViewer } from "@/components/pdf-viewer";
+import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
+
+export const metadata = generateSiteMetadata({
+  title: "About NCHC",
+  description: "Learn about the National Capital Hoops Circuit - Ottawa's premier basketball league. Discover our story, mission, and commitment to developing elite youth basketball in Canada's capital."
+});
 
 export default function AboutPage() {
   return (

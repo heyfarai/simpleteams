@@ -1,7 +1,10 @@
 import { TeamsDirectory } from "@/components/teams-directory";
-export const metadata = {
-  title: "Teams",
-};
+import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
+
+export const metadata = generateSiteMetadata({
+  title: "Teams Directory",
+  description: "Explore all teams competing in the National Capital Hoops Circuit. View team profiles, rosters, stats, and achievements from across all divisions in Ottawa's premier basketball league."
+});
 export default function TeamsPage() {
   return (
     <main className="min-h-screen bg-background">
