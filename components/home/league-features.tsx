@@ -16,7 +16,9 @@ export function LeagueFeatures() {
       {/* Grid */}
       <div className="grid md:grid-cols-2 gap-12">
         <div className="text-center md:text-left lg:w-3/4">
-          <h1 className="display-heading">Greatness Lives Here.</h1>
+          <div className="">
+            <h1 className="display-heading">Greatness Lives Here.</h1>
+          </div>
           <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
             Elite Features. <br />
             Feels Pro.

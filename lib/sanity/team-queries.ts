@@ -14,6 +14,52 @@ export const teamsQuery = groq`{
       "teamRefs": teams[]._ref
     }
   },
+  "teams": *[_type == "team" && status == "active"] {
+    _id,
+    name,
+    shortName,
+    "logo": logo.asset._ref,
+    coach,
+    region,
+    description,
+    homeVenue,
+    awards,
+    stats,
+    status,
+    rosters[] {
+      "season": season->{
+        _id,
+        name,
+        year
+      },
+      seasonStats {
+        wins,
+        losses,
+        ties,
+        pointsFor,
+        pointsAgainst,
+        homeRecord,
+        awayRecord,
+        conferenceRecord
+      }
+    }
+  }
+}`;
+
+export const teamsQueryAllStatus = groq`{
+  "seasons": *[_type == "season" && defined(activeDivisions)] | order(year desc) {
+    _id,
+    name,
+    year,
+    isActive,
+    "divisions": activeDivisions[status == "active" && defined(teams) && count(teams) > 0]{
+      "division": division->{
+        _id,
+        name
+      },
+      "teamRefs": teams[]._ref
+    }
+  },
   "teams": *[_type == "team"] {
     _id,
     name,
@@ -25,6 +71,7 @@ export const teamsQuery = groq`{
     homeVenue,
     awards,
     stats,
+    status,
     rosters[] {
       "season": season->{
         _id,

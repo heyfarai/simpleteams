@@ -47,7 +47,7 @@ export function ReviewStep({
   const { data: activeDivisions } = useActiveDivisions();
   
   const selectedDivision = activeDivisions?.find(
-    (d) => d.division._id === formData.divisionPreference
+    (d: any) => d.division._id === formData.divisionPreference
   );
 
   return (

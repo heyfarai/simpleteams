@@ -7,6 +7,7 @@ import { LeagueStructure } from "@/components/home/league-structure";
 import { LeagueFeatures } from "@/components/home/league-features";
 import { LeagueTeamSpotlight } from "@/components/home/league-team-spotlight";
 import { NextSessionCard } from "@/components/home/next-session-card";
+import { HowTheCircuitWorks } from "@/components/games/how-the-circuit-works";
 
 export default function HomePage() {
   return (

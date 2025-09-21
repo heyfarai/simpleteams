@@ -30,28 +30,23 @@ function PlayerCard({ player }: { player: Player }) {
   };
 
   return (
-    <Link
-      href={`/players/${player.player._id}`}
-      className="block"
-    >
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold">
-              #{player.jerseyNumber}
+    <Card className="">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold">
+            #{player.jerseyNumber}
+          </div>
+          <div className="flex-1">
+            <div className="font-medium text-foreground">
+              {player.player.name}
             </div>
-            <div className="flex-1">
-              <div className="font-medium text-foreground">
-                {player.player.name}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {player.position}
-              </div>
+            <div className="hidden text-sm text-muted-foreground">
+              {player.position}
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

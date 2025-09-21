@@ -62,9 +62,11 @@ export function LeagueDivisions() {
   return (
     <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto mt-24">
       <div className="text-center mb-24 space-y-4">
-        <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
-          Find Your Level.
-        </h1>
+        <div className="heading-highlight-container">
+          <h1 className="display-heading heading-highlight px-4">
+            Find Your Level.
+          </h1>
+        </div>
         <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
           4 Divisions. A Journey for Every Player.
         </h2>
@@ -88,7 +90,10 @@ export function LeagueDivisions() {
         {/* End Grid */}
 
         {/* Mobile CTA */}
-        <DivisionCTA activeDivision={null} isMobile />
+        <DivisionCTA
+          activeDivision={null}
+          isMobile
+        />
 
         {/* Background Color */}
         <div className="absolute inset-0 grid grid-cols-12 size-full">

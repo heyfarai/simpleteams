@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PDFViewer } from "@/components/pdf-viewer";
 
 export default function AboutPage() {
   return (
@@ -15,18 +16,20 @@ export default function AboutPage() {
               className="w-full max-w-44 mx-auto"
             />
           </div>
-          <h1 className="display-heading mt-8 mb-6 tracking-tight">
-            Champions
-            <span className="block">
-              <span className="text-primary">Rise</span> in the Capital
-            </span>
-          </h1>
+          <div className="heading-highlight-container">
+            <h1 className="display-heading mt-8 mb-6 tracking-tight">
+              Champions
+              <span className="block">
+                <span className="text-primary">Rise</span> in the Capital
+              </span>
+            </h1>
+          </div>
         </div>
       </section>
 
       {/* The Story */}
       <section className="py-0 px-8">
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className=" items-center">
             <div>
               <h1 className="hidden font-black lg:text-6xl md:text-3xl text-2xl tracking-tight text-foreground">
@@ -50,7 +53,8 @@ export default function AboutPage() {
       <section className="py-44 px-16">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl md:text-3xl font-normal mb-0 text-center text-foreground">
-            <span className="text-primary">Season 1</span> By the Numbers
+            <span className="text-primary">Season 1</span>
+            <br /> By the Numbers
           </h1>
           <p className="text-lg font-medium md:text-normal mb-16 text-center">
             The stats don't lie
@@ -81,8 +85,8 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow-lg">
+          <div className="hidden md:grid-cols-2 gap-8">
+            <div className=" p-8 rounded-lg shadow-lg">
               <div className="md:text-8xl text-6xl font-extrabold text-primary mb-4 grotesk">
                 97%
               </div>
@@ -101,9 +105,52 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      <section className="w-full min-h-screen bg-foreground flex items-center justify-center">
+        <div className="max-w-3xl mx-auto px-16">
+          <h1 className="text-4xl md:text-4xl font-normal mb-12 text-foreground">
+            <span className="text-[#dbe0e1]">
+              <span className="text-secondary pr-2 text-5xl md:text-7xl">
+                97%
+              </span>
+              of coaches and team staff members called their NCHC experience
+              <span className="pl-2 text-secondary"> “excellent”</span>.
+            </span>
+          </h1>
+          <h1 className="text-4xl md:text-4xl font-normal mb-0 text-foreground">
+            <span className="text-[#dbe0e1]">
+              <span className="text-secondary pr-2 text-5xl md:text-7xl">
+                93%
+              </span>
+              “would take part again”.
+            </span>
+          </h1>
+          <p className="text-lg italic font-medium md:text-normal mb-16 text-gray-600 mt-12">
+            Source: 2024 Post season survey
+          </p>
+        </div>
+      </section>
+      {/* Season 2 */}
+      <section className="py-44 px-16">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl md:text-3xl font-normal mb-0 text-center text-foreground">
+            <span className="text-primary">Season 2</span>
+          </h1>
+          <p className="text-lg font-medium md:text-normal mb-16 text-center">
+            Registration is open.
+          </p>
+
+          {/* PDF Viewer */}
+          <div className="mb-16">
+            <PDFViewer
+              pdfUrl="/pdf/NCHC-Season-2-Full-details.pdf"
+              title="NCHC Season 2 Full Details"
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Commissioner Message */}
-      <section className="py-44 px-4">
+      <section className="py-36 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
@@ -114,7 +161,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="space-y-8 max-w-xl mx-auto">
+          <div className="space-y-8 max-w-3xl mx-auto">
             <div className="p-8">
               <div className="flex items-start space-x-4">
                 <div className="w-8 h-8 bg-black rounded-full flex-shrink-0 flex items-center justify-center">

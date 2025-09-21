@@ -37,11 +37,7 @@ export function ComparisonTable() {
       );
     }
 
-    return (
-      <span className={isHighlighted ? "text-green-600 font-bold" : ""}>
-        {value}
-      </span>
-    );
+    return <span className={isHighlighted ? "" : ""}>{value}</span>;
   };
 
   return (
@@ -65,19 +61,19 @@ export function ComparisonTable() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-center text-normal font-extrabold text-green-700 uppercase"
+                      className="px-6 py-3 text-center text-normal font-extrabold  "
                     >
                       Full Season
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-center text-normal font-extrabold text-gray-700 uppercase"
+                      className="px-6 py-3 text-center text-normal font-extrabold text-gray-700 "
                     >
                       Two Session
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-center text-normal font-extrabold text-gray-700 uppercase"
+                      className="px-6 py-3 text-center text-normal font-extrabold text-gray-700 "
                     >
                       Pay Per Session
                     </th>
@@ -121,7 +117,6 @@ export function ComparisonTable() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

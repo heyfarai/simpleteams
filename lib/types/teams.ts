@@ -58,6 +58,7 @@ export interface Team {
   rosters?: TeamRoster[];
   record?: string;
   showStats?: boolean;
+  status?: 'active' | 'inactive' | 'pending' | 'suspended';
 }
 
 export interface TeamFilterState {

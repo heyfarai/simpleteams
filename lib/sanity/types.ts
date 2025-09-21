@@ -154,6 +154,13 @@ export interface PlayerWithTeamInfo extends SanityPlayer {
 }
 
 export interface FilterOptions {
+  sessions: Array<{
+    _id: string;
+    name: string;
+    type?: string;
+    startDate?: string;
+    isActive?: boolean;
+  }>;
   seasons: SanitySeason[];
   divisions: SanityDivision[];
   teams: Pick<SanityTeam, "_id" | "name" | "shortName">[];

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import Link from "next/link";
+import { HowTheCircuitWorks } from "@/components/games/how-the-circuit-works";
 
 const season = {
   name: "2025-26 Regular Season",
@@ -47,7 +48,9 @@ const season = {
 };
 export function UpcomingSeason() {
   return (
-    <div className="text-center py-8 space-y-6">
+    <div className="text-center py-8 space-y-8">
+      <HowTheCircuitWorks />
+
       <div className="seasonteaser">
         <div className="space-y-4">
           <p className="text-normal text-foreground/50">

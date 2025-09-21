@@ -1,5 +1,5 @@
 import { client } from "@/lib/sanity/client";
-import { teamsQuery, teamDetailsQuery } from "@/lib/sanity/team-queries";
+import { teamsQuery, teamsQueryAllStatus, teamDetailsQuery } from "@/lib/sanity/team-queries";
 import { Team } from "@/lib/types/teams";
 
 async function fetchWithRetry<T>(
@@ -76,6 +76,7 @@ interface SanityTeam {
   description?: string;
   homeVenue?: string;
   awards?: string[];
+  status?: 'active' | 'inactive' | 'pending' | 'suspended';
   stats?: {
     wins?: number;
     losses?: number;
@@ -122,10 +123,11 @@ interface SanityAllTeamsResponse {
   teams: SanityTeam[];
 }
 
-export async function fetchAllTeams(): Promise<Team[]> {
+export async function fetchAllTeams(activeOnly: boolean = false): Promise<Team[]> {
   try {
+    const statusFilter = activeOnly ? ' && status == "active"' : '';
     const allTeamsQuery = `{
-      "teams": *[_type == "team"] {
+      "teams": *[_type == "team"${statusFilter}] {
         _id,
         name,
         shortName,
@@ -136,6 +138,7 @@ export async function fetchAllTeams(): Promise<Team[]> {
         homeVenue,
         awards,
         stats,
+        status,
         "divisions": *[_type == "seasonDivision" && references(^._id)]{
           "season": season->{
             _id,
@@ -207,6 +210,7 @@ export async function fetchAllTeams(): Promise<Team[]> {
         region: team.region || "Unknown",
         homeVenue: team.homeVenue || "TBA",
         awards: team.awards || [],
+        status: team.status || 'active',
         rosters: (team.rosters ?? []).map((roster) => ({
           season: roster.season,
           seasonStats: roster.seasonStats
@@ -251,9 +255,10 @@ export async function fetchAllTeams(): Promise<Team[]> {
   }
 }
 
-export async function fetchTeams(seasonId?: string): Promise<Team[]> {
+export async function fetchTeams(seasonId?: string, activeOnly: boolean = false): Promise<Team[]> {
   try {
-    const data = await fetchWithRetry<SanityResponse>(teamsQuery);
+    const query = activeOnly ? teamsQuery : teamsQueryAllStatus;
+    const data = await fetchWithRetry<SanityResponse>(query);
     if (
       !data?.teams ||
       !Array.isArray(data.teams) ||
@@ -319,6 +324,7 @@ export async function fetchTeams(seasonId?: string): Promise<Team[]> {
           region: team.region || "Unknown",
           homeVenue: team.homeVenue || "TBA",
           awards: team.awards || [],
+          status: team.status || 'active',
           rosters: (team.rosters ?? []).map((roster) => ({
             season: roster.season,
             seasonStats: roster.seasonStats

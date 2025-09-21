@@ -5,8 +5,11 @@ import { NextSessionCard } from "./next-session-card";
 
 export function HeroSection() {
   return (
-    <section className="relative max-h-[80vh] min-h-[600px] w-full overflow-hidden flex">
-      <div className="relative flex-1 lg:w-2/3 p-0">
+    <section className="relative max-h-[80vh] min-h-[600px] w-full overflow-hidden flex bg-contain bg-center bg-no-repeat bg-opacity-50 ">
+      {/* Overlay for better content readability */}
+      <div className="absolute inset-0 "></div>
+
+      <div className="relative flex-1 lg:w-2/3 p-0 z-10">
         {/* Hero Content */}
         <div className="">
           <div className="contentContainer mx-auto ">

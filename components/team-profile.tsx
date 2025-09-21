@@ -54,13 +54,11 @@ export function TeamProfile({ teamId }: TeamProfileProps) {
     availableSeasons.find((s) => s.id === selectedSeason)?.name || "";
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-48">
+    <div className="container mx-auto px-4 py-8 mt-16 md:mt-24">
       {/* Team Header */}
       <div className="mb-8">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 mb-6">
-          <div className="">
-            <TeamHeader team={team} />
-          </div>
+        <div className="flex justify-center mb-6">
+          <TeamHeader team={team} />
         </div>
 
         {/* Team Stats Overview */}

@@ -15,7 +15,11 @@ export default async function GamesPage() {
     <main className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-18 mt-16 md:mt-24 text-center">
-          <h1 className=" display-heading">Game Schedules</h1>
+          <div className="heading-highlight-container">
+            <h1 className="display-heading heading-highlight">
+              Game Schedules
+            </h1>
+          </div>
           <p className="text-muted-foreground">
             Stay up to date with all games and tournaments
           </p>

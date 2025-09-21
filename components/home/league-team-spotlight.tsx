@@ -15,8 +15,8 @@ export function LeagueTeamSpotlight() {
   useEffect(() => {
     async function loadTeams() {
       try {
-        const teamsData = await fetchAllTeams();
-        setTeams(teamsData.slice(0, 16)); // Take first 4 teams
+        const teamsData = await fetchAllTeams(true); // Only active teams
+        setTeams(teamsData.slice(0, 16)); // Take first 16 teams
         setError(null);
       } catch (err) {
         setError("Failed to load teams");
@@ -58,11 +58,11 @@ export function LeagueTeamSpotlight() {
   }
 
   return (
-    <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+    <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto mt-48">
       <div className="text-center mb-24 space-y-4">
-        <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
-          Rep Your City.
-        </h1>
+        <div className="heading-highlight-container">
+          <h1 className="display-heading heading-highlight">Rep Your City.</h1>
+        </div>
         <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
           Champions Compete Here.
         </h2>

@@ -22,7 +22,7 @@ export function PackageSelectionStep({
     if (onNext) {
       setTimeout(() => {
         onNext();
-      }, 300);
+      }, 100);
     }
   };
 
@@ -37,15 +37,14 @@ export function PackageSelectionStep({
         </p>
       </div>
 
-      {/* Official Pricing Table */}
-      <PricingTable />
-
       {/* Package Selection Cards */}
       <PackageGrid
         packages={packages}
         selectedPackage={selectedPackage}
         onPackageSelect={handlePackageSelect}
       />
+      {/* Official Pricing Table */}
+      <PricingTable />
       {/* Comparison Table */}
       <ComparisonTable />
     </div>

@@ -22,13 +22,6 @@ import { toast } from "sonner";
 import { useServiceStatus } from "@/hooks/use-service-status";
 import { useAuth } from "@/hooks/use-auth";
 import { InlineMagicLinkSignIn } from "@/components/auth/magic-link-signin";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 interface Division {
   _id: string;
@@ -225,7 +218,7 @@ export function CheckoutForm() {
     // Prevent double-clicking and multiple submissions
     if (isSubmitting) {
       toast.error("Submission in progress", {
-        description: "Please wait while we process your registration."
+        description: "Please wait while we process your registration.",
       });
       return;
     }
@@ -289,7 +282,7 @@ export function CheckoutForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       <div className="container mx-auto px-6 py-8">
         {/* Mobile Summary Accordion */}
         <div className="lg:hidden mb-6 max-w-2xl mx-auto">
@@ -421,7 +414,7 @@ export function CheckoutForm() {
                               <button
                                 type="button"
                                 onClick={() => setShowSignInModal(true)}
-                                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                className="text-sm text-primary hover:text-primary/80 underline"
                               >
                                 Sign in
                               </button>
@@ -429,7 +422,7 @@ export function CheckoutForm() {
                               <button
                                 type="button"
                                 onClick={handleChangeEmail}
-                                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                className="text-sm text-primary hover:text-primary/80 underline"
                               >
                                 Change email
                               </button>
@@ -442,7 +435,7 @@ export function CheckoutForm() {
                             onChange={(e) =>
                               handleInputChange("contactEmail", e.target.value)
                             }
-                            className={`mt-1 ${
+                            className={`mt-1 bg-primary/10 shadow-none ${
                               user ? "bg-gray-50 cursor-not-allowed" : ""
                             }`}
                             readOnly={!!user}
@@ -458,7 +451,7 @@ export function CheckoutForm() {
                             onChange={(e) =>
                               handleInputChange("teamName", e.target.value)
                             }
-                            className="mt-1"
+                            className="mt-1 bg-primary/10 shadow-none"
                             required
                           />
                         </div>
@@ -470,7 +463,7 @@ export function CheckoutForm() {
                             onChange={(e) =>
                               handleInputChange("city", e.target.value)
                             }
-                            className="mt-1"
+                            className="mt-1 bg-primary/10 shadow-none"
                             required
                           />
                         </div>
@@ -482,7 +475,7 @@ export function CheckoutForm() {
                             onChange={(e) =>
                               handleInputChange("province", e.target.value)
                             }
-                            className="mt-1"
+                            className="mt-1 bg-primary/10 shadow-none"
                             required
                           />
                         </div>
@@ -532,6 +525,7 @@ export function CheckoutForm() {
                               <RadioGroupItem
                                 value={division._id}
                                 id={division._id}
+                                className="bg-primary/10 shadow-none"
                               />
                               <Label
                                 htmlFor={division._id}
@@ -571,7 +565,7 @@ export function CheckoutForm() {
                                   e.target.value
                                 )
                               }
-                              className="mt-1"
+                              className="mt-1 bg-primary/10 shadow-none"
                               required
                             />
                           </div>
@@ -589,7 +583,7 @@ export function CheckoutForm() {
                                   e.target.value
                                 )
                               }
-                              className="mt-1"
+                              className="mt-1 bg-primary/10 shadow-none"
                               required
                             />
                           </div>
@@ -606,7 +600,7 @@ export function CheckoutForm() {
                                   e.target.value
                                 )
                               }
-                              className="mt-1"
+                              className="mt-1 bg-primary/10 shadow-none"
                             />
                           </div>
                           <div>
@@ -617,7 +611,7 @@ export function CheckoutForm() {
                                 handleInputChange("primaryContactRole", value)
                               }
                             >
-                              <SelectTrigger className="mt-1">
+                              <SelectTrigger className="mt-1 bg-primary/10 shadow-none w-full">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -653,7 +647,7 @@ export function CheckoutForm() {
                                   e.target.value
                                 )
                               }
-                              className="mt-1"
+                              className="mt-1 bg-primary/10 shadow-none"
                               required
                             />
                           </div>
@@ -671,7 +665,7 @@ export function CheckoutForm() {
                                   e.target.value
                                 )
                               }
-                              className="mt-1"
+                              className="mt-1 bg-primary/10 shadow-none"
                               required
                             />
                           </div>
@@ -686,7 +680,7 @@ export function CheckoutForm() {
                                   e.target.value
                                 )
                               }
-                              className="mt-1"
+                              className="mt-1 bg-primary/10 shadow-none"
                             />
                           </div>
                           <div>
@@ -703,7 +697,7 @@ export function CheckoutForm() {
                                 )
                               }
                               placeholder="e.g., Level 3 Certified, Youth Development"
-                              className="mt-1"
+                              className="mt-1 bg-primary/10 shadow-none"
                             />
                           </div>
                         </div>
@@ -716,35 +710,33 @@ export function CheckoutForm() {
           </div>
 
           {/* Summary Sidebar */}
-          <div className="hidden lg:block lg:col-span-5">
+          <div className="hidden lg:block lg:col-span-5 mt-11">
             <div className="sticky top-8">
-              <Card>
+              <Card className="bg-secondary text-foreground">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-0">
+                    <CreditCard className="h-5 w-5 mr-2" />
                     Order Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 md:space-y-6">
+                <CardContent className="space-y-4 md:space-y-6 px-6">
                   {/* Package Details */}
                   {formData.selectedPackage && (
                     <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="font-medium">
-                          {packageDetails.name}
-                        </span>
+                      <div className="flex justify-between mb-0">
+                        <span className="font-bold">{packageDetails.name}</span>
                         <div className="text-right">
                           {packageDetails.originalAmount && (
                             <div className="text-sm text-gray-500 line-through">
                               ${packageDetails.originalAmount.toLocaleString()}
                             </div>
                           )}
-                          <div className="font-medium">
+                          <div className="font-bold">
                             ${packageDetails.amount.toLocaleString()}
                           </div>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-[#f3f4f5] mt-0">
                         {packageDetails.description}
                       </p>
                       {packageDetails.originalAmount && (
@@ -763,36 +755,35 @@ export function CheckoutForm() {
                   )}
 
                   {/* Registration Details */}
-                  <div className="space-y-3 pt-6 border-t">
-                    <h4 className="font-medium">Registration Details</h4>
+                  <div className="space-y-3 pt-0 ">
                     {formData.teamName && (
                       <div className="flex justify-between text-sm">
-                        <span>Team:</span>
-                        <span className="font-medium">{formData.teamName}</span>
+                        <span>Team</span>
+                        <span className="font-bold">{formData.teamName}</span>
+                      </div>
+                    )}
+                    {selectedDivision && (
+                      <div className="flex justify-between text-sm">
+                        <span>Division</span>
+                        <span className="font-bold">
+                          {selectedDivision.name}
+                        </span>
                       </div>
                     )}
                     {(formData.city || formData.province) && (
                       <div className="flex justify-between text-sm">
-                        <span>Location:</span>
-                        <span className="font-medium">
+                        <span>Location</span>
+                        <span className="font-bold">
                           {[formData.city, formData.province]
                             .filter(Boolean)
                             .join(", ")}
                         </span>
                       </div>
                     )}
-                    {selectedDivision && (
-                      <div className="flex justify-between text-sm">
-                        <span>Division:</span>
-                        <span className="font-medium">
-                          {selectedDivision.name}
-                        </span>
-                      </div>
-                    )}
                     {formData.contactEmail && (
                       <div className="flex justify-between text-sm">
-                        <span>Contact:</span>
-                        <span className="font-medium">
+                        <span>Contact</span>
+                        <span className="font-bold">
                           {formData.contactEmail}
                         </span>
                       </div>
@@ -800,10 +791,10 @@ export function CheckoutForm() {
                   </div>
 
                   {/* Total */}
-                  <div className="pt-6 border-t">
+                  <div className="pt-6 border-t border-primary/20">
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-medium">Total</span>
-                      <span className="text-lg font-bold">
+                      <span className="font-medium">Total</span>
+                      <span className="font-bold">
                         ${packageDetails.amount.toLocaleString()}
                       </span>
                     </div>
@@ -813,7 +804,7 @@ export function CheckoutForm() {
                   <Button
                     onClick={handleSubmit}
                     disabled={!isFormValid() || isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full bg-primary/80 hover:bg-primary-700 text-white"
                     size="lg"
                   >
                     {isSubmitting
@@ -833,46 +824,45 @@ export function CheckoutForm() {
       </div>
 
       {/* Sign-in Modal */}
-      <Dialog
-        open={showSignInModal}
-        onOpenChange={setShowSignInModal}
-      >
-        <DialogContent
-          className="sm:max-w-md"
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 9999,
-          }}
+      {showSignInModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ zIndex: 9999 }}
         >
           <div
             className="fixed inset-0 bg-black/50"
-            style={{ zIndex: -1 }}
             onClick={() => setShowSignInModal(false)}
           />
-          <DialogHeader>
-            <DialogTitle>Sign in to your account</DialogTitle>
-            <DialogDescription>
-              Already have an account? Sign in to add this team to your existing
-              account.
-            </DialogDescription>
-          </DialogHeader>
+          <div className="relative bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+            <button
+              onClick={() => setShowSignInModal(false)}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
 
-          <div className="py-4">
-            <InlineMagicLinkSignIn
-              returnTo={`/register/checkout?package=${formData.selectedPackage}`}
-              onSuccess={() => {
-                setShowSignInModal(false);
-                toast.success("Magic link sent!", {
-                  description: "Check your email for the sign-in link.",
-                });
-              }}
-            />
+            <div className="mb-4">
+              <h2 className="text-xl font-bold">Sign in to your account</h2>
+              <p className="text-gray-600 text-sm mt-1">
+                Already have an account? Sign in to add this team to your
+                existing account.
+              </p>
+            </div>
+
+            <div className="py-4">
+              <InlineMagicLinkSignIn
+                returnTo={`/register/checkout?package=${formData.selectedPackage}`}
+                onSuccess={() => {
+                  setShowSignInModal(false);
+                  toast.success("Magic link sent!", {
+                    description: "Check your email for the sign-in link.",
+                  });
+                }}
+              />
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }

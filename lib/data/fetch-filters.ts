@@ -46,6 +46,7 @@ export async function fetchFilterData(): Promise<FilterOptions> {
   } catch (error) {
     console.error('Error fetching filter data:', error)
     return {
+      sessions: [],
       divisions: [],
       seasons: [],
       teams: [],
