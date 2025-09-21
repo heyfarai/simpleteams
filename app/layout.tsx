@@ -7,7 +7,10 @@ import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { Schibsted_Grotesk } from "next/font/google";
-import { generateMetadata as generateSiteMetadata, generateOrganizationSchema } from "@/lib/metadata";
+import {
+  generateMetadata as generateSiteMetadata,
+  generateOrganizationSchema,
+} from "@/lib/metadata";
 import "./globals.css";
 
 const schibstedGrotesk = Schibsted_Grotesk({
@@ -29,10 +32,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
+        <link
+          rel="icon"
+          href="/favicon.ico"
+          sizes="any"
+        />
+        <link
+          rel="apple-touch-icon"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="manifest"
+          href="/manifest.json"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -44,12 +56,13 @@ export default function RootLayout({
         className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${schibstedGrotesk.variable}`}
       >
         <Providers>
-          <LayoutWrapper>
-            {children}
-          </LayoutWrapper>
+          <LayoutWrapper>{children}</LayoutWrapper>
           <Analytics />
           <Toaster />
-          <SonnerToaster position="top-right" richColors />
+          <SonnerToaster
+            position="top-right"
+            richColors
+          />
         </Providers>
       </body>
     </html>
