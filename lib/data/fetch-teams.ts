@@ -1,452 +1,104 @@
-import { client } from "@/lib/sanity/client";
-import { teamsQuery, teamsQueryAllStatus, teamDetailsQuery } from "@/lib/sanity/team-queries";
-import { Team } from "@/lib/types/teams";
+// Database-agnostic team data fetching using service layer
+import { teamService, seasonService, filterService } from "@/lib/services";
+import type { Team as DomainTeam } from "@/lib/domain/models";
+import { Team } from "@/lib/types/teams"; // Legacy type for backward compatibility
 
-async function fetchWithRetry<T>(
-  query: string,
-  retries = 3,
-  delay = 1000
-): Promise<T> {
-  let lastError;
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await client.fetch<T>(query);
-    } catch (error) {
-      lastError = error;
-      if (error instanceof Error && error.message.includes("authentication")) {
-        throw new Error(
-          "Authentication failed. Please check your Sanity token."
-        );
-      }
-      if (i < retries - 1)
-        await new Promise((r) => setTimeout(r, delay * (i + 1)));
-    }
-  }
-  throw lastError;
-}
-
-interface SanityDivisionInfo {
-  division: {
-    _id: string;
-    name: string;
-  };
-  teamRefs: string[];
-}
-
-interface SanitySeason {
-  _id: string;
-  name: string;
-  year: number;
-  isActive?: boolean;
-  divisions: SanityDivisionInfo[];
-}
-
-interface SanityRoster {
-  season: {
-    _id: string;
-    name: string;
-    year: number;
-  };
-  players?: Array<{
-    player: {
-      _id: string;
-      name: string;
-    };
-    jerseyNumber: number;
-    position: string;
-    status: 'active' | 'inactive' | 'injured';
-  }>;
-  seasonStats?: {
-    wins?: number;
-    losses?: number;
-    ties?: number;
-    pointsFor?: number;
-    pointsAgainst?: number;
-    gamesPlayed?: number;
+// Transform domain model Team to legacy Team interface for backward compatibility
+function transformToLegacyTeam(domainTeam: DomainTeam): Team {
+  return {
+    id: domainTeam.id,
+    _id: domainTeam.id,
+    name: domainTeam.name,
+    shortName: domainTeam.shortName,
+    logo: domainTeam.logo,
+    coach: domainTeam.headCoach || "TBA",
+    region: domainTeam.location?.city || "Unknown",
+    homeVenue: domainTeam.location?.name || "TBA",
+    awards: [], // Domain model doesn't have awards yet
+    status: domainTeam.status,
+    description: "", // Domain model doesn't have description yet
+    division: domainTeam.division,
+    season: domainTeam.season,
+    rosters: [], // Will be populated if needed
+    stats: domainTeam.stats ? {
+      wins: domainTeam.stats.wins,
+      losses: domainTeam.stats.losses,
+      pointsFor: domainTeam.stats.pointsFor,
+      pointsAgainst: domainTeam.stats.pointsAgainst,
+      gamesPlayed: domainTeam.stats.gamesPlayed,
+    } : {
+      wins: 0,
+      losses: 0,
+      pointsFor: 0,
+      pointsAgainst: 0,
+      gamesPlayed: 0,
+    },
+    showStats: Boolean(domainTeam.stats),
   };
 }
 
-interface SanityTeam {
-  _id: string;
-  name: string;
-  shortName?: string;
-  logo?: string;
-  coach?: string;
-  region?: string;
-  description?: string;
-  homeVenue?: string;
-  awards?: string[];
-  status?: 'active' | 'inactive' | 'pending' | 'suspended';
-  stats?: {
-    wins?: number;
-    losses?: number;
-    pointsFor?: number;
-    pointsAgainst?: number;
-    gamesPlayed?: number;
-  };
-  divisions?: Array<{
-    season: {
-      _id: string;
-      name: string;
-      year: number;
-    };
-    division: {
-      _id: string;
-      name: string;
-    };
-  }>;
-  rosters?: Array<{
-    season: {
-      _id: string;
-      name: string;
-      year: number;
-    };
-    seasonStats?: {
-      wins?: number;
-      losses?: number;
-      ties?: number;
-      pointsFor?: number;
-      pointsAgainst?: number;
-      homeRecord?: string;
-      awayRecord?: string;
-      conferenceRecord?: string;
-    };
-  }>;
-}
-
-interface SanityResponse {
-  teams: SanityTeam[];
-  seasons: SanitySeason[];
-}
-
-interface SanityAllTeamsResponse {
-  teams: SanityTeam[];
-}
+// Database-agnostic functions using service layer
 
 export async function fetchAllTeams(activeOnly: boolean = false): Promise<Team[]> {
   try {
-    const statusFilter = activeOnly ? ' && status == "active"' : '';
-    const allTeamsQuery = `{
-      "teams": *[_type == "team"${statusFilter}] {
-        _id,
-        name,
-        shortName,
-        logo,
-        coach,
-        region,
-        description,
-        homeVenue,
-        awards,
-        stats,
-        status,
-        "divisions": *[_type == "seasonDivision" && references(^._id)]{
-          "season": season->{
-            _id,
-            name,
-            year
-          },
-          "division": division->{
-            _id,
-            name
-          }
-        },
-        rosters[] {
-          "season": season->{
-            _id,
-            name,
-            year
-          },
-          seasonStats {
-            wins,
-            losses,
-            ties,
-            pointsFor,
-            pointsAgainst,
-            homeRecord,
-            awayRecord,
-            conferenceRecord
-          }
-        }
-      }
-    }`;
+    let teams: DomainTeam[];
 
-    const data = await fetchWithRetry<SanityAllTeamsResponse>(allTeamsQuery);
-
-    if (!data?.teams || !Array.isArray(data.teams)) {
-      throw new Error("Invalid response format from Sanity");
+    if (activeOnly) {
+      teams = await teamService.getActiveTeams();
+    } else {
+      teams = await teamService.getAllTeams();
     }
 
-    const { teams } = data;
-
-    // Transform all teams without season filtering
-    return teams.map((team) => {
-      // Get the most recent roster for stats
-      const mostRecentRoster = team.rosters?.sort(
-        (a, b) => b.season.year - a.season.year
-      )[0];
-
-      const hasStats = Boolean(
-        mostRecentRoster?.seasonStats?.wins !== null &&
-          mostRecentRoster?.seasonStats?.wins !== undefined &&
-          mostRecentRoster?.seasonStats?.losses !== null &&
-          mostRecentRoster?.seasonStats?.losses !== undefined
-      );
-
-      // Get the most recent division info
-      const mostRecentDivision = team.divisions?.sort(
-        (a, b) => b.season.year - a.season.year
-      )[0];
-
-      return {
-        ...team,
-        id: team._id,
-        division: mostRecentDivision?.division,
-        season: mostRecentDivision?.season || {
-          _id: "",
-          name: "No Season",
-          year: 0,
-        },
-        coach: team.coach || "TBA",
-        region: team.region || "Unknown",
-        homeVenue: team.homeVenue || "TBA",
-        awards: team.awards || [],
-        status: team.status || 'active',
-        rosters: (team.rosters ?? []).map((roster) => ({
-          season: roster.season,
-          seasonStats: roster.seasonStats
-            ? {
-                wins: roster.seasonStats.wins ?? 0,
-                losses: roster.seasonStats.losses ?? 0,
-                ties: roster.seasonStats.ties ?? 0,
-                pointsFor: roster.seasonStats.pointsFor ?? 0,
-                pointsAgainst: roster.seasonStats.pointsAgainst ?? 0,
-                gamesPlayed:
-                  (roster.seasonStats.wins ?? 0) +
-                  (roster.seasonStats.losses ?? 0) +
-                  (roster.seasonStats.ties ?? 0),
-              }
-            : undefined,
-        })),
-        stats:
-          hasStats && mostRecentRoster?.seasonStats
-            ? {
-                wins: mostRecentRoster.seasonStats.wins ?? 0,
-                losses: mostRecentRoster.seasonStats.losses ?? 0,
-                pointsFor: mostRecentRoster.seasonStats.pointsFor ?? 0,
-                pointsAgainst: mostRecentRoster.seasonStats.pointsAgainst ?? 0,
-                gamesPlayed:
-                  (mostRecentRoster.seasonStats.wins ?? 0) +
-                  (mostRecentRoster.seasonStats.losses ?? 0) +
-                  (mostRecentRoster.seasonStats.ties ?? 0),
-              }
-            : {
-                wins: 0,
-                losses: 0,
-                pointsFor: 0,
-                pointsAgainst: 0,
-                gamesPlayed: 0,
-              },
-        showStats: hasStats,
-      };
-    });
+    return teams.map(transformToLegacyTeam);
   } catch (error) {
     console.error("Error fetching all teams:", error);
-    throw error;
+    return [];
   }
 }
 
 export async function fetchTeams(seasonId?: string, activeOnly: boolean = false): Promise<Team[]> {
   try {
-    const query = activeOnly ? teamsQuery : teamsQueryAllStatus;
-    const data = await fetchWithRetry<SanityResponse>(query);
-    if (
-      !data?.teams ||
-      !Array.isArray(data.teams) ||
-      !data?.seasons ||
-      !Array.isArray(data.seasons)
-    ) {
-      throw new Error("Invalid response format from Sanity");
+    let teams: DomainTeam[];
+
+    if (seasonId) {
+      teams = await teamService.getTeamsBySeason(seasonId);
+    } else {
+      // Get teams for current season
+      const currentSeason = await seasonService.getCurrentSeason();
+      if (currentSeason) {
+        teams = await teamService.getTeamsBySeason(currentSeason.id);
+      } else {
+        teams = await teamService.getAllTeams();
+      }
     }
 
-    const { teams, seasons } = data;
-
-    // Find the specified season or default to the first active season
-    let targetSeason = seasonId
-      ? seasons.find((s) => s._id === seasonId)
-      : seasons.find((s) => s.isActive) || seasons[0];
-
-    if (!targetSeason) {
-      return [];
+    if (activeOnly) {
+      teams = teams.filter(team => team.status === "active");
     }
 
-    // Get all team IDs that are in divisions of the target season
-    const seasonTeamIds = new Set<string>();
-    const teamDivisions = new Map<string, { _id: string; name: string }>();
-    
-    targetSeason.divisions.forEach((div) => {
-      div.teamRefs.forEach((teamRef) => {
-        seasonTeamIds.add(teamRef);
-        teamDivisions.set(teamRef, div.division);
-      });
-    });
-
-    // Filter and transform teams that are in the target season
-    return teams
-      .filter((team) => seasonTeamIds.has(team._id))
-      .map((team) => {
-        // Find roster for target season
-        const activeRoster = team.rosters?.find(
-          (r) => r.season._id === targetSeason._id
-        );
-
-        // Find the division for this team in the target season
-        const teamDivision = targetSeason.divisions.find(div => 
-          div.teamRefs.includes(team._id)
-        )?.division;
-
-        const hasStats = Boolean(
-          activeRoster?.seasonStats?.wins !== null &&
-            activeRoster?.seasonStats?.wins !== undefined &&
-            activeRoster?.seasonStats?.losses !== null &&
-            activeRoster?.seasonStats?.losses !== undefined
-        );
-
-        return {
-          ...team,
-          id: team._id,
-          division: teamDivisions.get(team._id),
-          season: {
-            _id: targetSeason._id,
-            name: targetSeason.name,
-            year: targetSeason.year,
-          },
-          coach: team.coach || "TBA",
-          region: team.region || "Unknown",
-          homeVenue: team.homeVenue || "TBA",
-          awards: team.awards || [],
-          status: team.status || 'active',
-          rosters: (team.rosters ?? []).map((roster) => ({
-            season: roster.season,
-            seasonStats: roster.seasonStats
-              ? {
-                  wins: roster.seasonStats.wins ?? 0,
-                  losses: roster.seasonStats.losses ?? 0,
-                  ties: roster.seasonStats.ties ?? 0,
-                  pointsFor: roster.seasonStats.pointsFor ?? 0,
-                  pointsAgainst: roster.seasonStats.pointsAgainst ?? 0,
-                  gamesPlayed:
-                    (roster.seasonStats.wins ?? 0) +
-                    (roster.seasonStats.losses ?? 0) +
-                    (roster.seasonStats.ties ?? 0),
-                }
-              : undefined,
-          })),
-          stats:
-            hasStats && activeRoster?.seasonStats
-              ? {
-                  wins: activeRoster.seasonStats.wins ?? 0,
-                  losses: activeRoster.seasonStats.losses ?? 0,
-                  pointsFor: activeRoster.seasonStats.pointsFor ?? 0,
-                  pointsAgainst: activeRoster.seasonStats.pointsAgainst ?? 0,
-                  gamesPlayed:
-                    (activeRoster.seasonStats.wins ?? 0) +
-                    (activeRoster.seasonStats.losses ?? 0) +
-                    (activeRoster.seasonStats.ties ?? 0),
-                }
-              : {
-                  wins: 0,
-                  losses: 0,
-                  pointsFor: 0,
-                  pointsAgainst: 0,
-                  gamesPlayed: 0,
-                },
-          showStats: hasStats,
-        };
-      });
+    return teams.map(transformToLegacyTeam);
   } catch (error) {
     console.error("Error fetching teams:", error);
-    throw error;
+    return [];
   }
 }
 
 export async function fetchTeamDetails(teamId: string) {
   try {
-    const team = await client.fetch<SanityTeam & { rosters?: SanityRoster[] }>(
-      `*[_type == "team" && _id == $teamId][0] {
-      _id,
-      name,
-      "logo": logo.asset._ref,
-      coach,
-      region,
-      description,
-      homeVenue,
-      awards,
-      stats,
-      rosters[] {
-        "season": season->{
-          _id,
-          name,
-          year
-        },
-        players[] {
-          "player": player->{
-            _id,
-            name
-          },
-          jerseyNumber,
-          position,
-          status
-        },
-        seasonStats {
-          wins,
-          losses,
-          ties,
-          pointsFor,
-          pointsAgainst,
-          gamesPlayed
-        }
-      }
-    }`,
-      { teamId }
-    );
+    const team = await teamService.getTeamById(teamId);
 
     if (!team) {
       throw new Error(`Team not found: ${teamId}`);
     }
 
+    // Transform to legacy format with additional details
+    const legacyTeam = transformToLegacyTeam(team);
+
+    // For team details, we might need additional roster information
+    // This would require implementing player fetching by team in the service layer
     return {
-      ...team,
-      id: team._id,
-      rosters: (team.rosters || []).map((roster: SanityRoster) => {
-        if (!roster.season) {
-          console.warn(`Invalid roster data for team ${teamId}: missing season`, roster);
-          return null;
-        }
-        return {
-          season: roster.season,
-          players: (roster.players || []).map(player => ({
-            player: player.player,
-            jerseyNumber: player.jerseyNumber,
-            position: player.position,
-            status: player.status
-          })),
-          seasonStats: roster.seasonStats || {
-            wins: 0,
-            losses: 0,
-            ties: 0,
-            pointsFor: 0,
-            pointsAgainst: 0,
-            gamesPlayed: 0
-          }
-        };
-      }).filter((roster): roster is NonNullable<typeof roster> => roster !== null),
-      stats: {
-        wins: team.stats?.wins || 0,
-        losses: team.stats?.losses || 0,
-        pointsFor: team.stats?.pointsFor || 0,
-        pointsAgainst: team.stats?.pointsAgainst || 0,
-        gamesPlayed: team.stats?.gamesPlayed || 0,
-      },
+      ...legacyTeam,
+      rosters: [], // TODO: Implement roster fetching through service layer
     };
   } catch (error) {
     console.error("Error fetching team details:", error);
@@ -456,59 +108,65 @@ export async function fetchTeamDetails(teamId: string) {
 
 export async function fetchTeamFilters() {
   try {
-    const [seasonsData, awards] = await Promise.all([
-      // Fetch seasons with their active divisions
-      client.fetch(`*[_type == "season"] | order(year desc) {
-        _id,
-        name,
-        year,
-        isActive,
-        "divisions": activeDivisions[status == "active" && defined(teams) && count(teams) > 0]{
-          "division": division->{
-            _id,
-            name
-          }
-        }
-      }`),
-      // Fetch all unique awards
-      client.fetch('*[_type == "team"].awards[]'),
-    ]);
+    const filterOptions = await filterService.getFilterOptions();
+    const seasons = await seasonService.getAllSeasons();
 
-    // Transform seasons to include divisions properly
-    const seasons = seasonsData.map((season: any) => ({
-      _id: season._id,
-      name: season.name,
-      year: season.year,
-      isActive: season.isActive || false,
-      activeDivisions:
-        season.divisions?.map((div: any) => ({
-          division: {
-            _id: div.division._id,
-            name: div.division.name,
-          },
-          status: "active",
-        })) || [],
-    }));
-
-    // Get divisions from all seasons for filter options
-    const allDivisions = seasonsData.flatMap(
-      (season: any) =>
-        season.divisions?.map((div: any) => ({
-          _id: div.division._id,
-          name: div.division.name,
-          season: {
-            _ref: season._id,
-          },
-        })) || []
-    );
-
+    // Transform to legacy filter format
     return {
-      seasons,
-      divisions: allDivisions,
-      awards: Array.from(new Set(awards.flat())),
+      seasons: seasons.map(season => ({
+        _id: season.id,
+        name: season.name,
+        year: season.year,
+        isActive: season.status === "active",
+        activeDivisions: [], // TODO: Get divisions for season
+      })),
+      divisions: filterOptions.divisions.map(division => ({
+        _id: division.id,
+        name: division.name,
+        season: {
+          _ref: division.conference.season.id,
+        },
+      })),
+      awards: [], // TODO: Get unique awards from teams
     };
   } catch (error) {
     console.error("Error fetching filters:", error);
-    throw error;
+    return {
+      seasons: [],
+      divisions: [],
+      awards: [],
+    };
+  }
+}
+
+// Additional utility functions using service layer
+
+export async function fetchTeamsByDivision(divisionId: string): Promise<Team[]> {
+  try {
+    const teams = await teamService.getTeamsByDivision(divisionId);
+    return teams.map(transformToLegacyTeam);
+  } catch (error) {
+    console.error("Error fetching teams by division:", error);
+    return [];
+  }
+}
+
+export async function searchTeams(query: string): Promise<Team[]> {
+  try {
+    const teams = await teamService.searchTeams(query);
+    return teams.map(transformToLegacyTeam);
+  } catch (error) {
+    console.error("Error searching teams:", error);
+    return [];
+  }
+}
+
+export async function fetchTopTeamsByWins(seasonId?: string, limit: number = 10): Promise<Team[]> {
+  try {
+    const teams = await teamService.getTopTeamsByWins(seasonId, limit);
+    return teams.map(transformToLegacyTeam);
+  } catch (error) {
+    console.error("Error fetching top teams:", error);
+    return [];
   }
 }

@@ -4,8 +4,8 @@ import {
   ComparisonTable,
   PackageGrid,
   PricingTable,
-  usePackageComparison,
 } from "./package-selection";
+import { usePackageComparison } from "@/hooks/use-package-comparison";
 import type { PackageSelectionStepProps } from "./package-selection";
 
 export function PackageSelectionStep({
@@ -30,7 +30,7 @@ export function PackageSelectionStep({
     <div className="space-y-6 mt-16">
       <div className="hidden text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Choose Your Package
+          Choose Your 2025-26 Package
         </h2>
         <p className="text-gray-600">
           Select the registration package that works best for your team

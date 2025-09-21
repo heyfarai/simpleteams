@@ -20,10 +20,13 @@ export function SeasonTabs({
   className,
   children,
 }: SeasonTabsProps) {
+
   return (
     <Tabs.Root
       value={selectedSeason}
-      onValueChange={onSeasonChange}
+      onValueChange={(value) => {
+        onSeasonChange(value);
+      }}
       className={cn("w-full h-full ", className)}
     >
       <Tabs.List className="flex h-10 items-center justify-start rounded-full bg-gray-200 p-1 overflow-x-auto">
@@ -31,7 +34,7 @@ export function SeasonTabs({
           .filter((season) => season.isActive)
           .map((season, index, activeSeasons) => (
             <Tabs.Trigger
-              key={season.id}
+              key={`trigger-${season.id}`}
               value={season.id}
               className={cn(
                 "inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm  ring-offset-background transition-all  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-black data-[state=active]:font-bold text-gray-500 ",
@@ -48,11 +51,13 @@ export function SeasonTabs({
         .filter((season) => season.isActive)
         .map((season) => (
           <Tabs.Content
-            key={season.id}
+            key={`content-${season.id}`}
             value={season.id}
             className="flex-1 outline-none mt-4"
           >
-            {children}
+            <div key={`content-wrapper-${season.id}`}>
+              {children}
+            </div>
           </Tabs.Content>
         ))}
     </Tabs.Root>

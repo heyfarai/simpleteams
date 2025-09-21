@@ -1,6 +1,8 @@
-import { client } from "@/lib/sanity/client";
-import { playerProfileQuery } from "@/lib/sanity/player-profile-queries";
+// Database-agnostic player profile data fetching using service layer
+import { playerService } from "@/lib/services";
+import type { Player as DomainPlayer } from "@/lib/domain/models";
 
+// Legacy interface for backward compatibility
 export interface PlayerProfile {
   _id: string;
   name: string;
@@ -70,17 +72,62 @@ export interface PlayerProfile {
   };
 }
 
+// Transform domain model Player to legacy PlayerProfile interface
+function transformToPlayerProfile(domainPlayer: DomainPlayer): PlayerProfile {
+  return {
+    _id: domainPlayer.id,
+    name: domainPlayer.name,
+    firstName: domainPlayer.firstName,
+    lastName: domainPlayer.lastName,
+    personalInfo: {
+      gradYear: domainPlayer.gradYear,
+      height: domainPlayer.height || "",
+      weight: undefined, // Domain model doesn't have weight yet
+      hometown: domainPlayer.hometown,
+      position: domainPlayer.position,
+    },
+    photo: domainPlayer.photo ? {
+      asset: {
+        _ref: domainPlayer.photo, // Simplified for now
+      }
+    } : undefined,
+    stats: {
+      points: domainPlayer.stats.ppg,
+      rebounds: domainPlayer.stats.rpg,
+      assists: domainPlayer.stats.apg,
+      steals: domainPlayer.stats.spg,
+      blocks: domainPlayer.stats.bpg,
+      minutes: domainPlayer.stats.mpg,
+      fieldGoalPercentage: 0, // Domain model doesn't have FG% yet
+      gamesPlayed: domainPlayer.gamesPlayed,
+    },
+    yearlyStats: undefined, // TODO: Implement yearly stats in domain model
+    sessionHighs: undefined, // TODO: Implement session highs in domain model
+    bio: undefined, // Domain model doesn't have bio yet
+    highlightVideos: undefined, // TODO: Implement highlight videos in domain model
+    awards: domainPlayer.awards,
+    social: undefined, // Domain model doesn't have social yet
+    team: {
+      _id: domainPlayer.team.id,
+      name: domainPlayer.team.name,
+      division: domainPlayer.division.name,
+      coach: domainPlayer.team.headCoach,
+      record: undefined, // TODO: Calculate team record
+      logo: domainPlayer.team.logo,
+    },
+  };
+}
+
+// Database-agnostic function using service layer
 export async function fetchPlayerProfile(
   playerId: string
 ): Promise<PlayerProfile | null> {
   try {
-    const player = await client.fetch<PlayerProfile>(playerProfileQuery, {
-      playerId,
-    });
+    const player = await playerService.getPlayer(playerId);
 
     if (!player) return null;
 
-    return player;
+    return transformToPlayerProfile(player);
   } catch (error) {
     console.error("Error fetching player profile:", error);
     return null;

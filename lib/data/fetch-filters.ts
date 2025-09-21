@@ -1,56 +1,19 @@
-import { client } from '@/lib/sanity/client'
-import { groq } from 'next-sanity'
-
-import { FilterOptions } from '@/lib/sanity/types'
-
-const filterDataQuery = groq`{
-  "sessions": *[_type == "session"] | order(startDate desc) {
-    _id,
-    name,
-    type,
-    startDate,
-    isActive
-  },
-  "divisions": *[_type == "division"] | order(order asc) {
-    _id,
-    name,
-    order,
-    "seasons": *[_type == "season"] | order(year desc) {
-      _id, 
-      name, 
-      year, 
-      status, 
-      isActive
-    }
-  },
-  "seasons": *[_type == "season"] | order(year desc) {
-    _id,
-    name,
-    year,
-    startDate,
-    endDate,
-    status,
-    isActive
-  },
-  "teams": *[_type == "team"] {
-    _id,
-    name,
-    shortName
-  },
-  "positions": *[_type == "player"].position[]
-}`
+// Database-agnostic filter data fetching using service layer
+import { filterService } from "@/lib/services";
+import { FilterOptions } from '@/lib/domain/models';
 
 export async function fetchFilterData(): Promise<FilterOptions> {
   try {
-    return await client.fetch(filterDataQuery)
+    const result = await filterService.getFilterOptions();
+    return result;
   } catch (error) {
-    console.error('Error fetching filter data:', error)
+    console.error('Error fetching filter data via service:', error);
     return {
       sessions: [],
-      divisions: [],
       seasons: [],
+      divisions: [],
       teams: [],
-      positions: []
-    }
+      positions: ["PG", "SG", "SF", "PF", "C"]
+    };
   }
 }

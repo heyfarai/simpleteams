@@ -4,18 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, Award } from "lucide-react";
-import { fetchFeaturedPlayers } from "@/lib/data/fetch-players";
-import { useQuery } from "@tanstack/react-query";
+import { useFeaturedPlayers } from "@/hooks/use-players";
 import Link from "next/link";
 
 export function PlayerSpotlight() {
-  const { data: featuredPlayers = [], isLoading } = useQuery({
-    queryKey: ["featuredPlayers"],
-    queryFn: () => fetchFeaturedPlayers(4),
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  });
+  const { players: featuredPlayers, isLoading } = useFeaturedPlayers(4);
 
   return (
     <section className="space-y-6 py-24">

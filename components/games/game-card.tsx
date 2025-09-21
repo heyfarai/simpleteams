@@ -81,7 +81,6 @@ export function GameCard({ game, loading = false }: GameCardProps) {
           <div className="flex-1">
             {/* Status and Session */}
             <div className="hidden md:flex justify-center items-center gap-2 mb-2">
-              {getStatusBadge(game.status)}
               {game.session?.name && (
                 <Badge
                   variant="outline"
@@ -115,24 +114,44 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                     </span>
                   </div>
                 </div>
-                {game.score && (
+                {game.score &&
+                (game.status === "final" || game.status === "in-progress") ? (
                   <span className="text-4xl font-extrabold grotesk text-primary">
                     {game.score.homeScore}
                   </span>
+                ) : game.status === "final" ? (
+                  <span className="text-2xl font-bold text-muted-foreground">
+                    -
+                  </span>
+                ) : (
+                  <span className="text-sm font-medium text-muted-foreground"></span>
                 )}
               </div>
 
               <div className="hidden md:flex items-center px-4">
-                <div className="text-muted-foreground font-medium">
-                  {game.status === "final" ? "FINAL" : "VS"}
+                {getStatusBadge(game.status)}
+
+                <div className="hidden text-muted-foreground font-medium">
+                  {game.status === "final"
+                    ? "FINAL"
+                    : game.status === "in-progress"
+                    ? "LIVE"
+                    : "VS"}
                 </div>
               </div>
 
               <div className="flex justify-between flex-1 items-center">
-                {game.score && (
+                {game.score &&
+                (game.status === "final" || game.status === "in-progress") ? (
                   <span className="text-4xl font-extrabold text-primary order-2 md:order-1 grotesk">
                     {game.score.awayScore}
                   </span>
+                ) : game.status === "final" ? (
+                  <span className="text-2xl font-bold text-muted-foreground order-2 md:order-1">
+                    -
+                  </span>
+                ) : (
+                  <span className="text-sm font-medium text-muted-foreground order-2 md:order-1"></span>
                 )}
                 <div className="team-lockup md:p-2 p-0 flex items-center justify-end  gap-6 order-1 md:order-2">
                   <Image

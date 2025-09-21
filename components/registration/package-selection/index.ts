@@ -9,7 +9,7 @@ export { packages } from "./data/packages";
 export { comparisonRows } from "./data/comparisonFeatures";
 
 // Hooks
-export { usePackageComparison } from "./hooks/usePackageComparison";
+export { usePackageComparison } from "@/hooks/use-package-comparison";
 
 // Types
 export type {

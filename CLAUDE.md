@@ -175,3 +175,13 @@ The registration system has been refactored into a **5-step multi-step flow**:
 - reminder to improve UX for webhook errors
 - team, player, season, divisions, game, and roster data is only in sanity. NOT supabase
 - no dummy data on this project. Ask permission before using and dummy data
+
+# Refactoring
+
+When I ask you to refactor make my code:
+
+- Modular: Each handler can be tested/modified independently
+- Extensible: Easy to add new event handlers
+- Reusable: Services can be used elsewhere (team creation, emails)
+- Maintainable: Clear separation of concerns
+- Follows conventions: Uses existing project patterns (/lib, /hooks, etc.)

@@ -58,10 +58,10 @@ function DateSection({
 
 interface GamesListProps {
   filterData: {
-    sessions: Array<{ _id: string; name: string }>;
-    divisions: Array<{ _id: string; name: string }>;
+    sessions: Array<{ id: string; name: string }>;
+    divisions: Array<{ id: string; name: string }>;
     seasons: Array<{
-      _id: string;
+      id: string;
       name: string;
       year: number;
       status: string;
@@ -94,8 +94,8 @@ export function GamesList({ filterData }: GamesListProps) {
 
   // Select the first active season as default
   const defaultSeason =
-    filterData.seasons.find((s) => s.isActive)?._id ||
-    (filterData.seasons.length > 0 ? filterData.seasons[0]._id : "all");
+    filterData.seasons.find((s) => s.isActive)?.id ||
+    (filterData.seasons.length > 0 ? filterData.seasons[0].id : "all");
 
   // Get filter values from URL or use defaults
   const season =
@@ -144,7 +144,7 @@ export function GamesList({ filterData }: GamesListProps) {
   // Convert filter data seasons to Season format for SeasonTabs
   const availableSeasons: Season[] = (filterData.seasons || []).map(
     (season) => ({
-      id: season._id,
+      id: season.id,
       name: season.name,
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
@@ -195,7 +195,7 @@ export function GamesList({ filterData }: GamesListProps) {
     <div className="h-full flex flex-col">
       {/* Season Tabs with content */}
       <SeasonTabs
-        selectedSeason={season === "all" ? "" : season}
+        selectedSeason={season === "all" ? (availableSeasons.find(s => s.isActive)?.id || "") : season}
         seasons={availableSeasons}
         onSeasonChange={(value) => handleFilterChange("season", value || "all")}
         className="flex-1 p-2"
