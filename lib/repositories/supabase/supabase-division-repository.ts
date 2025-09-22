@@ -101,6 +101,7 @@ export class SupabaseDivisionRepository implements DivisionRepository {
       id: data.id,
       name: data.name,
       ageGroup: this.mapToAgeGroup(data.description || ""),
+      description: data.description || "",
       conference: {
         id: "default",
         name: "Default Conference",

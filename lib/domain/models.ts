@@ -39,6 +39,7 @@ export interface Division {
   id: string;
   name: string;
   ageGroup: AgeGroup;
+  description?: string;
   skillLevel?: SkillLevel;
   conference: Conference;
   teamLimits?: TeamLimits;

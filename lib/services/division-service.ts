@@ -1,5 +1,6 @@
 import { divisionRepository } from "@/lib/repositories/factory";
-import type { Division } from "@/lib/types";
+import type { Division } from "@/lib/domain/models";
+import { SupabaseDivisionRepository } from "@/lib/repositories/supabase/supabase-division-repository";
 
 export class DivisionService {
   async getAllDivisions(): Promise<Division[]> {
@@ -15,13 +16,14 @@ export class DivisionService {
   }
 
   async getActiveDivisions(): Promise<Division[]> {
-    // Check if Supabase repository has findByActiveSeason method
-    if ('findByActiveSeason' in divisionRepository) {
-      return await (divisionRepository as any).findByActiveSeason();
+    // Check if this is the Supabase repository with findByActiveSeason method
+    if (divisionRepository instanceof SupabaseDivisionRepository) {
+      return await divisionRepository.findByActiveSeason();
     }
 
-    // Fallback to all divisions if not available
-    return await divisionRepository.findAll();
+    // Fallback: filter all divisions for active ones
+    const allDivisions = await divisionRepository.findAll();
+    return allDivisions.filter(division => division.isActive);
   }
 }
 

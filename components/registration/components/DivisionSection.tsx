@@ -64,9 +64,9 @@ export function DivisionSection({
                   >
                     <div>
                       <div className="font-medium">{division.name}</div>
-                      {division.ageGroup && (
+                      {division.description && (
                         <div className="text-sm text-gray-600">
-                          {division.ageGroup}
+                          {division.description}
                         </div>
                       )}
                     </div>
