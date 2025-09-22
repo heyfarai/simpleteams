@@ -24,7 +24,7 @@ export const packages: PackageOption[] = (() => {
       originalPrice: fullSeasonOriginalPrice,
       games: "12 Games + Playoffs",
       isRecommended: true,
-      badge: "🥇 BEST VALUE",
+      badge: "Early Bird - Save $300",
       description: isEarlyBird
         ? "Early Bird Pricing - Save $300!"
         : "Pick any 3 season sessions × 4 games each",

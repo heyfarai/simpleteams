@@ -47,14 +47,6 @@ export function PackageCard({
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-0">{pkg.name}</h3>
             <p className="text-sm ">{pkg.games}</p>
-
-            {pkg.isRecommended && (
-              <div className="hidden top-0 left-1/2 transform z-20 mb-2">
-                <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                  {pkg.badge}
-                </span>
-              </div>
-            )}
             <div className="flex items-center  gap-2 mb-2 mt-6">
               <span className="text-3xl font-bold">
                 ${pkg.price.toLocaleString()}
@@ -65,7 +57,14 @@ export function PackageCard({
                 </span>
               )}
             </div>
-            {pkg.description && (
+            {pkg.isRecommended && (
+              <div className="top-0 left-1/2 transform z-20 mb-2">
+                <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                  {pkg.badge}
+                </span>
+              </div>
+            )}
+            {pkg.description && !pkg.isRecommended && (
               <p className="text-sm text-gray-500 mb-2">{pkg.description}</p>
             )}
           </div>
