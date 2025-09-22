@@ -12,14 +12,14 @@ import {
 
 export function LeagueFeatures() {
   return (
-    <div className="max-w-[85rem] md:min-h-screen md:max-h-[600px] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto flex justify-center items-center">
+    <div className="max-w-[85rem] md:min-h-screen md:max-h-[600px] px-4 py-10 sm:px-6 lg:px-8 lg:py-0 mx-auto flex justify-center items-center">
       {/* Grid */}
       <div className="grid md:grid-cols-2 gap-12">
         <div className="text-center md:text-left lg:w-3/4">
           <div className="">
             <h1 className="display-heading">Greatness Lives Here.</h1>
           </div>
-          <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
+          <h2 className="text-xl md:text-2xl mt-4 leading-7">
             Elite Features. <br />
             Feels Pro.
           </h2>

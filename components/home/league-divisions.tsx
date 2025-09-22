@@ -67,7 +67,7 @@ export function LeagueDivisions() {
             Find Your Level.
           </h1>
         </div>
-        <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
+        <h2 className="text-xl md:text-2xl mt-4 leading-7">
           4 Divisions. A Journey for Every Player.
         </h2>
       </div>

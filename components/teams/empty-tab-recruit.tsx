@@ -39,7 +39,7 @@ export function EmptyTabRecruit() {
       {/* Hero Challenge */}
       <div className="">
         <div className="space-y-2">
-          <h2 className="text-4xl font-bold text-foreground">
+          <h2 className="text-4xl font-normal text-foreground">
             Your Competition Awaits
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

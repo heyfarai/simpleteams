@@ -64,7 +64,7 @@ export function LeagueTeamSpotlight() {
         <div className="heading-highlight-container">
           <h1 className="display-heading heading-highlight">Rep Your City.</h1>
         </div>
-        <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
+        <h2 className="text-xl md:text-2xl mt-4 leading-7">
           Champions Compete in the Capital.
         </h2>
       </div>

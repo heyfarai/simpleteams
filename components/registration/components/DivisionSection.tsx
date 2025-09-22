@@ -19,7 +19,7 @@ export function DivisionSection({
 }: DivisionSectionProps) {
   return (
     <div>
-      <h2 className="text-lg md:text-xl font-medium text-gray-900 mb-4">
+      <h2 className="text-lg md:text-xl text-gray-900 mb-4">
         Division
       </h2>
       <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border">

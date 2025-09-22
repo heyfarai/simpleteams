@@ -16,7 +16,7 @@ export function PackageGrid({
 }: PackageGridProps) {
   return (
     <div className="mb-36 md:mb-44 mt-24 md:mt-36">
-      <h2 className="md:text-3xl text-2xl font-bold text-center mb-12 grotesk">
+      <h2 className="md:text-3xl text-2xl text-center mb-12 grotesk">
         Choose Your Package
       </h2>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">

@@ -125,6 +125,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Mutant Academy";
+  src: url("/fonts/MutantAcademyBB.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -133,7 +141,11 @@
     @apply bg-background text-foreground;
   }
   h1,
-  h2,
+  h2 {
+    font-family: "Mutant Academy", sans-serif;
+    font-weight: normal;
+    letter-spacing: 0.02px;
+  }
   h3,
   h4,
   h5,
@@ -142,8 +154,8 @@
     font-weight: 800; /* ExtraBold weight */
     letter-spacing: -0.02px;
   }
-  grotestk {
-    font-family: "Old School Grotesk", sans-serif;
+  .mutant {
+    font-family: "Mutant Academy", sans-serif;
   }
 
   h2.normal {
@@ -153,7 +165,7 @@
 
 @layer components {
   .display-heading {
-    @apply font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground;
+    @apply lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground;
   }
 
   .heading-highlight {

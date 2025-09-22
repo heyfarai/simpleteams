@@ -56,7 +56,7 @@ export function NextSessionCard() {
                   key={unit}
                   className=" rounded-lg p-2 text-center"
                 >
-                  <div className="lg:text-4xl text-3xl font-extrabold text-gray-600">
+                  <div className="lg:text-4xl text-3xl mutant text-gray-600">
                     {value}
                   </div>
                   <div className="lg:text-sm text-xs capitalize -mt-0.5 text-gray-400">

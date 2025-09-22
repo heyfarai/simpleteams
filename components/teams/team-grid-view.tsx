@@ -37,7 +37,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
           className="space-y-4"
         >
           <div className="flex items-center space-x-3">
-            <h2 className="text-2xl font-bold text-foreground">{name}</h2>
+            <h2 className="text-2xl text-foreground">{name}</h2>
             <Badge
               variant="secondary"
               className="text-sm"

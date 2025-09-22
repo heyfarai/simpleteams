@@ -23,8 +23,9 @@ export function DivisionTab({ division, isActive, onClick }: DivisionTabProps) {
           "p-4 md:p-5 rounded-xl transition-all",
           !isActive && "hover:bg-amber-950 dark:hover:bg-neutral-800",
           "focus-within:outline-none focus-within:ring-2 focus-within:ring-amber-950/20 dark:focus-within:bg-neutral-800",
-          isActive && "md:bg-white md:text-black md:shadow-md md:dark:bg-neutral-800",
-          division.id === "tab-3" && isActive && "md:border-2 md:border-primary"
+          isActive &&
+            "md:bg-white md:text-black md:shadow-md md:dark:bg-neutral-800",
+          division.id === "tab-3" && isActive && ""
         )}
       >
         <button
@@ -40,12 +41,16 @@ export function DivisionTab({ division, isActive, onClick }: DivisionTabProps) {
             <Icon className="iconDivision hidden h-5 w-5 mt-0.5" />
             <span className="grow">
               {division.isNew ? (
-                <span className="flex flex-row items-center mb-3 font-semibold">
+                <h2 className="flex flex-row items-center mb-3 text-3xl font-normal tracking-wide">
                   {division.name}
-                  <Badge className="ml-2 bg-amber-200 text-amber-950">New</Badge>
-                </span>
+                  <Badge className="ml-2 bg-amber-200 text-amber-950">
+                    New
+                  </Badge>
+                </h2>
               ) : (
-                <span className="block text-xl font-semibold">{division.name}</span>
+                <h2 className="block text-3xl font-normal tracking-wide">
+                  {division.name}
+                </h2>
               )}
               <div className="mt-1 text-sm grid grid-cols-2">
                 {division.categories.map((category, index) => (
@@ -60,7 +65,10 @@ export function DivisionTab({ division, isActive, onClick }: DivisionTabProps) {
         {isActive && (
           <div className="hidden md:block mt-4">
             <Link href="/register">
-              <Button size="lg" className="w-full">
+              <Button
+                size="lg"
+                className="w-full"
+              >
                 Register for {division.displayName}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

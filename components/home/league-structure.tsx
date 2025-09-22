@@ -13,7 +13,7 @@ export function LeagueStructure() {
         <div className="heading-highlight-container">
           <h1 className="display-heading heading-highlight">Play Hard.</h1>
         </div>
-        <h2 className="text-xl font-medium md:text-2xl mt-4 leading-7">
+        <h2 className="text-xl font-normal md:text-3xl mt-4 leading-7">
           Circuit Format Built For Champions
         </h2>
       </div>
@@ -104,7 +104,7 @@ export function LeagueStructure() {
                   <CheckCircle2 />
                 </span>
                 <span className=" sm:text-base text-foreground">
-                  <span className="font-semibold">No 8AM games.</span>
+                  <span className="font-semibold">No games before 10AM.</span>
                 </span>
               </li>
             </ul>

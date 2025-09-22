@@ -1,8 +1,8 @@
 export function HowTheCircuitWorks() {
   return (
     <div className="max-w-4xl mx-auto my-12">
-      <h2 className="text-3xl font-bold mb-10 text-center grotesk">
-        How the Circuit Works
+      <h2 className="text-3xl mb-10 text-center grotesk">
+        How the Schedule Works
       </h2>
       <div className="grid md:grid-cols-3 gap-6 text-left">
         <div className="bg-muted/30 rounded-lg p-6">

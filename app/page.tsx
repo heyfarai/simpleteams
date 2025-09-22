@@ -12,7 +12,8 @@ import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
 
 export const metadata = generateSiteMetadata({
   title: "Ottawa's Premier Basketball League",
-  description: "Join the National Capital Hoops Circuit - Ottawa's elite basketball league featuring competitive divisions, player development, and championship tournaments. Register your team today and compete at the highest level."
+  description:
+    "Join the National Capital Hoops Circuit - Ottawa's elite basketball league featuring competitive divisions, player development, and championship tournaments. Register your team today and compete at the highest level.",
 });
 
 export default function HomePage() {
@@ -23,9 +24,9 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-8 space-y-12">
         <LeagueDivisions />
         <LeagueStructure />
+        <LeagueFeatures />
         <LeagueTeamSpotlight />
         {/* <PlayerSpotlight /> */}
-        <LeagueFeatures />
       </div>
       {/* <EnhancedSponsorStrip /> */}
     </main>
