@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchAllTeams } from "@/lib/data/fetch-teams";
-import { Team } from "@/lib/types/teams";
+import { teamService } from "@/lib/services";
+import { Team } from "@/lib/domain/models";
 import Image from "next/image";
 import Link from "next/link";
-import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
 
 export function LeagueTeamSpotlight() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -15,10 +14,12 @@ export function LeagueTeamSpotlight() {
   useEffect(() => {
     async function loadTeams() {
       try {
-        const teamsData = await fetchAllTeams(true); // Only active teams
-        setTeams(teamsData.slice(0, 16)); // Take first 16 teams
+        const activeTeams = await teamService.getActiveTeams();
+        const limitedTeams = activeTeams.slice(0, 32);
+        setTeams(limitedTeams);
         setError(null);
       } catch (err) {
+        console.error("Failed to load teams:", err);
         setError("Failed to load teams");
       } finally {
         setIsLoading(false);
@@ -76,7 +77,7 @@ export function LeagueTeamSpotlight() {
           >
             <div className="flex justify-center items-center size-32  mx-auto dark:bg-neutral-800  overflow-hidden">
               <Image
-                src={getTeamLogoUrl(team.logo)}
+                src={team.logo || "/placeholder-team-logo.png"}
                 alt={`${team.name} logo`}
                 width={96}
                 height={96}

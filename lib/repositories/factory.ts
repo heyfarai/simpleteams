@@ -18,6 +18,9 @@ import { SanityGameRepository } from "./sanity/sanity-game-repository";
 import { SanitySeasonRepository } from "./sanity/sanity-season-repository";
 import { SanityDivisionRepository } from "./sanity/sanity-division-repository";
 
+// Supabase implementations
+import { SupabaseTeamRepository } from "./supabase-team-repository";
+
 // Future implementations could be added here:
 // import { PostgreSQLPlayerRepository } from "./postgresql/postgresql-player-repository";
 // import { MongoPlayerRepository } from "./mongo/mongo-player-repository";
@@ -27,7 +30,12 @@ export class RepositoryFactory {
   private readonly dbType: string;
 
   private constructor() {
-    this.dbType = process.env.DATABASE_TYPE || "sanity";
+    const serverDbType = process.env.DATABASE_TYPE;
+    const clientDbType = process.env.NEXT_PUBLIC_DATABASE_TYPE;
+    console.log('🏭 Factory Constructor: SERVER DATABASE_TYPE =', serverDbType);
+    console.log('🏭 Factory Constructor: CLIENT DATABASE_TYPE =', clientDbType);
+    this.dbType = serverDbType || clientDbType || "sanity";
+    console.log('🏭 Factory Constructor: Selected dbType =', this.dbType);
   }
 
   static getInstance(): RepositoryFactory {
@@ -51,14 +59,20 @@ export class RepositoryFactory {
   }
 
   createTeamRepository(): TeamRepository {
+    console.log('🏭 Repository Factory: Creating team repository for dbType:', this.dbType);
     switch (this.dbType) {
       case "sanity":
+        console.log('🏭 Repository Factory: Using SanityTeamRepository');
         return new SanityTeamRepository();
+      case "supabase":
+        console.log('🏭 Repository Factory: Using SupabaseTeamRepository');
+        return new SupabaseTeamRepository();
       // case "postgresql":
       //   return new PostgreSQLTeamRepository();
       // case "mongodb":
       //   return new MongoTeamRepository();
       default:
+        console.log('🏭 Repository Factory: Defaulting to SanityTeamRepository');
         return new SanityTeamRepository();
     }
   }

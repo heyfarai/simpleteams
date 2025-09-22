@@ -20,7 +20,7 @@ export async function checkSanityConnection(): Promise<{ connected: boolean; err
 
 export async function checkSupabaseConnection(): Promise<{ connected: boolean; error?: string }> {
   try {
-    const { error } = await supabase.from('registration_carts').select('id').limit(1);
+    const { error } = await supabase.from('teams').select('id').limit(1);
     if (error) throw error;
     return { connected: true };
   } catch (error) {

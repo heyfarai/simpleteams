@@ -223,3 +223,13 @@ When I ask you to refactor make my code:
 - Reusable: Services can be used elsewhere (team creation, emails)
 - Maintainable: Clear separation of concerns
 - Follows conventions: Uses existing project patterns (/lib, /hooks, etc.)
+- the big switch to supabase
+
+Roster and Player Migration Pattern:
+
+- Use for moving team rosters 1 at a time
+
+1. ✅ Query Sanity for team roster data
+2. ✅ Insert players into Supabase players table with generated UUIDs
+3. ✅ Create roster in rosters table linking team, season, division
+4. ✅ Insert player assignments into roster_players table with jersey numbers and positions

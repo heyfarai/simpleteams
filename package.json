@@ -6,7 +6,10 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "supabase:deploy": "tsx scripts/deploy-supabase-schema.ts",
+    "supabase:migrate": "tsx scripts/migrate-sanity-to-supabase.ts",
+    "supabase:setup": "npm run supabase:deploy && npm run supabase:migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

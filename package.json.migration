@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "supabase:deploy": "tsx scripts/deploy-supabase-schema.ts",
+    "supabase:migrate": "tsx scripts/migrate-sanity-to-supabase.ts",
+    "supabase:setup": "npm run supabase:deploy && npm run supabase:migrate",
+    "supabase:reset": "supabase db reset --linked",
+    "supabase:status": "supabase status",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0"
+  }
+}
