@@ -1,10 +1,12 @@
 import Image from "next/image";
-import { PDFViewer } from "@/components/pdf-viewer";
 import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
+import { StatCounter } from "@/components/stat-counter";
+import { SlidesCarousel } from "@/components/slides-carousel";
 
 export const metadata = generateSiteMetadata({
   title: "About NCHC",
-  description: "Learn about the National Capital Hoops Circuit - Ottawa's premier basketball league. Discover our story, mission, and commitment to developing elite youth basketball in Canada's capital."
+  description:
+    "Learn about the National Capital Hoops Circuit - Ottawa's premier basketball league. Discover our story, mission, and commitment to developing elite youth basketball in Canada's capital.",
 });
 
 export default function AboutPage() {
@@ -66,30 +68,22 @@ export default function AboutPage() {
             The stats don't lie
           </p>
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="text-center">
-              <div className="md:text-8xl text-6xl text-primary mb-0 font-extrabold grotesk">
-                21
-              </div>
-              <p className="text-sm text-gray-600 uppercase font-bold">
-                Teams (U16-U19)
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="md:text-8xl text-6xl text-primary mb-0 font-extrabold grotesk">
-                100
-              </div>
-              <p className="text-sm text-gray-600 uppercase font-bold">
-                Games Played
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="md:text-8xl text-6xl text-primary mb-0 font-extrabold grotesk">
-                10K+
-              </div>
-              <p className="text-sm text-gray-600 uppercase font-bold">
-                Stream Views
-              </p>
-            </div>
+            <StatCounter
+              end={21}
+              label="Teams (U16-U19)"
+              duration={2500}
+            />
+            <StatCounter
+              end={100}
+              label="Games Played"
+              duration={2800}
+            />
+            <StatCounter
+              end={10000}
+              suffix="K+"
+              label="Stream Views"
+              duration={3000}
+            />
           </div>
           <div className="hidden md:grid-cols-2 gap-8">
             <div className=" p-8 rounded-lg shadow-lg">
@@ -113,23 +107,23 @@ export default function AboutPage() {
       </section>
       <section className="w-full min-h-screen bg-foreground flex items-center justify-center">
         <div className="max-w-3xl mx-auto px-16">
-          <h1 className="text-4xl md:text-4xl font-normal mb-12 text-foreground">
+          <h3 className="text-4xl md:text-4xl font-normal mb-12 text-foreground">
             <span className="text-[#dbe0e1]">
               <span className="text-secondary pr-2 text-5xl md:text-7xl">
-                97%
+                <span className="mutant-outline">97%</span>
               </span>
               of coaches and team staff members called their NCHC experience
               <span className="pl-2 text-secondary"> “excellent”</span>.
             </span>
-          </h1>
-          <h1 className="text-4xl md:text-4xl font-normal mb-0 text-foreground">
+          </h3>
+          <h3 className="text-4xl md:text-4xl font-normal mb-0 text-foreground">
             <span className="text-[#dbe0e1]">
               <span className="text-secondary pr-2 text-5xl md:text-7xl">
-                93%
+                <span className="mutant-outline">93%</span>
               </span>
               “would take part again”.
             </span>
-          </h1>
+          </h3>
           <p className="text-lg italic font-medium md:text-normal mb-16 text-gray-600 mt-12">
             Source: 2024 Post season survey
           </p>
@@ -145,11 +139,32 @@ export default function AboutPage() {
             Registration is open.
           </p>
 
-          {/* PDF Viewer */}
+          {/* Season 2 Slides */}
           <div className="mb-16">
-            <PDFViewer
-              pdfUrl="/pdf/NCHC-Season-2-Full-details.pdf"
-              title="NCHC Season 2 Full Details"
+            <SlidesCarousel
+              slides={[
+                "NCHC-Season-2-slides-21.jpeg",
+                "NCHC-Season-2-slides-22.jpeg",
+                "NCHC-Season-2-slides-23.jpeg",
+                "NCHC-Season-2-slides-24.jpeg",
+                "NCHC-Season-2-slides-25.jpeg",
+                "NCHC-Season-2-slides-26.jpeg",
+                "NCHC-Season-2-slides-27.jpeg",
+                "NCHC-Season-2-slides-28.jpeg",
+                "NCHC-Season-2-slides-29.jpeg",
+                "NCHC-Season-2-slides-30.jpeg",
+                "NCHC-Season-2-slides-31.jpeg",
+                "NCHC-Season-2-slides-32.jpeg",
+                "NCHC-Season-2-slides-33.jpeg",
+                "NCHC-Season-2-slides-34.jpeg",
+                "NCHC-Season-2-slides-35.jpeg",
+                "NCHC-Season-2-slides-36.jpeg",
+                "NCHC-Season-2-slides-37.jpeg",
+                "NCHC-Season-2-slides-38.jpeg",
+                "NCHC-Season-2-slides-39.jpeg",
+                "NCHC-Season-2-slides-40.jpeg",
+              ]}
+              title="NCHC Season 2 Details"
             />
           </div>
         </div>

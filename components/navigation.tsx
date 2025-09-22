@@ -65,28 +65,102 @@ export function Navigation() {
         )}
 
         {!isCheckoutPage && (
-          <div
-            className={`${
-              isOpen ? "block" : "hidden"
-            } md:block overflow-hidden transition-all duration-300 basis-full md:basis-auto grow md:grow-0 md:w-auto md:order-2 md:col-start-2 md:col-end-3`}
-          >
-            <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-3 mt-3 md:mt-0 py-2 md:py-0 md:ps-7 lg:ps-0 lg:whitespace-nowrap">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`py-0.5 md:py-3 px-4 md:px-1 border-s-2 tracking-wide md:border-s-0 md:border-b-2 font-bold ${
-                    pathname === item.href
-                      ? "border-primary  text-primary"
-                      : "border-transparent text-foreground hover:text-gray-800"
-                  } focus:outline-none dark:border-neutral-200 dark:text-neutral-200 dark:hover:text-neutral-200`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+          <>
+            {/* Desktop Navigation */}
+            <div className="hidden md:block md:order-2 md:col-start-2 md:col-end-3">
+              <div className="flex flex-row items-center justify-center gap-3 py-0 ps-7 lg:ps-0 lg:whitespace-nowrap">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`py-3 px-1 border-b-2 tracking-wide font-bold ${
+                      pathname === item.href
+                        ? "border-primary text-primary"
+                        : "border-transparent text-foreground hover:text-gray-800"
+                    } focus:outline-none dark:border-neutral-200 dark:text-neutral-200 dark:hover:text-neutral-200`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+
+            {/* Mobile Navigation Overlay */}
+            <div
+              className={`md:hidden fixed inset-0 z-[60] transition-all duration-300 ease-out ${
+                isOpen
+                  ? "opacity-100 pointer-events-auto"
+                  : "opacity-0 pointer-events-none"
+              }`}
+            >
+              {/* Backdrop with blur */}
+              <div
+                className={`absolute inset-0 bg-primary/100 backdrop-blur-md transition-all duration-500 ease-out ${
+                  isOpen ? "scale-100" : "scale-110"
+                }`}
+              />
+
+              {/* Navigation Content */}
+              <div className="relative flex flex-col h-full">
+                {/* Header with close button */}
+                <div className="flex items-center justify-end p-8">
+                  <button
+                    type="button"
+                    className="flex justify-center items-center w-9 h-9 text-white hover:bg-white/20 rounded-full transition-colors duration-200"
+                    onClick={() => setIsOpen(false)}
+                    aria-label="Close navigation"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Navigation Items */}
+                <div className="flex-1 flex flex-col justify-center px-8">
+                  <nav className="space-y-8">
+                    {navItems.map((item, index) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsOpen(false)}
+                        className={`block text-3xl font-bold text-white hover:text-white/80 transition-all duration-300 ease-out transform ${
+                          isOpen
+                            ? "translate-x-0 opacity-100"
+                            : "translate-x-8 opacity-0"
+                        }`}
+                        style={{
+                          transitionDelay: isOpen
+                            ? `${(index + 1) * 150}ms`
+                            : "0ms",
+                        }}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+
+                {/* Register Button */}
+                <div className="p-8">
+                  <Link
+                    href="/register"
+                    onClick={() => setIsOpen(false)}
+                    className={`block w-full text-center py-4 px-6 text-lg font-bold bg-white text-primary rounded-full hover:bg-white/90 transition-all duration-300 ease-out transform ${
+                      isOpen
+                        ? "translate-y-0 opacity-100"
+                        : "translate-y-8 opacity-0"
+                    }`}
+                    style={{
+                      transitionDelay: isOpen
+                        ? `${(navItems.length + 1) * 150}ms`
+                        : "0ms",
+                    }}
+                  >
+                    Register Now
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </nav>
     </header>

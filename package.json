@@ -12,6 +12,7 @@
     "supabase:setup": "npm run supabase:deploy && npm run supabase:migrate"
   },
   "dependencies": {
+    "@glidejs/glide": "^3.7.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -85,6 +86,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
+    "@types/glidejs__glide": "^3.6.6",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",

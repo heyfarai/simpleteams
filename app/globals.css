@@ -1,5 +1,25 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@glidejs/glide/dist/css/glide.core.min.css";
+
+/* Custom GlideJS styles */
+.glide__bullet--active {
+  background-color: var(--primary);
+}
+
+.glide__bullet:hover {
+  background-color: var(--primary);
+}
+
+.glide__slides {
+  position: relative;
+}
+
+.glide__slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -133,6 +153,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Mutant Outline";
+  src: url("/fonts/MutantAcademyDCBB.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -142,7 +170,7 @@
   }
   h1,
   h2 {
-    font-family: "Mutant Academy", sans-serif;
+    font-family: "Mutant Outline", sans-serif;
     font-weight: normal;
     letter-spacing: 0.02px;
   }
@@ -157,6 +185,9 @@
   .mutant {
     font-family: "Mutant Academy", sans-serif;
   }
+  .mutant-outline {
+    font-family: "Mutant Outline", sans-serif;
+  }
 
   h2.normal {
     font-weight: 400; /* Normal weight */
@@ -165,16 +196,17 @@
 
 @layer components {
   .display-heading {
-    @apply lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground;
+    font-family: "Mutant Academy", sans-serif;
+    @apply lg:text-8xl md:text-6xl text-5xl tracking-tight text-primary text-shadow-secondary text-shadow-sm;
   }
 
   .heading-highlight {
-    @apply relative px-4 text-primary;
+    @apply relative px-4;
   }
 
   .heading-highlight::before {
     content: "";
-    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-2/3 bg-[#fdbb30] w-full h-[33%] -z-[1];
+    @apply hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-2/3 bg-primary w-full h-[33%] -z-[1];
   }
 
   .heading-highlight-container {
