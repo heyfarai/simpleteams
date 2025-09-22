@@ -143,26 +143,26 @@ export default function AboutPage() {
           <div className="mb-16">
             <SlidesCarousel
               slides={[
-                "NCHC-Season-2-slides-21.jpeg",
-                "NCHC-Season-2-slides-22.jpeg",
-                "NCHC-Season-2-slides-23.jpeg",
-                "NCHC-Season-2-slides-24.jpeg",
-                "NCHC-Season-2-slides-25.jpeg",
-                "NCHC-Season-2-slides-26.jpeg",
-                "NCHC-Season-2-slides-27.jpeg",
-                "NCHC-Season-2-slides-28.jpeg",
-                "NCHC-Season-2-slides-29.jpeg",
-                "NCHC-Season-2-slides-30.jpeg",
-                "NCHC-Season-2-slides-31.jpeg",
-                "NCHC-Season-2-slides-32.jpeg",
-                "NCHC-Season-2-slides-33.jpeg",
-                "NCHC-Season-2-slides-34.jpeg",
-                "NCHC-Season-2-slides-35.jpeg",
-                "NCHC-Season-2-slides-36.jpeg",
-                "NCHC-Season-2-slides-37.jpeg",
-                "NCHC-Season-2-slides-38.jpeg",
-                "NCHC-Season-2-slides-39.jpeg",
-                "NCHC-Season-2-slides-40.jpeg",
+                "NCHC-Season-2-slides-1.jpeg",
+                "NCHC-Season-2-slides-2.jpeg",
+                "NCHC-Season-2-slides-3.jpeg",
+                "NCHC-Season-2-slides-4.jpeg",
+                "NCHC-Season-2-slides-5.jpeg",
+                "NCHC-Season-2-slides-6.jpeg",
+                "NCHC-Season-2-slides-7.jpeg",
+                "NCHC-Season-2-slides-8.jpeg",
+                "NCHC-Season-2-slides-9.jpeg",
+                "NCHC-Season-2-slides-10.jpeg",
+                "NCHC-Season-2-slides-11.jpeg",
+                "NCHC-Season-2-slides-12.jpeg",
+                "NCHC-Season-2-slides-13.jpeg",
+                "NCHC-Season-2-slides-14.jpeg",
+                "NCHC-Season-2-slides-15.jpeg",
+                "NCHC-Season-2-slides-16.jpeg",
+                "NCHC-Season-2-slides-17.jpeg",
+                "NCHC-Season-2-slides-18.jpeg",
+                "NCHC-Season-2-slides-19.jpeg",
+                "NCHC-Season-2-slides-20.jpeg",
               ]}
               title="NCHC Season 2 Details"
             />
@@ -174,7 +174,7 @@ export default function AboutPage() {
       <section className="py-36 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="font-black lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
+            <h1 className="lg:text-8xl md:text-6xl text-4xl tracking-tight text-foreground">
               The NCHC Difference
             </h1>
             <p className="text-xl text-gray-600">

@@ -56,6 +56,7 @@ export function generateMetadata({
     : `${siteConfig.url}${image}`;
 
   return {
+    metadataBase: new URL(siteConfig.url),
     title: pageTitle,
     description: pageDescription,
     keywords: siteConfig.keywords,
