@@ -161,6 +161,19 @@ export async function POST(request: Request) {
     // Note: Payment record will be created by webhook after successful Stripe payment
     // We'll store the registration ID in Stripe metadata for the webhook to use
 
+    // Get dynamic base URL for return URLs
+    const getReturnUrl = (path: string) => {
+      // On Netlify, use the main site URL
+      if (process.env.URL) {
+        return `${process.env.URL}${path}`;
+      }
+
+      // Fallback for local development or other hosting
+      const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+      const host = process.env.VERCEL_URL || 'localhost:3000';
+      return `${protocol}://${host}${path}`;
+    };
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -171,8 +184,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_URL}/register/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/register/checkout`,
+      success_url: `${getReturnUrl('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: getReturnUrl('/register/checkout'),
       metadata: {
         registrationId: registration.id,
         contactEmail: formData.contactEmail,
