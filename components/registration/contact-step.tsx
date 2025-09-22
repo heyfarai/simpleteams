@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Building, MapPin, Mail, Trophy } from "lucide-react";
 import { useEffect } from "react";
 import { useActiveDivisions } from "@/hooks/use-active-divisions";
+import { useAuth } from "@/hooks/use-auth";
 
 interface ContactStepProps {
   formData: {
@@ -39,6 +40,7 @@ interface ContactStepProps {
 
 export function ContactStep({ formData, onInputChange, onGoToPrevious }: ContactStepProps) {
   const { data: activeDivisions = [], isLoading, error } = useActiveDivisions();
+  const { user } = useAuth();
 
   console.log('ContactStep Debug:', {
     activeDivisions,
@@ -57,7 +59,10 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && (!formData.primaryContactName || !formData.headCoachName)) {
       onInputChange('primaryContactName', 'John Smith');
-      onInputChange('primaryContactEmail', 'john.smith@thunderhawks.com');
+      // Only auto-fill email if user is not authenticated
+      if (!user) {
+        onInputChange('primaryContactEmail', 'john.smith@thunderhawks.com');
+      }
       onInputChange('primaryContactPhone', '416-555-0123');
       onInputChange('primaryContactRole', 'manager');
       onInputChange('headCoachName', 'Sarah Johnson');
@@ -65,7 +70,7 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
       onInputChange('headCoachPhone', '416-555-0124');
       onInputChange('headCoachCertifications', 'NCCP Level 2, First Aid CPR');
     }
-  }, [formData.primaryContactName, formData.headCoachName, onInputChange]);
+  }, [formData.primaryContactName, formData.headCoachName, onInputChange, user]);
 
   return (
     <div className="space-y-6">
@@ -174,7 +179,10 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="primaryContactEmail">Email Address *</Label>
+              <Label htmlFor="primaryContactEmail">
+                Email Address *
+                {user && <span className="text-xs text-gray-500 ml-2">(from your account)</span>}
+              </Label>
               <Input
                 id="primaryContactEmail"
                 type="email"
@@ -183,6 +191,8 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
                   onInputChange("primaryContactEmail", e.target.value)
                 }
                 placeholder="Enter email address"
+                disabled={!!user}
+                className={user ? "bg-gray-50 text-gray-600" : ""}
                 required
               />
             </div>
@@ -222,10 +232,10 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
 
         {/* Head Coach */}
         <div className="space-y-4">
-          <h4 className="font-medium text-gray-900">Head Coach</h4>
+          <h4 className="font-medium text-gray-900">Head Coach <span className="text-sm font-normal text-gray-500">(optional)</span></h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="headCoachName">Full Name *</Label>
+              <Label htmlFor="headCoachName">Full Name</Label>
               <Input
                 id="headCoachName"
                 value={formData.headCoachName}
@@ -233,11 +243,10 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
                   onInputChange("headCoachName", e.target.value)
                 }
                 placeholder="Enter coach name"
-                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="headCoachEmail">Email Address *</Label>
+              <Label htmlFor="headCoachEmail">Email Address</Label>
               <Input
                 id="headCoachEmail"
                 type="email"
@@ -246,7 +255,6 @@ export function ContactStep({ formData, onInputChange, onGoToPrevious }: Contact
                   onInputChange("headCoachEmail", e.target.value)
                 }
                 placeholder="Enter coach email"
-                required
               />
             </div>
             <div className="space-y-2">

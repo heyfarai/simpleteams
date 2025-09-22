@@ -33,7 +33,7 @@ This is a basketball league website built with Next.js 15, TypeScript, and Tailw
 - shadcn/ui component library (New York style)
 - Tailwind CSS v4 with CSS variables
 - Radix UI primitives for complex components
-- Custom fonts: Geist Sans/Mono, Schibsted Grotesk
+- Custom fonts: Geist Sans/Mono,
 - Lucide React for icons
 
 ### State Management & Data

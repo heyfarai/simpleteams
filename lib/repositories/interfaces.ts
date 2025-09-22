@@ -21,6 +21,50 @@ export interface PlayerRepository {
   findLeadersByCategory(category: StatCategory, seasonId?: string): Promise<Player[]>;
   findFeatured(count: number): Promise<Player[]>;
   search(query: string): Promise<Player[]>;
+  create(playerData: CreatePlayerRequest): Promise<Player>;
+  update(id: string, playerData: UpdatePlayerRequest): Promise<Player>;
+  softDelete(id: string): Promise<void>;
+}
+
+export interface CreatePlayerRequest {
+  firstName: string;
+  lastName: string;
+  personalInfo?: {
+    gradYear?: number;
+    hometown?: string;
+    position?: string;
+    dateOfBirth?: string;
+    height?: string;
+    weight?: number;
+  };
+  jerseyNumber?: number;
+  bio?: string;
+  teamId: string;
+  rosterData?: {
+    jerseyNumber: number;
+    position: string;
+    status: string;
+  };
+}
+
+export interface UpdatePlayerRequest {
+  firstName?: string;
+  lastName?: string;
+  personalInfo?: {
+    gradYear?: number;
+    hometown?: string;
+    position?: string;
+    dateOfBirth?: string;
+    height?: string;
+    weight?: number;
+  };
+  jerseyNumber?: number;
+  bio?: string;
+  rosterData?: {
+    jerseyNumber?: number;
+    position?: string;
+    status?: string;
+  };
 }
 
 export interface TeamRepository {

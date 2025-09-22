@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import { getCurrentUser } from '@/lib/supabase/auth'
+import { supabaseTeamService } from '@/lib/services/supabase-services'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 
 interface Team {
   id: string
   sanity_team_id: string
   name: string
-  contact_email: string
+  primary_contact_email: string
   created_at: string
 }
 
@@ -30,19 +32,42 @@ export default function RosterListPage() {
           return
         }
 
-        const response = await fetch(`/api/admin/user-teams?userId=${user.id}`)
+        // Use Supabase client directly for user-specific team queries
+        // TODO: This currently uses team_registrations as a temporary solution
+        // Long-term should use team_members table for proper ownership model
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch teams: ${response.status}`)
+        const { data: registrationData, error: teamsError } = await supabase
+          .from('team_registrations')
+          .select(`
+            team_id,
+            teams!inner (
+              id,
+              name,
+              primary_contact_email,
+              created_at
+            )
+          `)
+          .eq('user_id', user.id)
+          .not('team_id', 'is', null)
+
+        if (teamsError) {
+          throw teamsError
         }
 
-        const result = await response.json()
+        // Transform the nested data structure from team_registrations
+        const transformedTeams = registrationData?.map(reg => ({
+          id: reg.teams.id,
+          sanity_team_id: reg.teams.id, // Using Supabase ID as sanity_team_id for now
+          name: reg.teams.name,
+          primary_contact_email: reg.teams.primary_contact_email,
+          created_at: reg.teams.created_at
+        })) || []
 
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to load teams')
-        }
-
-        setTeams(result.teams || [])
+        setTeams(transformedTeams)
 
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to load teams')
@@ -116,7 +141,7 @@ export default function RosterListPage() {
                         {team.name}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {team.contact_email}
+                        {team.primary_contact_email}
                       </p>
                     </div>
                   </div>

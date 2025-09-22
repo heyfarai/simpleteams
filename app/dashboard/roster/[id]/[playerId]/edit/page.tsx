@@ -17,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, User, Upload } from "lucide-react";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/supabase/auth";
+import { playerRepository } from "@/lib/repositories/factory";
+import type { Player } from "@/lib/domain/models";
 
 interface PlayerForm {
   firstName: string;
@@ -76,35 +78,30 @@ function EditPlayerForm() {
           return;
         }
 
-        // Fetch player data from API
-        const response = await fetch(`/api/players?id=${playerId}`);
+        // Fetch player data from repository
+        const player = await playerRepository.findById(playerId);
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch player: ${response.status}`);
+        if (!player) {
+          setError('Player not found');
+          return;
         }
-
-        const result = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to load player');
-        }
-
-        const player = result.player;
 
         // Populate form with player data
+        console.log('🔍 Player data loaded for editing:', player);
         setFormData({
           firstName: player.firstName || '',
           lastName: player.lastName || '',
-          gradYear: player.personalInfo?.gradYear?.toString() || '',
-          hometown: player.personalInfo?.hometown || '',
-          position: player.personalInfo?.position || '',
-          jerseyNumber: player.jerseyNumber?.toString() || '',
-          dateOfBirth: player.personalInfo?.dateOfBirth || '',
-          height: player.personalInfo?.height || '',
-          weight: player.personalInfo?.weight?.toString() || '',
-          bio: player.bio || '',
+          gradYear: player.gradYear?.toString() || '',
+          hometown: player.hometown || '',
+          position: player.position || '',
+          jerseyNumber: player.jersey?.toString() || '',
+          dateOfBirth: '', // Not available in current domain model
+          height: player.height || '',
+          weight: '', // Not available in current domain model
+          bio: '', // Not available in current domain model
           status: 'active' // Default status - roster status will be handled separately
         });
+        console.log('🔍 Form data populated with jersey:', player.jersey?.toString() || '');
 
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to load player data');
@@ -161,6 +158,7 @@ function EditPlayerForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔄 Edit form submitted for player:', playerId);
 
     const validationError = validateForm();
     if (validationError) {
@@ -197,36 +195,28 @@ function EditPlayerForm() {
       let rosterData = null;
       if (formData.jerseyNumber.trim() !== "" && formData.position) {
         rosterData = {
-          teamId: teamId,
-          seasonId: null, // TODO: Get current season ID if needed
           jerseyNumber: Number(formData.jerseyNumber),
           position: formData.position,
           status: formData.status,
         };
       }
 
-      // Call API to update player
-      const response = await fetch("/api/players", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          playerId,
-          playerData,
-          rosterData,
-        }),
-      });
+      const updatePlayerData = {
+        firstName: playerData.firstName,
+        lastName: playerData.lastName,
+        personalInfo: playerData.personalInfo,
+        jerseyNumber: playerData.jerseyNumber,
+        bio: playerData.bio,
+        rosterData: rosterData
+      };
 
-      const result = await response.json();
+      console.log('🔄 Updating player with data:', updatePlayerData);
+      const updatedPlayer = await playerRepository.update(playerId, updatePlayerData);
+      console.log('✅ Player updated successfully:', updatedPlayer);
 
-      if (!result.success) {
-        throw new Error(result.error || "Failed to update player");
-      }
-
-      // TODO: Handle photo upload to Sanity if needed
+      // TODO: Handle photo upload to Supabase storage if needed
       if (photoFile) {
-        // await uploadPhotoToSanity(photoFile, playerId)
+        // await uploadPhotoToSupabase(photoFile, playerId)
       }
 
       router.push(`/dashboard/roster/${teamId}`);

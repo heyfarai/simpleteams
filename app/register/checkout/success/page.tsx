@@ -168,12 +168,11 @@ function CheckoutSuccessContent() {
                 <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Registration Successful!
+                <h1 className="text-3xl text-gray-900 mb-2">
+                  You're Registered!
                 </h1>
                 <p className="text-lg text-gray-600">
-                  Thank you for registering. Your team is now signed up for the
-                  2025-26 season.
+                  Get ready for the 2025-26 season.
                 </p>
               </>
             ) : isPaymentPending ? (
@@ -243,14 +242,13 @@ function CheckoutSuccessContent() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Registration Summary */}
-            <Card>
+            <Card className="bg-white p-6">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5" />
-                  Team Registration
+                <CardTitle className="flex items-center">
+                  <h2 className="text-xl">Team Registration</h2>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="">
                 {registrationData && (
                   <>
                     <div className="flex justify-between">
@@ -294,43 +292,36 @@ function CheckoutSuccessContent() {
             </Card>
 
             {/* Next Steps */}
-            <Card>
+            <Card className="bg-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  What's Next?
+                  <h2 className="text-xl">What's Next?</h2>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-2 p-6">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <Mail className="w-5 h-5 text-blue-600 mt-0.5" />
                     <div>
-                      <p className="font-medium">Confirmation Email</p>
-                      <p className="text-sm text-gray-600">
-                        Check your email for detailed registration confirmation
-                        and next steps.
+                      <p className="font-medium">
+                        Check your email (or junk) for confirmation.
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Users className="w-5 h-5 text-blue-600 mt-0.5" />
                     <div>
-                      <p className="font-medium">Team Management</p>
-                      <p className="text-sm text-gray-600">
-                        Access your team dashboard to manage players and view
-                        schedules.
+                      <p className="font-medium">
+                        <Link href="/dashboard/roster">
+                          Add your team roster
+                        </Link>
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Calendar className="w-5 h-5 text-blue-600 mt-0.5" />
                     <div>
-                      <p className="font-medium">Season Updates</p>
-                      <p className="text-sm text-gray-600">
-                        We'll notify you when the schedule is released and games
-                        begin.
-                      </p>
+                      <p className="font-medium">Get your reps in!</p>
                     </div>
                   </div>
                 </div>

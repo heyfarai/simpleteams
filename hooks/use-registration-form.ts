@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { client } from "@/lib/sanity/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
-
-export interface Division {
-  _id: string;
-  name: string;
-  ageGroup: string;
-}
+import { divisionService } from "@/lib/services/division-service";
+import type { Division } from "@/lib/domain/models";
 
 export interface FormData {
   selectedPackage: string;
@@ -28,20 +23,8 @@ export interface FormData {
   headCoachCertifications: string;
 }
 
-const fetchDivisions = async () => {
-  const query = `*[_type == "season" && _id == $seasonId][0]{
-    "divisions": activeDivisions[].division->{
-      _id,
-      name,
-      ageGroup
-    }
-  }`;
-
-  const result = await client.fetch(query, {
-    seasonId: process.env.NEXT_PUBLIC_ACTIVE_SEASON_ID,
-  });
-
-  return result?.divisions || [];
+const fetchDivisions = async (): Promise<Division[]> => {
+  return await divisionService.getActiveDivisions();
 };
 
 export function useRegistrationForm() {
@@ -78,15 +61,16 @@ export function useRegistrationForm() {
     headCoachCertifications: "",
   });
 
-  // Set authenticated user's email as contact email
+  // Set authenticated user's email as contact email and primary contact email
   useEffect(() => {
-    if (user?.email && !formData.contactEmail) {
+    if (user?.email) {
       setFormData((prev) => ({
         ...prev,
         contactEmail: user.email || "",
+        primaryContactEmail: user.email || "",
       }));
     }
-  }, [user?.email, formData.contactEmail]);
+  }, [user?.email]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -101,9 +85,7 @@ export function useRegistrationForm() {
       formData.contactEmail &&
       formData.divisionPreference &&
       formData.primaryContactName &&
-      formData.primaryContactEmail &&
-      formData.headCoachName &&
-      formData.headCoachEmail
+      formData.primaryContactEmail
     );
   };
 

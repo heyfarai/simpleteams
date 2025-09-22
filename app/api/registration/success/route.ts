@@ -21,9 +21,11 @@ export async function GET(request: Request) {
       expand: ['payment_intent', 'subscription'],
     });
 
-    if (!session.metadata?.teamId) {
+    const registrationId = session.metadata?.registrationId;
+
+    if (!registrationId) {
       return NextResponse.json(
-        { error: "No team information found for this session" },
+        { error: "No registration information found for this session" },
         { status: 404 }
       );
     }
@@ -61,30 +63,52 @@ export async function GET(request: Request) {
       );
     }
 
-    const { data: team, error: teamError } = await supabaseAdmin
-      .from("teams")
-      .select("*")
-      .eq("id", session.metadata.teamId)
+    // Get team via registration
+    const { data: registration, error: registrationError } = await supabaseAdmin
+      .from("team_registrations")
+      .select("*, teams(*)")
+      .eq("id", registrationId)
       .single();
 
-    if (teamError || !team) {
+    if (registrationError || !registration) {
       return NextResponse.json(
-        { error: "Team not found" },
+        { error: "Registration not found" },
         { status: 404 }
       );
     }
 
-    const { data: payment, error: paymentError } = await supabaseAdmin
-      .from("team_payments")
-      .select("*")
+    if (!registration.team_id || !registration.teams) {
+      return NextResponse.json(
+        { error: "Team not yet created for this registration" },
+        { status: 404 }
+      );
+    }
+
+    const team = registration.teams;
+
+    // Get payment information via roster
+    let payment = null;
+    const { data: roster } = await supabaseAdmin
+      .from("rosters")
+      .select("id")
       .eq("team_id", team.id)
-      .eq("stripe_session_id", sessionId)
       .single();
 
-    if (paymentError) {
-      console.error("Payment lookup error:", paymentError);
-      // Don't fail if payment record isn't found, use session data instead
+    if (roster) {
+      const { data: paymentData } = await supabaseAdmin
+        .from("team_payments")
+        .select("*")
+        .eq("roster_id", roster.id)
+        .eq("stripe_session_id", sessionId)
+        .single();
+      payment = paymentData;
     }
+
+    // Add registration-specific fields to team object
+    team.selected_package = registration.selected_package;
+    team.contact_email = registration.primary_contact_email;
+
+    // Payment lookup errors are handled above, continue with available data
 
     // Handle webhook failure scenario - update our records if Stripe shows payment succeeded
     // but our database still shows pending

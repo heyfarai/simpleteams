@@ -21,11 +21,18 @@ export async function GET(request: Request) {
 
     console.log('🔍 Admin API: Fetching teams for user:', userId)
 
-    // Get teams that belong to this user
-    const { data: teams, error } = await supabaseAdmin
-      .from('teams')
-      .select('id, name, sanity_team_id')
+    // Get teams that belong to this user via team_registrations
+    const { data: registrations, error } = await supabaseAdmin
+      .from('team_registrations')
+      .select(`
+        team_id,
+        teams!inner (
+          id,
+          name
+        )
+      `)
       .eq('user_id', userId)
+      .not('team_id', 'is', null)
 
     if (error) {
       console.error('❌ Admin API: Error fetching teams:', error)
@@ -35,11 +42,18 @@ export async function GET(request: Request) {
       )
     }
 
-    console.log('✅ Admin API: Found teams:', teams?.length || 0)
+    // Transform the nested data structure to match expected format
+    const teams = registrations?.map(reg => ({
+      id: reg.teams.id,
+      sanity_team_id: reg.teams.id, // Use Supabase ID as sanity_team_id for now
+      name: reg.teams.name
+    })) || []
+
+    console.log('✅ Admin API: Found teams:', teams.length)
 
     return NextResponse.json({
       success: true,
-      teams: teams || []
+      teams: teams
     })
 
   } catch (error) {

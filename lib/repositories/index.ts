@@ -9,7 +9,7 @@ import { SanityPlayerRepository } from "./sanity-player-repository";
 // Factory function - single place to change database implementation
 export function createPlayerRepository(): PlayerRepository {
   // Environment-based switching
-  const dbType = process.env.DATABASE_TYPE || "sanity";
+  const dbType = process.env.NEXT_PUBLIC_DATABASE_TYPE || "sanity";
 
   switch (dbType) {
     case "sanity":

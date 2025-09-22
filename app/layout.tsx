@@ -6,19 +6,11 @@ import { LayoutWrapper } from "@/components/layout-wrapper";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
-import { Schibsted_Grotesk } from "next/font/google";
 import {
   generateMetadata as generateSiteMetadata,
   generateOrganizationSchema,
 } from "@/lib/metadata";
 import "./globals.css";
-
-const schibstedGrotesk = Schibsted_Grotesk({
-  subsets: ["latin"],
-  weight: ["900"],
-  variable: "--font-schibsted-grotesk",
-  display: "swap",
-});
 
 export const metadata = generateSiteMetadata();
 
@@ -52,9 +44,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${schibstedGrotesk.variable}`}
-      >
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>
           <Analytics />

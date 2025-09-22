@@ -114,21 +114,20 @@ export async function POST(request: Request) {
       }, { status: 401 });
     }
 
-    // Create team record in our new structure
-    const teamData: Database['public']['Tables']['teams']['Insert'] = {
+    // Create registration record (teams will be created after payment)
+    const registrationData = {
       user_id: userId,
-      name: formData.teamName,
+      team_name: formData.teamName,
       city: formData.city,
       region: formData.province,
-      contact_email: formData.contactEmail,
       phone: formData.phone || null,
       primary_color: formData.primaryColors?.[0] || '#1e40af',
       secondary_color: formData.primaryColors?.[1] || '#fbbf24',
       accent_color: formData.primaryColors?.[2] || null,
       primary_contact_name: formData.primaryContactName,
-      primary_contact_email: formData.primaryContactEmail,
+      primary_contact_email: formData.contactEmail,
       primary_contact_phone: formData.primaryContactPhone || null,
-      primary_contact_role: formData.primaryContactRole || 'Team Manager',
+      primary_contact_role: formData.primaryContactRole || 'manager',
       head_coach_name: formData.headCoachName || null,
       head_coach_email: formData.headCoachEmail || null,
       head_coach_phone: formData.headCoachPhone || null,
@@ -140,46 +139,27 @@ export async function POST(request: Request) {
       payment_status: 'pending'
     };
 
-    const { data: team, error: teamError } = await supabase
-      .from("teams")
-      .insert(teamData)
+    const { data: registration, error: registrationError } = await supabase
+      .from("team_registrations")
+      .insert(registrationData)
       .select()
       .single();
 
-    if (teamError) {
-      console.error("Team creation error:", teamError);
-      return NextResponse.json({ error: teamError.message }, { status: 500 });
+    if (registrationError) {
+      console.error("Registration creation error:", registrationError);
+      return NextResponse.json({ error: registrationError.message }, { status: 500 });
     }
 
-    if (!team) {
+    if (!registration) {
       return NextResponse.json(
-        { error: "Failed to create team" },
+        { error: "Failed to create registration" },
         { status: 500 }
       );
     }
 
 
-    // Create initial payment record
-    const paymentData: Database['public']['Tables']['team_payments']['Insert'] = {
-      team_id: team.id,
-      user_id: userId,
-      amount: packageConfig.amount,
-      currency: 'CAD',
-      description: `${packageConfig.name} - 2025-26 Season`,
-      payment_type: 'registration',
-      status: 'pending'
-    };
-
-    const { data: payment, error: paymentError } = await supabase
-      .from("team_payments")
-      .insert(paymentData)
-      .select()
-      .single();
-
-    if (paymentError) {
-      console.error("Payment creation error:", paymentError);
-      // Don't fail the registration if payment record creation fails
-    }
+    // Note: Payment record will be created by webhook after successful Stripe payment
+    // We'll store the registration ID in Stripe metadata for the webhook to use
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -194,8 +174,7 @@ export async function POST(request: Request) {
       success_url: `${process.env.NEXT_PUBLIC_URL}/register/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/register/checkout`,
       metadata: {
-        teamId: team.id,
-        paymentId: payment?.id || '',
+        registrationId: registration.id,
         contactEmail: formData.contactEmail,
         teamName: formData.teamName,
         selectedPackage: formData.selectedPackage,
@@ -204,17 +183,15 @@ export async function POST(request: Request) {
       customer_email: formData.contactEmail,
     });
 
-    // Update payment record with Stripe session ID
-    if (payment) {
-      await supabase
-        .from("team_payments")
-        .update({ stripe_session_id: session.id })
-        .eq("id", payment.id);
-    }
+    // Update registration with Stripe session ID
+    await supabase
+      .from("team_registrations")
+      .update({ stripe_session_id: session.id })
+      .eq("id", registration.id);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       checkoutUrl: session.url,
-      teamId: team.id 
+      registrationId: registration.id
     });
   } catch (error) {
     console.error("Registration error:", error);

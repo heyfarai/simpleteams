@@ -42,6 +42,7 @@ export interface Division {
   skillLevel?: SkillLevel;
   conference: Conference;
   teamLimits?: TeamLimits;
+  isActive?: boolean;
 }
 
 export interface Season {
@@ -185,6 +186,16 @@ export type AgeGroup = "ascent" | "supreme" | "premier" | "diamond";
 export type SkillLevel = "beginner" | "intermediate" | "advanced" | "elite";
 export type TeamStatus = "active" | "inactive" | "pending" | "suspended";
 export type SeasonStatus = "active" | "completed" | "upcoming" | "cancelled";
-export type GameStatus = "scheduled" | "live" | "completed" | "cancelled" | "postponed";
-export type StaffRole = "head-coach" | "assistant-coach" | "manager" | "trainer" | "volunteer";
+export type GameStatus =
+  | "scheduled"
+  | "live"
+  | "completed"
+  | "cancelled"
+  | "postponed";
+export type StaffRole =
+  | "head-coach"
+  | "assistant-coach"
+  | "manager"
+  | "trainer"
+  | "volunteer";
 export type PlayerStatus = "active" | "inactive" | "injured";

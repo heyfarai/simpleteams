@@ -72,7 +72,7 @@ export function CheckoutForm() {
 
   const packageDetails = getPackageDetails(formData.selectedPackage);
   const selectedDivision = divisions.find(
-    (d) => d._id === formData.divisionPreference
+    (d) => d.id === formData.divisionPreference
   );
 
 

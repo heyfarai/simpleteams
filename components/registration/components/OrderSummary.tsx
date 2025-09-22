@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard } from "lucide-react";
-import type { FormData, Division } from "@/hooks/use-registration-form";
+import type { FormData } from "@/hooks/use-registration-form";
+import type { Division } from "@/lib/domain/models";
 import type { PackageDetails } from "../utils/packageDetails";
 
 interface OrderSummaryProps {
@@ -24,7 +25,7 @@ export function OrderSummary({
 }: OrderSummaryProps) {
   return (
     <div className="sticky top-8">
-      <Card className="bg-secondary text-foreground">
+      <Card className="bg-black text-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-0">
             <CreditCard className="h-5 w-5 mr-2" />
@@ -52,7 +53,10 @@ export function OrderSummary({
                 {packageDetails.description}
               </p>
               {packageDetails.originalAmount && (
-                <Badge variant="secondary" className="text-green-700 bg-green-50">
+                <Badge
+                  variant="secondary"
+                  className="text-green-700 bg-green-50"
+                >
                   Save $
                   {(
                     packageDetails.originalAmount - packageDetails.amount

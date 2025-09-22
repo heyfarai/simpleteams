@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { Division, FormData } from "@/hooks/use-registration-form";
+import type { FormData } from "@/hooks/use-registration-form";
+import type { Division } from "@/lib/domain/models";
 
 interface DivisionSectionProps {
   formData: FormData;
@@ -19,9 +20,7 @@ export function DivisionSection({
 }: DivisionSectionProps) {
   return (
     <div>
-      <h2 className="text-lg md:text-xl text-gray-900 mb-4">
-        Division
-      </h2>
+      <h2 className="text-lg md:text-xl text-gray-900 mb-4">Division</h2>
       <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border">
         {divisionsLoading ? (
           <div className="text-gray-500">Loading divisions...</div>
@@ -42,21 +41,38 @@ export function DivisionSection({
         ) : (
           <RadioGroup
             value={formData.divisionPreference}
-            onValueChange={(value) => onInputChange("divisionPreference", value)}
+            onValueChange={(value) =>
+              onInputChange("divisionPreference", value)
+            }
             className="space-y-3"
           >
-            {divisions.map((division) => (
-              <div key={division._id} className="flex items-center space-x-3">
-                <RadioGroupItem
-                  value={division._id}
-                  id={division._id}
-                  className="bg-primary/10 shadow-none"
-                />
-                <Label htmlFor={division._id} className="cursor-pointer">
-                  {division.name} - {division.ageGroup}
-                </Label>
-              </div>
-            ))}
+            {divisions
+              .filter((division) => division.isActive)
+              .map((division) => (
+                <div
+                  key={division.id}
+                  className="flex items-center space-x-3"
+                >
+                  <RadioGroupItem
+                    value={division.id}
+                    id={division.id}
+                    className="bg-primary/10 shadow-none"
+                  />
+                  <Label
+                    htmlFor={division.id}
+                    className="cursor-pointer"
+                  >
+                    <div>
+                      <div className="font-medium">{division.name}</div>
+                      {division.ageGroup && (
+                        <div className="text-sm text-gray-600">
+                          {division.ageGroup}
+                        </div>
+                      )}
+                    </div>
+                  </Label>
+                </div>
+              ))}
           </RadioGroup>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/auth";
+import { playerRepository } from "@/lib/repositories/factory";
 
 export interface PlayerForm {
   firstName: string;
@@ -124,38 +125,31 @@ export function usePlayerForm(
       if (
         formData.jerseyNumber.trim() !== "" &&
         formData.position &&
-        teamId &&
-        seasonId
+        teamId
       ) {
         rosterData = {
-          sanityTeamId: teamId,
-          seasonId: seasonId,
           jerseyNumber: Number(formData.jerseyNumber),
           position: formData.position,
           status: formData.status,
         };
       }
 
-      const response = await fetch("/api/players", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          playerData,
-          rosterData,
-        }),
-      });
+      const createPlayerData = {
+        firstName: playerData.firstName,
+        lastName: playerData.lastName,
+        personalInfo: playerData.personalInfo,
+        jerseyNumber: playerData.jerseyNumber,
+        bio: playerData.bio,
+        teamId: teamId,
+        rosterData: rosterData
+      };
 
-      const result = await response.json();
+      const newPlayer = await playerRepository.create(createPlayerData);
+      console.log('✅ Player created successfully:', newPlayer);
 
-      if (!result.success) {
-        throw new Error(result.error || "Failed to create player");
-      }
-
-      // TODO: Handle photo upload to Sanity if needed
+      // TODO: Handle photo upload to Supabase storage if needed
       if (photoFile) {
-        // await uploadPhotoToSanity(photoFile, result.player._id)
+        // await uploadPhotoToSupabase(photoFile, newPlayerId)
       }
 
       router.push(redirectPath);
