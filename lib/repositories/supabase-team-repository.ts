@@ -129,18 +129,19 @@ export class SupabaseTeamRepository implements TeamRepository {
           status,
           rosters!inner(
             id,
-            division:divisions(
-              id,
-              name,
-              age_group,
-              skill_level
-            ),
-            season:seasons!inner(
-              id,
-              name,
-              year,
-              status,
-              is_active
+            season_division:season_divisions(
+              division:league_divisions(
+                id,
+                name,
+                description
+              ),
+              season:seasons!inner(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              )
             ),
             roster_season_stats(
               wins,
@@ -154,8 +155,9 @@ export class SupabaseTeamRepository implements TeamRepository {
             )
           )
         `)
-        .eq('rosters.season.id', seasonId)
-        .eq('status', 'active');
+        .eq('rosters.season_division.season.id', seasonId)
+        .eq('status', 'active')
+        .not('rosters.season_division', 'is', null); // Ensure season_division is not null
 
       if (error) throw error;
 
@@ -184,18 +186,19 @@ export class SupabaseTeamRepository implements TeamRepository {
           status,
           rosters!inner(
             id,
-            division:divisions!inner(
-              id,
-              name,
-              age_group,
-              skill_level
-            ),
-            season:seasons(
-              id,
-              name,
-              year,
-              status,
-              is_active
+            season_division:season_divisions(
+              division:league_divisions!inner(
+                id,
+                name,
+                description
+              ),
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              )
             ),
             roster_season_stats(
               wins,
@@ -209,7 +212,7 @@ export class SupabaseTeamRepository implements TeamRepository {
             )
           )
         `)
-        .eq('rosters.division.id', divisionId)
+        .eq('rosters.season_division.division.id', divisionId)
         .eq('status', 'active');
 
       if (error) throw error;
@@ -231,12 +234,12 @@ export class SupabaseTeamRepository implements TeamRepository {
           rosters(
             id,
             status,
-            division:divisions(
-              id,
-              name,
-              age_group,
-              skill_level
-            ),
+            season_division:season_divisions(
+              division:league_divisions(
+                id,
+                name,
+                description
+              ),
             season:seasons(
               id,
               name,
@@ -544,8 +547,12 @@ export class SupabaseTeamRepository implements TeamRepository {
 
   // Transform with roster details (most complete but slower)
   private transformToTeamWithRoster(row: any): Team {
-    const roster = row.rosters?.[0];
-    const stats = roster?.roster_season_stats?.[0];
+    // Find the roster with a valid season_division (not null)
+    const roster = row.rosters?.find((r: any) => r.season_division != null) || row.rosters?.[0];
+    // roster_season_stats can be either an array or single object, handle both
+    const stats = Array.isArray(roster?.roster_season_stats)
+      ? roster?.roster_season_stats?.[0]
+      : roster?.roster_season_stats;
 
     return {
       id: row.id,
@@ -569,30 +576,31 @@ export class SupabaseTeamRepository implements TeamRepository {
         ties: stats.ties,
         pointsFor: stats.points_for,
         pointsAgainst: stats.points_against,
+        gamesPlayed: stats.games_played,
       } : undefined,
-      division: roster?.division ? {
-        id: roster.division.id,
-        name: roster.division.name,
-        ageGroup: roster.division.age_group,
-        skillLevel: roster.division.skill_level,
+      division: roster?.season_division?.division ? {
+        id: roster.season_division.division.id,
+        name: roster.season_division.division.name,
+        ageGroup: roster.season_division.division.description,
+        skillLevel: roster.season_division.division.description,
         conference: {
-          id: roster.season?.id || '',
-          name: roster.season?.name || '',
+          id: roster.season_division.season?.id || '',
+          name: roster.season_division.season?.name || '',
           season: {
-            id: roster.season?.id || '',
-            name: roster.season?.name || '',
-            year: roster.season?.year || 0,
-            status: roster.season?.status || 'upcoming',
-            isActive: roster.season?.is_active || false,
+            id: roster.season_division.season?.id || '',
+            name: roster.season_division.season?.name || '',
+            year: roster.season_division.season?.year || 0,
+            status: roster.season_division.season?.status || 'upcoming',
+            isActive: roster.season_division.season?.is_active || false,
           },
         },
       } : undefined,
-      season: roster?.season ? {
-        id: roster.season.id,
-        name: roster.season.name,
-        year: roster.season.year,
-        status: roster.season.status,
-        isActive: roster.season.is_active,
+      season: roster?.season_division?.season ? {
+        id: roster.season_division.season.id,
+        name: roster.season_division.season.name,
+        year: roster.season_division.season.year,
+        status: roster.season_division.season.status,
+        isActive: roster.season_division.season.is_active,
       } : undefined,
     };
   }
@@ -625,30 +633,31 @@ export class SupabaseTeamRepository implements TeamRepository {
         ties: stats.ties,
         pointsFor: stats.points_for,
         pointsAgainst: stats.points_against,
+        gamesPlayed: stats.games_played,
       } : undefined,
-      division: currentRoster?.division ? {
-        id: currentRoster.division.id,
-        name: currentRoster.division.name,
-        ageGroup: currentRoster.division.age_group,
-        skillLevel: currentRoster.division.skill_level,
+      division: currentRoster?.season_division?.division ? {
+        id: currentRoster.season_division.division.id,
+        name: currentRoster.season_division.division.name,
+        ageGroup: currentRoster.season_division.division.description,
+        skillLevel: currentRoster.season_division.division.description,
         conference: {
-          id: currentRoster.season?.id || '',
-          name: currentRoster.season?.name || '',
+          id: currentRoster.season_division.season?.id || '',
+          name: currentRoster.season_division.season?.name || '',
           season: {
-            id: currentRoster.season?.id || '',
-            name: currentRoster.season?.name || '',
-            year: currentRoster.season?.year || 0,
-            status: currentRoster.season?.status || 'upcoming',
-            isActive: currentRoster.season?.is_active || false,
+            id: currentRoster.season_division.season?.id || '',
+            name: currentRoster.season_division.season?.name || '',
+            year: currentRoster.season_division.season?.year || 0,
+            status: currentRoster.season_division.season?.status || 'upcoming',
+            isActive: currentRoster.season_division.season?.is_active || false,
           },
         },
       } : undefined,
-      season: currentRoster?.season ? {
-        id: currentRoster.season.id,
-        name: currentRoster.season.name,
-        year: currentRoster.season.year,
-        status: currentRoster.season.status,
-        isActive: currentRoster.season.is_active,
+      season: currentRoster?.season_division?.season ? {
+        id: currentRoster.season_division.season.id,
+        name: currentRoster.season_division.season.name,
+        year: currentRoster.season_division.season.year,
+        status: currentRoster.season_division.season.status,
+        isActive: currentRoster.season_division.season.is_active,
       } : undefined,
     };
   }

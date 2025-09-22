@@ -1,13 +1,17 @@
 // Supabase implementation of SeasonRepository
 import { createClient } from '@supabase/supabase-js';
+import type { SeasonRepository } from './interfaces';
 import type { Season, Division } from '@/lib/domain/models';
 
-const supabase = createClient(
-  process.env.SIMPLE_SUPABASE_URL!,
-  process.env.SIMPLE_SUPABASE_SERVICE_ROLE_KEY!
-);
+// Use service role key on server side, anon key on client side
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = typeof window === 'undefined'
+  ? process.env.SUPABASE_SERVICE_ROLE_KEY! // Server side
+  : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; // Client side
 
-export class SupabaseSeasonRepository {
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+export class SupabaseSeasonRepository implements SeasonRepository {
   async getAllSeasons(): Promise<Season[]> {
     try {
       const { data: seasons, error } = await supabase
@@ -215,6 +219,48 @@ export class SupabaseSeasonRepository {
       console.error('Error setting active season:', error);
       throw error;
     }
+  }
+
+  // Interface methods required by SeasonRepository
+  async findAll(): Promise<Season[]> {
+    return this.getAllSeasons();
+  }
+
+  async findById(id: string): Promise<Season | null> {
+    return this.getSeasonById(id);
+  }
+
+  async findActive(): Promise<Season[]> {
+    return this.getActiveSeasons();
+  }
+
+  async findCompleted(): Promise<Season[]> {
+    try {
+      const { data: seasons, error } = await supabase
+        .from('seasons')
+        .select(`
+          id,
+          name,
+          year,
+          start_date,
+          end_date,
+          status,
+          is_active
+        `)
+        .eq('status', 'completed')
+        .order('year', { ascending: false });
+
+      if (error) throw error;
+
+      return seasons?.map(this.transformToSeason) || [];
+    } catch (error) {
+      console.error('Error fetching completed seasons:', error);
+      throw error;
+    }
+  }
+
+  async findCurrent(): Promise<Season | null> {
+    return this.getCurrentSeason();
   }
 
   // Transform Supabase row to domain Season model

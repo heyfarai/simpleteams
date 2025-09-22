@@ -97,18 +97,21 @@ export class TeamRepository {
           status,
           rosters!inner(
             id,
-            division:divisions(
+            season_division:season_divisions!inner(
               id,
-              name,
-              age_group,
-              skill_level
-            ),
-            season:seasons!inner(
-              id,
-              name,
-              year,
-              status,
-              is_active
+              season:seasons!inner(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description,
+                display_order
+              )
             ),
             roster_season_stats(
               wins,
@@ -123,7 +126,7 @@ export class TeamRepository {
           )
         `
         )
-        .eq("rosters.season.id", seasonId)
+        .eq("rosters.season_division.season.id", seasonId)
         .eq("status", "active");
 
       if (error) throw error;
@@ -154,18 +157,21 @@ export class TeamRepository {
           status,
           rosters!inner(
             id,
-            division:divisions!inner(
+            season_division:season_divisions!inner(
               id,
-              name,
-              age_group,
-              skill_level
-            ),
-            season:seasons(
-              id,
-              name,
-              year,
-              status,
-              is_active
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions!inner(
+                id,
+                name,
+                description,
+                display_order
+              )
             ),
             roster_season_stats(
               wins,
@@ -180,7 +186,7 @@ export class TeamRepository {
           )
         `
         )
-        .eq("rosters.division.id", divisionId)
+        .eq("rosters.season_division.division.id", divisionId)
         .eq("status", "active");
 
       if (error) throw error;
@@ -203,18 +209,21 @@ export class TeamRepository {
           rosters(
             id,
             status,
-            division:divisions(
+            season_division:season_divisions(
               id,
-              name,
-              age_group,
-              skill_level
-            ),
-            season:seasons(
-              id,
-              name,
-              year,
-              status,
-              is_active
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description,
+                display_order
+              )
             ),
             roster_season_stats(
               wins,
@@ -537,6 +546,9 @@ export class TeamRepository {
   private transformToTeamWithRoster(row: any): Team {
     const roster = row.rosters?.[0];
     const stats = roster?.roster_season_stats?.[0];
+    const seasonDivision = roster?.season_division;
+    const division = seasonDivision?.division;
+    const season = seasonDivision?.season;
 
     return {
       id: row.id,
@@ -563,32 +575,32 @@ export class TeamRepository {
             pointsAgainst: stats.points_against,
           }
         : undefined,
-      division: roster?.division
+      division: division
         ? {
-            id: roster.division.id,
-            name: roster.division.name,
-            ageGroup: roster.division.age_group,
-            skillLevel: roster.division.skill_level,
+            id: division.id,
+            name: division.name,
+            ageGroup: "unknown", // league_divisions don't have age_group
+            skillLevel: "unknown", // we can derive from division name if needed
             conference: {
-              id: roster.season?.id || "",
-              name: roster.season?.name || "",
+              id: season?.id || "",
+              name: season?.name || "",
               season: {
-                id: roster.season?.id || "",
-                name: roster.season?.name || "",
-                year: roster.season?.year || 0,
-                status: roster.season?.status || "upcoming",
-                isActive: roster.season?.is_active || false,
+                id: season?.id || "",
+                name: season?.name || "",
+                year: season?.year || 0,
+                status: season?.status || "upcoming",
+                isActive: season?.is_active || false,
               },
             },
           }
         : undefined,
-      season: roster?.season
+      season: season
         ? {
-            id: roster.season.id,
-            name: roster.season.name,
-            year: roster.season.year,
-            status: roster.season.status,
-            isActive: roster.season.is_active,
+            id: season.id,
+            name: season.name,
+            year: season.year,
+            status: season.status,
+            isActive: season.is_active,
           }
         : undefined,
     };
@@ -597,8 +609,11 @@ export class TeamRepository {
   // Transform with full team details (slowest but most complete)
   private transformToTeamWithFullDetails(row: any): Team {
     // Find current roster (active season)
-    const currentRoster = row.rosters?.find((r: any) => r.season?.is_active);
+    const currentRoster = row.rosters?.find((r: any) => r.season_division?.season?.is_active);
     const stats = currentRoster?.roster_season_stats?.[0];
+    const seasonDivision = currentRoster?.season_division;
+    const division = seasonDivision?.division;
+    const season = seasonDivision?.season;
 
     return {
       id: row.id,
@@ -625,32 +640,32 @@ export class TeamRepository {
             pointsAgainst: stats.points_against,
           }
         : undefined,
-      division: currentRoster?.division
+      division: division
         ? {
-            id: currentRoster.division.id,
-            name: currentRoster.division.name,
-            ageGroup: currentRoster.division.age_group,
-            skillLevel: currentRoster.division.skill_level,
+            id: division.id,
+            name: division.name,
+            ageGroup: "unknown", // league_divisions don't have age_group
+            skillLevel: "unknown", // we can derive from division name if needed
             conference: {
-              id: currentRoster.season?.id || "",
-              name: currentRoster.season?.name || "",
+              id: season?.id || "",
+              name: season?.name || "",
               season: {
-                id: currentRoster.season?.id || "",
-                name: currentRoster.season?.name || "",
-                year: currentRoster.season?.year || 0,
-                status: currentRoster.season?.status || "upcoming",
-                isActive: currentRoster.season?.is_active || false,
+                id: season?.id || "",
+                name: season?.name || "",
+                year: season?.year || 0,
+                status: season?.status || "upcoming",
+                isActive: season?.is_active || false,
               },
             },
           }
         : undefined,
-      season: currentRoster?.season
+      season: season
         ? {
-            id: currentRoster.season.id,
-            name: currentRoster.season.name,
-            year: currentRoster.season.year,
-            status: currentRoster.season.status,
-            isActive: currentRoster.season.is_active,
+            id: season.id,
+            name: season.name,
+            year: season.year,
+            status: season.status,
+            isActive: season.is_active,
           }
         : undefined,
     };

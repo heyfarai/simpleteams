@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as Tabs from "@radix-ui/react-tabs";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Season } from "@/lib/utils/season-filters";
 
@@ -20,13 +21,23 @@ export function SeasonTabs({
   className,
   children,
 }: SeasonTabsProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleSeasonChange = (value: string) => {
+    // Update URL search params
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('season', value);
+    router.push(`?${params.toString()}`, { scroll: false });
+
+    // Call the parent callback
+    onSeasonChange(value);
+  };
 
   return (
     <Tabs.Root
       value={selectedSeason}
-      onValueChange={(value) => {
-        onSeasonChange(value);
-      }}
+      onValueChange={handleSeasonChange}
       className={cn("w-full h-full ", className)}
     >
       <Tabs.List className="flex h-10 items-center justify-start rounded-full bg-gray-200 p-1 overflow-x-auto">

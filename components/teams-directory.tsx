@@ -1,42 +1,103 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ViewModeToggle } from "./teams/view-mode-toggle";
 import { TeamGridView } from "./teams/team-grid-view";
 import { TeamStandingsView } from "./teams/team-standings-view";
 import { SeasonTabs } from "./filters/season-tabs";
-import { ViewMode, Team } from "@/lib/types/teams";
-import { fetchTeams, fetchTeamFilters } from "@/lib/data/fetch-teams";
-import type { SanitySeason } from "@/lib/sanity/types";
+import { teamService, seasonService } from "@/lib/services";
+import type { Team as DomainTeam, Season } from "@/lib/domain/models";
+import type { Team as UITeam } from "@/lib/types/teams";
 import type { Season as UISeasonType } from "@/lib/utils/season-filters";
-import { divisions } from "./home/league-divisions/division-data";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+
+type ViewMode = "grid" | "standings";
+
+// Helper function to convert domain team to UI team format
+function transformTeamForUI(team: DomainTeam): UITeam {
+  return {
+    id: team.id,
+    _id: team.id,
+    name: team.name,
+    shortName: team.shortName || team.name,
+    logo: team.logo || "",
+    coach: team.headCoach || "",
+    region: team.location?.city || "Unknown",
+    homeVenue: "TBA", // We don't have venue info in domain model yet
+    awards: [], // We don't have awards in domain model yet
+    status: team.status,
+    description: "",
+    rosters: [],
+    stats: team.stats || {
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      pointsFor: 0,
+      pointsAgainst: 0,
+      gamesPlayed: 0,
+    },
+    showStats: Boolean(team.stats),
+    division: team.division
+      ? {
+          _id: team.division.id,
+          name: team.division.name,
+          season: team.season ? { _ref: team.season.id } : undefined,
+        }
+      : undefined,
+  };
+}
+import { EmptyTabRecruit } from "./teams/empty-tab-recruit";
 
 export function TeamsDirectory() {
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [seasons, setSeasons] = useState<SanitySeason[]>([]);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [teams, setTeams] = useState<UITeam[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>("");
+  const [playoffCutoff] = useState(4);
+
+  // Get season and view mode from URL or use defaults
+  const seasonFromUrl = searchParams.get("season");
+  const viewModeFromUrl = searchParams.get("view") as ViewMode;
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    viewModeFromUrl || "standings"
+  );
 
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        const filterData = await fetchTeamFilters();
-        setSeasons(filterData.seasons);
 
-        // Set first season as default if no season is selected
+        // Get all seasons (including 2025-2026 for tab display)
+        const allSeasons = await seasonService.getAllSeasons();
+        setSeasons(allSeasons);
+
+        // Set season from URL or first season as default
         const defaultSeasonId =
-          selectedSeasonId || filterData.seasons[0]?._id || "";
-        if (!selectedSeasonId && defaultSeasonId) {
+          seasonFromUrl || selectedSeasonId || allSeasons[0]?.id || "";
+        if (defaultSeasonId !== selectedSeasonId) {
           setSelectedSeasonId(defaultSeasonId);
         }
 
-        const seasonTeams = await fetchTeams(defaultSeasonId, true); // Only active teams
-        setTeams(seasonTeams);
+        // Get teams for the selected season (only if it's not the 2025-2026 season)
+        if (
+          defaultSeasonId &&
+          defaultSeasonId !== "01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad"
+        ) {
+          const seasonTeams = await teamService.getTeamsBySeason(
+            defaultSeasonId
+          );
+          // Only show active teams with divisions and transform to UI format
+          const activeTeams = seasonTeams
+            .filter((team) => team.status === "active" && team.division) // Filter out teams without divisions
+            .map(transformTeamForUI);
+          setTeams(activeTeams);
+        } else if (defaultSeasonId === "01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad") {
+          // Clear teams for 2025-2026 season since we'll show UpcomingSeason component
+          setTeams([]);
+        }
       } catch (err) {
         console.error("Error loading data:", err);
         setError("Failed to load teams data");
@@ -45,27 +106,39 @@ export function TeamsDirectory() {
       }
     }
     loadData();
-  }, [selectedSeasonId]);
+  }, [selectedSeasonId, seasonFromUrl]);
 
-  const [viewMode, setViewMode] = useState<ViewMode>("standings");
-  const [playoffCutoff] = useState(4);
+  // Update view mode when URL changes
+  useEffect(() => {
+    if (viewModeFromUrl && viewModeFromUrl !== viewMode) {
+      setViewMode(viewModeFromUrl);
+    }
+  }, [viewModeFromUrl, viewMode]);
+
+  // Handler for view mode changes that updates URL
+  const handleViewModeChange = (newViewMode: ViewMode) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", newViewMode);
+    router.push(`?${params.toString()}`, { scroll: false });
+    setViewMode(newViewMode);
+  };
 
   // Transform seasons for UI
   const availableSeasons: UISeasonType[] = (seasons || []).map(
     (season): UISeasonType => ({
-      id: season._id,
+      id: season.id,
       name: season.name,
       year: `${season.year}-${(season.year + 1).toString().slice(2)}`,
       startDate: new Date(season.year, 8, 1),
       endDate: new Date(season.year + 1, 7, 31),
-      isActive: Boolean(season.isActive),
+      isActive: true, // All seasons in this list should be displayed
       status: season.status,
     })
   );
 
   // Get selected season or fallback to active season
   const selectedSeason =
-    selectedSeasonId || seasons?.find((s) => Boolean(s.isActive))?._id || "";
+    selectedSeasonId || seasons?.find((s) => s.status === "active")?.id || "";
 
   const handleSeasonChange = (seasonId: string) => {
     setSelectedSeasonId(seasonId);
@@ -90,93 +163,28 @@ export function TeamsDirectory() {
         {teams.length > 0 && (
           <ViewModeToggle
             viewMode={viewMode}
-            onViewModeChange={setViewMode}
+            onViewModeChange={handleViewModeChange}
           />
         )}
       </div>
 
       {/* Main Content */}
-      {viewMode === "grid" ? (
-        <TeamGridView teams={teams} />
+      {selectedSeasonId === "01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad" ? (
+        <EmptyTabRecruit />
       ) : (
-        <TeamStandingsView
-          teams={teams}
-          playoffCutoff={playoffCutoff}
-        />
-      )}
-
-      {/* No Results */}
-      {teams.length === 0 && (
-        <div className="text-center py-12">
-          {selectedSeasonId === "01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad" ? (
-            <div className="max-w-6xl mx-auto">
-              <div className="text-muted-foreground mb-8">
-                <h3 className="text-2xl font-bold mb-4">
-                  Ready to compete in the 2025-2026 season?
-                </h3>
-                <p className="text-lg mb-8">
-                  Registration is open. Choose your division below.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {divisions.map((division) => {
-                  const Icon = division.icon;
-                  return (
-                    <div
-                      key={division.id}
-                      className="border rounded-lg p-6 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-center gap-3 mb-4">
-                        <Icon className="w-6 h-6 text-primary" />
-                        <h4 className="text-xl font-semibold">
-                          {division.name}
-                        </h4>
-                        {division.isNew && (
-                          <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                            NEW
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Eligible categories:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {division.categories.map((category, index) => (
-                            <span
-                              key={index}
-                              className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded"
-                            >
-                              {category}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <Link href="/register">
-                <Button
-                  size="lg"
-                  className="px-8"
-                >
-                  Register Your Team
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
+        <>
+          {viewMode === "grid" ? (
+            <TeamGridView teams={teams} />
           ) : (
-            <div>
-              <div className="text-muted-foreground mb-2">No teams found</div>
-              <p className="text-sm text-muted-foreground">
-                Try adjusting your search criteria
-              </p>
-            </div>
+            <TeamStandingsView
+              teams={teams}
+              playoffCutoff={playoffCutoff}
+            />
           )}
-        </div>
+
+          {/* No Results for non-2025-2026 seasons - show recruitment */}
+          {teams.length === 0 && <EmptyTabRecruit />}
+        </>
       )}
     </div>
   );

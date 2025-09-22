@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X as XIcon, Minus } from "lucide-react";
@@ -49,9 +48,9 @@ export function TeamStandingsView({
     const gamesPlayed = stats.gamesPlayed ?? 0;
     const winPercentage =
       gamesPlayed > 0 ? (stats.wins / gamesPlayed) * 100 : 0;
-    const ppg = gamesPlayed > 0 ? stats.pointsFor / gamesPlayed : 0;
-    const oppPpg = gamesPlayed > 0 ? stats.pointsAgainst / gamesPlayed : 0;
-    const pointsDiff = ppg - oppPpg;
+    const totalPointsFor = Math.round(stats.pointsFor || 0);
+    const totalPointsAgainst = Math.round(stats.pointsAgainst || 0);
+    const pointsDiff = totalPointsFor - totalPointsAgainst;
     // Ensure showStats is always boolean
     const showStats = Boolean(team.showStats);
 
@@ -59,8 +58,8 @@ export function TeamStandingsView({
       ...team,
       stats,
       winPercentage,
-      ppg,
-      oppPpg,
+      totalPointsFor,
+      totalPointsAgainst,
       pointsDiff,
       showStats,
     };
@@ -68,8 +67,8 @@ export function TeamStandingsView({
 
   interface TeamWithStats extends Team {
     winPercentage: number;
-    ppg: number;
-    oppPpg: number;
+    totalPointsFor: number;
+    totalPointsAgainst: number;
     pointsDiff: number;
     showStats: boolean;
   }
@@ -192,10 +191,7 @@ export function TeamStandingsView({
                           </div>
                         </td>
                         <td className="p-4">
-                          <Link
-                            href={`/teams/${team.id}`}
-                            className="flex items-center gap-3 hover:text-primary transition-colors"
-                          >
+                          <div className="flex items-center gap-3">
                             <img
                               src={getTeamLogoUrl(team.logo, "thumbnail")}
                               alt={`${team.name} logo`}
@@ -206,7 +202,7 @@ export function TeamStandingsView({
                                 {team.name}
                               </div>
                             </div>
-                          </Link>
+                          </div>
                         </td>
                         <td className="p-4 text-sm text-center font-semibold text-green-600">
                           {team.stats?.wins ?? "-"}
@@ -220,10 +216,10 @@ export function TeamStandingsView({
                             : "-"}
                         </td>
                         <td className="p-4 text-sm text-center">
-                          {team.ppg != null ? team.ppg.toFixed(1) : "-"}
+                          {team.totalPointsFor != null ? team.totalPointsFor : "-"}
                         </td>
                         <td className="p-4 text-sm text-center">
-                          {team.oppPpg != null ? team.oppPpg.toFixed(1) : "-"}
+                          {team.totalPointsAgainst != null ? team.totalPointsAgainst : "-"}
                         </td>
                         <td
                           className={`p-4 text-sm text-center font-semibold ${
@@ -237,7 +233,7 @@ export function TeamStandingsView({
                           {team.pointsDiff != null
                             ? `${
                                 team.pointsDiff > 0 ? "+" : ""
-                              }${team.pointsDiff.toFixed(1)}`
+                              }${team.pointsDiff}`
                             : "-"}
                         </td>
                       </tr>

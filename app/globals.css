@@ -10,9 +10,9 @@
   --card-foreground: oklch(0.35 0 0); /* #4b5563 - dark gray */
   --popover: oklch(1 0 0); /* #ffffff - white */
   --popover-foreground: oklch(0.35 0 0); /* #4b5563 - dark gray */
-  --primary: #95122c; /* #ea580c - orange-600 */
+  --primary: #9f0f1c; /* #ea580c - orange-600 */
   --primary-foreground: oklch(1 0 0); /* #ffffff - white */
-  --secondary: #ff9408; /* #f97316 - brighter orange */
+  --secondary: #e6951a; /* #f97316 - brighter orange */
   --secondary-foreground: oklch(1 0 0); /* #ffffff - white */
   --muted: oklch(0.98 0.005 85); /* #f9fafb - very light gray */
   --muted-foreground: oklch(0.35 0 0); /* #4b5563 - dark gray */
@@ -157,12 +157,12 @@
   }
 
   .heading-highlight {
-    @apply relative px-4;
+    @apply relative px-4 text-primary;
   }
 
   .heading-highlight::before {
     content: "";
-    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-2/3 bg-[#ff9408] w-full h-[33%] -z-[1];
+    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-2/3 bg-[#fdbb30] w-full h-[33%] -z-[1];
   }
 
   .heading-highlight-container {

@@ -127,18 +127,21 @@ export class OptimizedRosterRepository {
             logo_url,
             city
           ),
-          season:seasons(
+          season_division:season_divisions(
             id,
-            name,
-            year,
-            status,
-            is_active
-          ),
-          division:divisions(
-            id,
-            name,
-            age_group,
-            skill_level
+            season:seasons(
+              id,
+              name,
+              year,
+              status,
+              is_active
+            ),
+            division:league_divisions(
+              id,
+              name,
+              description,
+              display_order
+            )
           ),
           roster_players(
             id,
@@ -198,18 +201,21 @@ export class OptimizedRosterRepository {
             logo_url,
             city
           ),
-          season:seasons(
+          season_division:season_divisions(
             id,
-            name,
-            year,
-            status,
-            is_active
-          ),
-          division:divisions(
-            id,
-            name,
-            age_group,
-            skill_level
+            season:seasons(
+              id,
+              name,
+              year,
+              status,
+              is_active
+            ),
+            division:league_divisions(
+              id,
+              name,
+              description,
+              display_order
+            )
           ),
           roster_players(
             id,
@@ -259,10 +265,12 @@ export class OptimizedRosterRepository {
               name,
               year
             ),
-            division:divisions(
-              id,
-              name,
-              age_group
+            season_division:season_divisions(
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
             )
           ),
           player_season_stats(
@@ -400,8 +408,10 @@ export class OptimizedRosterRepository {
         .select(`
           *,
           team:teams(*),
-          season:seasons(*),
-          division:divisions(*)
+          season_division:season_divisions(
+            season:seasons(*),
+            division:league_divisions(*)
+          )
         `)
         .eq('id', rosterId)
         .single();

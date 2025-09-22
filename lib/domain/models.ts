@@ -117,6 +117,7 @@ export interface TeamStats {
   ties?: number;
   pointsFor?: number;
   pointsAgainst?: number;
+  gamesPlayed?: number;
   conferenceRecord?: string;
 }
 

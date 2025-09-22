@@ -29,17 +29,38 @@ export class SupabaseGameRepository {
         .from('games')
         .select(`
           *,
-          division:divisions(
+          roster_home:rosters!roster_home_id(
             id,
-            name,
-            age_group,
-            skill_level,
-            season:seasons(
-              id,
-              name,
-              year,
-              status,
-              is_active
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
             )
           ),
           home_team:teams!home_team_id(
@@ -132,17 +153,38 @@ export class SupabaseGameRepository {
         .from('games')
         .select(`
           *,
-          division:divisions(
+          roster_home:rosters!roster_home_id(
             id,
-            name,
-            age_group,
-            skill_level,
-            season:seasons(
-              id,
-              name,
-              year,
-              status,
-              is_active
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
             )
           ),
           home_team:teams!home_team_id(
@@ -184,17 +226,38 @@ export class SupabaseGameRepository {
         .from('games')
         .select(`
           *,
-          division:divisions(
+          roster_home:rosters!roster_home_id(
             id,
-            name,
-            age_group,
-            skill_level,
-            season:seasons(
-              id,
-              name,
-              year,
-              status,
-              is_active
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
             )
           ),
           home_team:teams!home_team_id(
@@ -239,17 +302,38 @@ export class SupabaseGameRepository {
         .from('games')
         .select(`
           *,
-          division:divisions(
+          roster_home:rosters!roster_home_id(
             id,
-            name,
-            age_group,
-            skill_level,
-            season:seasons(
-              id,
-              name,
-              year,
-              status,
-              is_active
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
             )
           ),
           home_team:teams!home_team_id(

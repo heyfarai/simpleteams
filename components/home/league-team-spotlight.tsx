@@ -81,7 +81,7 @@ export function LeagueTeamSpotlight() {
                 alt={`${team.name} logo`}
                 width={96}
                 height={96}
-                className="object-fill"
+                className="object-fill rounded-full"
               />
             </div>
             <div className="-mt-2">
