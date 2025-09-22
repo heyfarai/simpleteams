@@ -59,7 +59,7 @@ export function EmptyTabRecruit() {
           return (
             <Card
               key={index}
-              className="border-0 bg-muted/30"
+              className="border-0 bg-white"
             >
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
