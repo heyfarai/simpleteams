@@ -163,7 +163,12 @@ export async function POST(request: Request) {
 
     // Get dynamic base URL for return URLs
     const getReturnUrl = (path: string) => {
-      // On Netlify, use the main site URL
+      // On Netlify, prioritize deploy preview URL over main site URL
+      if (process.env.DEPLOY_PRIME_URL) {
+        return `${process.env.DEPLOY_PRIME_URL}${path}`;
+      }
+
+      // Fallback to main site URL on Netlify
       if (process.env.URL) {
         return `${process.env.URL}${path}`;
       }

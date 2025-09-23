@@ -19,6 +19,7 @@ import {
 import { useSelectedTeam } from '@/components/dashboard/team-selector'
 import { supabase } from '@/lib/supabase/client-safe'
 import type { Database } from '@/lib/supabase/database.types'
+import { TeamLogoUpload } from '@/components/team-logo-upload'
 
 type Team = Database['public']['Tables']['teams']['Row']
 
@@ -49,7 +50,6 @@ export default function TeamSettingsPage() {
   const [formData, setFormData] = useState<TeamSettingsForm | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
@@ -115,44 +115,6 @@ export default function TeamSettingsPage() {
     setFormData({ ...formData, [field]: value })
   }
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file && file.type.startsWith('image/')) {
-      setLogoFile(file)
-      
-      // Create preview
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setLogoPreview(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const uploadLogo = async (file: File): Promise<string | null> => {
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${team!.id}/logo.${fileExt}`
-      
-      const { error: uploadError } = await supabase.storage
-        .from('team-assets')
-        .upload(fileName, file, { upsert: true })
-
-      if (uploadError) {
-        console.error('Logo upload error:', uploadError)
-        return null
-      }
-
-      const { data } = supabase.storage
-        .from('team-assets')
-        .getPublicUrl(fileName)
-
-      return data.publicUrl
-    } catch (error) {
-      console.error('Error uploading logo:', error)
-      return null
-    }
-  }
 
   const handleSave = async () => {
     if (!team || !formData) return
@@ -161,27 +123,10 @@ export default function TeamSettingsPage() {
     setSaveMessage(null)
 
     try {
-      let logoUrl = team.logo_url
-
-      // Upload new logo if selected
-      if (logoFile) {
-        const uploadedUrl = await uploadLogo(logoFile)
-        if (uploadedUrl) {
-          logoUrl = uploadedUrl
-        } else {
-          setSaveMessage({ type: 'error', message: 'Failed to upload logo' })
-          setIsSaving(false)
-          return
-        }
-      }
-
-      // Update team data
+      // Update team data (logo is handled by TeamLogoUpload component)
       const { error } = await supabase
         .from('teams')
-        .update({
-          ...formData,
-          logo_url: logoUrl
-        })
+        .update(formData)
         .eq('id', team.id)
 
       if (error) {
@@ -189,17 +134,16 @@ export default function TeamSettingsPage() {
       }
 
       // Update local state
-      setTeam({ ...team, ...formData, logo_url: logoUrl })
-      setLogoFile(null)
+      setTeam({ ...team, ...formData })
       setSaveMessage({ type: 'success', message: 'Team settings saved successfully!' })
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (error) {
       console.error('Error saving team settings:', error)
-      setSaveMessage({ 
-        type: 'error', 
-        message: error instanceof Error ? error.message : 'Failed to save settings' 
+      setSaveMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to save settings'
       })
     } finally {
       setIsSaving(false)
@@ -321,37 +265,20 @@ export default function TeamSettingsPage() {
           <CardContent className="space-y-4">
             {/* Logo Upload */}
             <div>
-              <Label htmlFor="logo">Team Logo</Label>
-              <div className="mt-2 flex items-start space-x-4">
-                {logoPreview && (
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
-                    <img
-                      src={logoPreview}
-                      alt="Team logo"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <input
-                    type="file"
-                    id="logo"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                    className="hidden"
+              <Label>Team Logo</Label>
+              <div className="mt-2">
+                {team && (
+                  <TeamLogoUpload
+                    teamId={team.id}
+                    teamName={team.name}
+                    currentLogoUrl={team.logo_url}
+                    onLogoUpdated={(logoUrl) => {
+                      setTeam({ ...team, logo_url: logoUrl })
+                      setLogoPreview(logoUrl)
+                    }}
+                    size="lg"
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('logo')?.click()}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Logo
-                  </Button>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Upload a square image for best results (PNG, JPG, max 5MB)
-                  </p>
-                </div>
+                )}
               </div>
             </div>
 

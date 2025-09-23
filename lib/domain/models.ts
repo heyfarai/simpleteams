@@ -24,7 +24,10 @@ export interface Team {
   id: string;
   name: string;
   shortName?: string;
-  logo?: string;
+  logo?: string; // Legacy field for compatibility
+  logoUrl?: string; // Current logo URL
+  logoStoragePath?: string; // Supabase storage path
+  logoPublicUrl?: string; // Public URL from storage
   location?: Location;
   colors?: TeamColors;
   headCoach?: string;
