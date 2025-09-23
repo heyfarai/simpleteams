@@ -116,7 +116,7 @@ export function useRegistrationForm() {
         city: formData.city,
         province: formData.province,
         selectedPackage: formData.selectedPackage,
-        paymentPlan: "full",
+        paymentMethod: "full", // TODO: Make this dynamic
         userId: user?.id,
       };
 

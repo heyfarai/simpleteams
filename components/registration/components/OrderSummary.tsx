@@ -13,6 +13,7 @@ interface OrderSummaryProps {
   isFormValid: boolean;
   isSubmitting: boolean;
   onSubmit: () => void;
+  paymentMethod?: 'full' | 'installments';
 }
 
 export function OrderSummary({
@@ -22,6 +23,7 @@ export function OrderSummary({
   isFormValid,
   isSubmitting,
   onSubmit,
+  paymentMethod = 'full',
 }: OrderSummaryProps) {
   return (
     <div className="sticky top-8">
@@ -98,14 +100,42 @@ export function OrderSummary({
             )}
           </div>
 
+          {/* Installment Schedule */}
+          {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && (
+            <div className="space-y-3 pt-4 border-t border-primary/20">
+              <h4 className="font-medium">Payment Schedule</h4>
+              <div className="text-sm space-y-2">
+                <div className="flex justify-between">
+                  <span>Today</span>
+                  <span className="font-bold">$437</span>
+                </div>
+                <div className="flex justify-between text-gray-300">
+                  <span>Months 2-8</span>
+                  <span>$437/month</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Total */}
           <div className="pt-6 border-t border-primary/20">
             <div className="flex justify-between items-center">
-              <span className="font-medium">Total</span>
+              <span className="font-medium">
+                {paymentMethod === 'installments' && formData.selectedPackage === 'full-season'
+                  ? 'Due Today'
+                  : 'Total'}
+              </span>
               <span className="font-bold">
-                ${packageDetails.amount.toLocaleString()}
+                {paymentMethod === 'installments' && formData.selectedPackage === 'full-season'
+                  ? '$437'
+                  : `$${packageDetails.amount.toLocaleString()}`}
               </span>
             </div>
+            {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && (
+              <div className="text-sm text-gray-300 text-right mt-1">
+                Total: ${packageDetails.amount.toLocaleString()}
+              </div>
+            )}
           </div>
 
           {/* Payment Button */}
@@ -115,7 +145,11 @@ export function OrderSummary({
             className="w-full bg-primary/80 hover:bg-primary-700 text-white"
             size="lg"
           >
-            {isSubmitting ? "Processing..." : "Complete Registration & Pay"}
+            {isSubmitting
+              ? "Processing..."
+              : paymentMethod === 'installments' && formData.selectedPackage === 'full-season'
+                ? "Start Installment Plan"
+                : "Complete Registration & Pay"}
           </Button>
 
           <p className="text-xs text-gray-500 text-center">

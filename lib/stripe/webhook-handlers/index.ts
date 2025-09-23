@@ -1,10 +1,13 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { handleCheckoutCompleted } from "./checkout-completed";
+import { handleInvoicePaymentSucceeded, handleInvoicePaymentFailed } from "./subscription-handlers";
 
 // Map of event types to their handlers
 const eventHandlers: Record<string, (event: Stripe.Event) => Promise<NextResponse>> = {
   "checkout.session.completed": handleCheckoutCompleted,
+  "invoice.payment_succeeded": handleInvoicePaymentSucceeded,
+  "invoice.payment_failed": handleInvoicePaymentFailed,
   // Add more event handlers as needed:
   // "payment_intent.succeeded": handlePaymentIntentSucceeded,
   // "payment_intent.payment_failed": handlePaymentIntentFailed,

@@ -9,12 +9,14 @@ interface PackageCardProps {
   package: PackageOption;
   isSelected: boolean;
   onClick: (packageId: string) => void;
+  paymentMethod?: 'full' | 'installments';
 }
 
 export function PackageCard({
   package: pkg,
   isSelected,
   onClick,
+  paymentMethod = 'full',
 }: PackageCardProps) {
   const renderFeatureIcon = (feature: PackageOption["features"][0]) => {
     if (feature.included) {
@@ -48,13 +50,26 @@ export function PackageCard({
             <h3 className="text-lg font-medium mb-0">{pkg.name}</h3>
             <p className="text-sm ">{pkg.games}</p>
             <div className="flex items-center  gap-2 mb-2 mt-6">
-              <span className="text-3xl font-bold">
-                ${pkg.price.toLocaleString()}
-              </span>
-              {pkg.originalPrice && (
-                <span className="text-sm text-gray-500 line-through">
-                  ${pkg.originalPrice.toLocaleString()}
-                </span>
+              {paymentMethod === 'installments' && pkg.id === 'full-season' ? (
+                <div className="flex flex-col">
+                  <span className="text-3xl font-bold">
+                    $437/month
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    8 payments of $437 (${pkg.price.toLocaleString()} total)
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <span className="text-3xl font-bold">
+                    ${pkg.price.toLocaleString()}
+                  </span>
+                  {pkg.originalPrice && (
+                    <span className="text-sm text-gray-500 line-through">
+                      ${pkg.originalPrice.toLocaleString()}
+                    </span>
+                  )}
+                </>
               )}
             </div>
             {pkg.isRecommended && (
@@ -96,7 +111,9 @@ export function PackageCard({
             className={`cursor-pointer w-full mt-auto transition-all duration-200 bg-foreground text-[#ff9408] hover:text-foreground hover:bg-secondary`}
             size="lg"
           >
-            Register with {pkg.name}
+            {paymentMethod === 'installments' && pkg.id === 'full-season'
+              ? 'Pay in 8 installments'
+              : `Register with ${pkg.name}`}
           </Button>
         </CardContent>
       </Card>

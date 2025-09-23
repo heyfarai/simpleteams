@@ -178,27 +178,89 @@ export async function POST(request: Request) {
       return getReturnUrl(path);
     };
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: packageConfig.priceId,
-          quantity: 1,
+    // Check if this should be an installment payment (janky MVP - hardcoded for full-season)
+    const isInstallment = formData.paymentMethod === 'installments' && formData.selectedPackage === 'full-season';
+
+    let session;
+
+    if (isInstallment) {
+      // Create customer first for subscription schedule
+      const customer = await stripe.customers.create({
+        email: formData.contactEmail,
+        name: formData.teamName,
+        metadata: {
+          registrationId: registration.id,
+          teamName: formData.teamName,
+        }
+      });
+
+      // Create subscription schedule with immediate first payment + 7 monthly payments
+      const subscriptionSchedule = await stripe.subscriptionSchedules.create({
+        customer: customer.id,
+        start_date: 'now',
+        end_behavior: 'cancel',
+        phases: [
+          {
+            // First payment - immediate
+            items: [{ price: 'price_1SAdMiIYuurzinGII9aloGAw', quantity: 1 }],
+            iterations: 8, // 8 total payments
+            billing_cycle_anchor: 'automatic',
+          }
+        ],
+        metadata: {
+          registrationId: registration.id,
+          contactEmail: formData.contactEmail,
+          teamName: formData.teamName,
+          selectedPackage: formData.selectedPackage,
+          paymentType: 'installments'
+        }
+      });
+
+      // Create checkout session for the subscription schedule
+      session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "subscription",
+        line_items: [
+          {
+            price: 'price_1SAdMiIYuurzinGII9aloGAw',
+            quantity: 1,
+          },
+        ],
+        success_url: `${getReturnUrlForStripe('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: getReturnUrlForStripe('/register/checkout'),
+        customer: customer.id,
+        metadata: {
+          registrationId: registration.id,
+          contactEmail: formData.contactEmail,
+          teamName: formData.teamName,
+          selectedPackage: formData.selectedPackage,
+          paymentType: 'installments'
         },
-      ],
-      mode: "payment",
-      success_url: `${getReturnUrlForStripe('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: getReturnUrlForStripe('/register/checkout'),
-      metadata: {
-        registrationId: registration.id,
-        contactEmail: formData.contactEmail,
-        teamName: formData.teamName,
-        selectedPackage: formData.selectedPackage,
-        packageName: packageConfig.name
-      },
-      customer_email: formData.contactEmail,
-    });
+      });
+    } else {
+      // Regular one-time payment
+      session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: packageConfig.priceId,
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `${getReturnUrlForStripe('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: getReturnUrlForStripe('/register/checkout'),
+        metadata: {
+          registrationId: registration.id,
+          contactEmail: formData.contactEmail,
+          teamName: formData.teamName,
+          selectedPackage: formData.selectedPackage,
+          packageName: packageConfig.name,
+          paymentType: 'one-time'
+        },
+        customer_email: formData.contactEmail,
+      });
+    }
 
     // Update registration with Stripe session ID
     await supabase

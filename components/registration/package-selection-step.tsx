@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ComparisonTable,
   PackageGrid,
@@ -7,6 +8,8 @@ import {
 } from "./package-selection";
 import { usePackageComparison } from "@/hooks/use-package-comparison";
 import type { PackageSelectionStepProps } from "./package-selection";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function PackageSelectionStep({
   selectedPackage,
@@ -14,6 +17,7 @@ export function PackageSelectionStep({
   onNext,
 }: PackageSelectionStepProps) {
   const { packages } = usePackageComparison();
+  const [paymentMethod, setPaymentMethod] = useState<'full' | 'installments'>('full');
 
   const handlePackageSelect = (packageId: string) => {
     onPackageSelect(packageId);
@@ -37,11 +41,42 @@ export function PackageSelectionStep({
         </p>
       </div>
 
+      {/* Payment Method Toggle */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Choose Your Payment Method</h3>
+            <div className="flex justify-center space-x-4">
+              <Button
+                variant={paymentMethod === 'full' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('full')}
+                className="px-8"
+              >
+                Pay Full Amount
+              </Button>
+              <Button
+                variant={paymentMethod === 'installments' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('installments')}
+                className="px-8"
+              >
+                Pay in Installments
+              </Button>
+            </div>
+            {paymentMethod === 'installments' && (
+              <p className="text-sm text-gray-600">
+                Split your payment into 8 monthly installments. First payment due today.
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Package Selection Cards */}
       <PackageGrid
         packages={packages}
         selectedPackage={selectedPackage}
         onPackageSelect={handlePackageSelect}
+        paymentMethod={paymentMethod}
       />
       {/* Official Pricing Table */}
       <PricingTable />

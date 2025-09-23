@@ -55,7 +55,7 @@ export default function PaymentsPage() {
             )
           `)
           .eq('rosters.team_id', selectedTeamId)
-          .eq('status', 'completed') // Only show completed payments
+          .in('status', ['completed', 'pending']) // Show completed and pending installments
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -151,6 +151,33 @@ export default function PaymentsPage() {
           View completed payments and download receipts from Stripe
         </p>
       </div>
+
+      {/* Installment Status */}
+      {payments.some(p => p.payment_type === 'installment') && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Installment Plan Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-blue-900">8-Month Payment Plan</h4>
+                  <p className="text-sm text-blue-700">
+                    Payments of $437/month • Next payment: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-blue-900">
+                    {payments.filter(p => p.payment_type === 'installment' && p.status === 'completed').length}/8
+                  </div>
+                  <div className="text-sm text-blue-700">payments made</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Payment History */}
       <Card>

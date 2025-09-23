@@ -12,11 +12,14 @@ import { ContactInformationSection } from "./components/ContactInformationSectio
 import { OrderSummary } from "./components/OrderSummary";
 import { MobileSummary } from "./components/MobileSummary";
 import { SignInModal } from "./components/SignInModal";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 
 export function CheckoutForm() {
   const { user, signOut } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'full' | 'installments'>('full');
 
   // Service status monitoring
   useServiceStatus();
@@ -29,8 +32,54 @@ export function CheckoutForm() {
     divisionsError,
     isSubmitting,
     isFormValid,
-    handleSubmit,
+    handleSubmit: originalHandleSubmit,
   } = useRegistrationForm();
+
+  // Janky MVP: Override the submit to include payment method
+  const handleSubmit = async () => {
+    if (isSubmitting || !isFormValid()) return;
+
+    try {
+      const registrationData = {
+        teamName: formData.teamName,
+        contactEmail: formData.contactEmail,
+        primaryContactName: formData.primaryContactName,
+        primaryContactEmail: formData.primaryContactEmail,
+        primaryContactPhone: formData.primaryContactPhone,
+        primaryContactRole: formData.primaryContactRole,
+        headCoachName: formData.headCoachName,
+        headCoachEmail: formData.headCoachEmail,
+        headCoachPhone: formData.headCoachPhone,
+        headCoachCertifications: formData.headCoachCertifications,
+        divisionPreference: formData.divisionPreference,
+        city: formData.city,
+        province: formData.province,
+        selectedPackage: formData.selectedPackage,
+        paymentMethod: paymentMethod, // Use our local state
+        userId: user?.id,
+      };
+
+      const res = await fetch("/api/registration/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formData: registrationData,
+          currentUrl: window.location.href
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit registration");
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+    }
+  };
 
   // Mark this as a registration tab and listen for auth success
   useEffect(() => {
@@ -89,6 +138,37 @@ export function CheckoutForm() {
           {/* Main Form Column */}
           <div className="lg:col-span-7">
             <div className="max-w-2xl mx-auto lg:max-w-none">
+              {/* Payment Method Toggle */}
+              {formData.selectedPackage === 'full-season' && (
+                <Card className="bg-blue-50 border-blue-200 mb-6">
+                  <CardContent className="p-6">
+                    <div className="text-center space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Choose Your Payment Method</h3>
+                      <div className="flex justify-center space-x-4">
+                        <Button
+                          variant={paymentMethod === 'full' ? 'default' : 'outline'}
+                          onClick={() => setPaymentMethod('full')}
+                          className="px-8"
+                        >
+                          Pay Full Amount
+                        </Button>
+                        <Button
+                          variant={paymentMethod === 'installments' ? 'default' : 'outline'}
+                          onClick={() => setPaymentMethod('installments')}
+                          className="px-8"
+                        >
+                          Pay in 8 Installments
+                        </Button>
+                      </div>
+                      {paymentMethod === 'installments' && (
+                        <p className="text-sm text-gray-600">
+                          Split your payment into 8 monthly installments. First payment due today.
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -129,6 +209,7 @@ export function CheckoutForm() {
               isFormValid={isFormValid()}
               isSubmitting={isSubmitting}
               onSubmit={handleSubmit}
+              paymentMethod={paymentMethod}
             />
           </div>
         </div>
