@@ -38,7 +38,7 @@ const getPackageConfig = () => {
 
 export async function POST(request: Request) {
   try {
-    const { formData } = await request.json();
+    const { formData, currentUrl } = await request.json();
 
     // Validate required fields
     if (!formData.teamName || !formData.contactEmail || !formData.city || !formData.province) {
@@ -162,6 +162,22 @@ export async function POST(request: Request) {
     // Note: Payment record will be created by webhook after successful Stripe payment
     // We'll store the registration ID in Stripe metadata for the webhook to use
 
+    // Create return URL function using client's current URL when available
+    const getReturnUrlForStripe = (path: string) => {
+      // Use client-provided URL if available (handles deploy previews correctly)
+      if (currentUrl) {
+        try {
+          const url = new URL(currentUrl);
+          return `${url.origin}${path}`;
+        } catch (error) {
+          console.warn('Invalid currentUrl provided:', currentUrl);
+        }
+      }
+
+      // Fallback to server-side URL detection
+      return getReturnUrl(path);
+    };
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -172,8 +188,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: "payment",
-      success_url: `${getReturnUrl('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: getReturnUrl('/register/checkout'),
+      success_url: `${getReturnUrlForStripe('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: getReturnUrlForStripe('/register/checkout'),
       metadata: {
         registrationId: registration.id,
         contactEmail: formData.contactEmail,

@@ -123,7 +123,10 @@ export function useRegistrationForm() {
       const res = await fetch("/api/registration/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formData: registrationData }),
+        body: JSON.stringify({
+          formData: registrationData,
+          currentUrl: window.location.href
+        }),
       });
 
       const data = await res.json();
