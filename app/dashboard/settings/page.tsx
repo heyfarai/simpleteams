@@ -27,7 +27,6 @@ interface TeamSettingsForm {
   name: string
   city: string
   region: string
-  contact_email: string
   phone: string
   website: string
   primary_color: string
@@ -41,7 +40,6 @@ interface TeamSettingsForm {
   head_coach_email: string
   head_coach_phone: string
   head_coach_certifications: string
-  registration_notes: string
 }
 
 export default function TeamSettingsPage() {
@@ -80,7 +78,6 @@ export default function TeamSettingsPage() {
           name: userTeam.name,
           city: userTeam.city,
           region: userTeam.region || '',
-          contact_email: userTeam.contact_email,
           phone: userTeam.phone || '',
           website: userTeam.website || '',
           primary_color: userTeam.primary_color,
@@ -93,8 +90,7 @@ export default function TeamSettingsPage() {
           head_coach_name: userTeam.head_coach_name || '',
           head_coach_email: userTeam.head_coach_email || '',
           head_coach_phone: userTeam.head_coach_phone || '',
-          head_coach_certifications: userTeam.head_coach_certifications || '',
-          registration_notes: userTeam.registration_notes || ''
+          head_coach_certifications: userTeam.head_coach_certifications || ''
         })
         
         if (userTeam.logo_url) {
@@ -350,12 +346,12 @@ export default function TeamSettingsPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="contact_email">Team Email</Label>
+                <Label htmlFor="primary_contact_email_team">Team Email</Label>
                 <Input
-                  id="contact_email"
+                  id="primary_contact_email_team"
                   type="email"
-                  value={formData.contact_email}
-                  onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                  value={formData.primary_contact_email}
+                  onChange={(e) => handleInputChange('primary_contact_email', e.target.value)}
                   placeholder="team@example.com"
                 />
               </div>
@@ -477,24 +473,6 @@ export default function TeamSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Notes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Additional Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <Label htmlFor="registration_notes">Registration Notes</Label>
-              <Textarea
-                id="registration_notes"
-                value={formData.registration_notes}
-                onChange={(e) => handleInputChange('registration_notes', e.target.value)}
-                placeholder="Any additional information about your team..."
-                rows={4}
-              />
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

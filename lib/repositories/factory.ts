@@ -11,12 +11,7 @@ import type {
   VenueRepository,
 } from "./interfaces";
 
-import { SanityPlayerRepository } from "./sanity/sanity-player-repository";
-import { SanityTeamRepository } from "./sanity/sanity-team-repository";
-import { SanityFilterRepository } from "./sanity/sanity-filter-repository";
-import { SanityGameRepository } from "./sanity/sanity-game-repository";
-import { SanitySeasonRepository } from "./sanity/sanity-season-repository";
-import { SanityDivisionRepository } from "./sanity/sanity-division-repository";
+// Removed Sanity imports - using Supabase only
 
 // Supabase implementations
 import { SupabaseTeamRepository } from "./supabase-team-repository";
@@ -35,7 +30,7 @@ export class RepositoryFactory {
   private constructor() {
     const serverDbType = process.env.DATABASE_TYPE;
     const clientDbType = process.env.NEXT_PUBLIC_DATABASE_TYPE;
-    this.dbType = serverDbType || clientDbType || "sanity";
+    this.dbType = serverDbType || clientDbType || "supabase";
     console.log('🏭 RepositoryFactory constructor - serverDbType:', serverDbType);
     console.log('🏭 RepositoryFactory constructor - clientDbType:', clientDbType);
     console.log('🏭 RepositoryFactory constructor - final dbType:', this.dbType);
@@ -50,8 +45,6 @@ export class RepositoryFactory {
 
   createPlayerRepository(): PlayerRepository {
     switch (this.dbType) {
-      case "sanity":
-        return new SanityPlayerRepository();
       case "supabase":
         return new SupabasePlayerRepository();
       // case "postgresql":
@@ -59,16 +52,13 @@ export class RepositoryFactory {
       // case "mongodb":
       //   return new MongoPlayerRepository();
       default:
-        return new SanityPlayerRepository();
+        return new SupabasePlayerRepository();
     }
   }
 
   createTeamRepository(): TeamRepository {
     console.log('🏭 RepositoryFactory.createTeamRepository() - dbType:', this.dbType);
     switch (this.dbType) {
-      case "sanity":
-        console.log('🏭 Creating SanityTeamRepository');
-        return new SanityTeamRepository();
       case "supabase":
         console.log('🏭 Creating SupabaseTeamRepository');
         return new SupabaseTeamRepository();
@@ -77,41 +67,21 @@ export class RepositoryFactory {
       // case "mongodb":
       //   return new MongoTeamRepository();
       default:
-        console.log('🏭 Creating default SanityTeamRepository');
-        return new SanityTeamRepository();
+        console.log('🏭 Creating default SupabaseTeamRepository');
+        return new SupabaseTeamRepository();
     }
   }
 
   createFilterRepository(): FilterRepository {
-    switch (this.dbType) {
-      case "sanity":
-        return new SanityFilterRepository();
-      // case "postgresql":
-      //   return new PostgreSQLFilterRepository();
-      // case "mongodb":
-      //   return new MongoFilterRepository();
-      default:
-        return new SanityFilterRepository();
-    }
+    throw new Error("FilterRepository not implemented for Supabase yet");
   }
 
   createGameRepository(): GameRepository {
-    switch (this.dbType) {
-      case "sanity":
-        return new SanityGameRepository();
-      // case "postgresql":
-      //   return new PostgreSQLGameRepository();
-      // case "mongodb":
-      //   return new MongoGameRepository();
-      default:
-        return new SanityGameRepository();
-    }
+    throw new Error("GameRepository not implemented for Supabase yet");
   }
 
   createDivisionRepository(): DivisionRepository {
     switch (this.dbType) {
-      case "sanity":
-        return new SanityDivisionRepository();
       case "supabase":
         return new SupabaseDivisionRepository();
       // case "postgresql":
@@ -119,14 +89,12 @@ export class RepositoryFactory {
       // case "mongodb":
       //   return new MongoDivisionRepository();
       default:
-        return new SanityDivisionRepository();
+        return new SupabaseDivisionRepository();
     }
   }
 
   createSeasonRepository(): SeasonRepository {
     switch (this.dbType) {
-      case "sanity":
-        return new SanitySeasonRepository();
       case "supabase":
         return new SupabaseSeasonRepository();
       // case "postgresql":
@@ -134,7 +102,7 @@ export class RepositoryFactory {
       // case "mongodb":
       //   return new MongoSeasonRepository();
       default:
-        return new SanitySeasonRepository();
+        return new SupabaseSeasonRepository();
     }
   }
 
@@ -157,10 +125,9 @@ const factory = RepositoryFactory.getInstance();
 console.log('🏭 Creating singleton repository instances...');
 export const playerRepository = factory.createPlayerRepository();
 export const teamRepository = factory.createTeamRepository();
-export const gameRepository = factory.createGameRepository();
 export const seasonRepository = factory.createSeasonRepository();
 export const divisionRepository = factory.createDivisionRepository();
-export const filterRepository = factory.createFilterRepository();
+// gameRepository and filterRepository not implemented for Supabase yet
 console.log('🏭 Singleton repository instances created');
 
 // Export factory for testing and advanced use cases

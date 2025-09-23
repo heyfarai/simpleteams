@@ -73,6 +73,7 @@ export interface TeamRepository {
   findBySeason(seasonId: string): Promise<Team[]>;
   findByDivision(divisionId: string): Promise<Team[]>;
   findWithRosters(seasonId?: string): Promise<Team[]>;
+  findByUserId(userId: string): Promise<Team[]>;
   search(query: string): Promise<Team[]>;
 }
 

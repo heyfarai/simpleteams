@@ -39,9 +39,12 @@ export class SupabaseTeamRepository implements TeamRepository {
     return this.searchTeams(query);
   }
 
+  async findByUserId(userId: string): Promise<Team[]> {
+    return this.getTeamsByUserId(userId);
+  }
+
   // Get all teams (fast query using denormalized fields)
   async getAllTeams(): Promise<Team[]> {
-    console.log("🗄️ SupabaseTeamRepository.getAllTeams() called");
     try {
       const { data: teams, error } = await supabase
         .from("teams")
@@ -234,10 +237,6 @@ export class SupabaseTeamRepository implements TeamRepository {
 
   // Get team by ID with full details
   async getTeamById(teamId: string): Promise<Team | null> {
-    console.log(
-      "🗄️ SupabaseTeamRepository.getTeamById() called with ID:",
-      teamId
-    );
     try {
       // Simplified query to start with - just get basic team data
       const { data: team, error } = await supabase
@@ -273,6 +272,55 @@ export class SupabaseTeamRepository implements TeamRepository {
       return transformedTeam;
     } catch (error) {
       console.error("Error fetching team by ID:", error);
+      throw error;
+    }
+  }
+
+  // Get teams by user ID (via team_registrations)
+  async getTeamsByUserId(userId: string): Promise<Team[]> {
+    try {
+      // First check if user has any registrations at all
+      const { data: allRegistrations, error: allRegError } = await supabase
+        .from("team_registrations")
+        .select("id, user_id, team_id, status")
+        .eq("user_id", userId);
+
+      const { data: registrations, error } = await supabase
+        .from("team_registrations")
+        .select(
+          `
+          team_id,
+          teams!inner (
+            id,
+            name,
+            short_name,
+            logo_url,
+            city,
+            region,
+            primary_color,
+            secondary_color,
+            head_coach_name,
+            status,
+            current_division_name,
+            current_season_year
+          )
+        `
+        )
+        .eq("user_id", userId)
+        .not("team_id", "is", null);
+
+      if (error) {
+        console.error("🗄️ Supabase query error for user teams:", error);
+        throw error;
+      }
+      // Transform the nested data structure
+      const teams =
+        registrations?.map((reg) => {
+          return this.transformToTeamFromDenormalized(reg.teams);
+        }) || [];
+      return teams;
+    } catch (error) {
+      console.error("Error fetching teams by user ID:", error);
       throw error;
     }
   }

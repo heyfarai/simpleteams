@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getCurrentUser } from '@/lib/supabase/auth'
-import { supabaseTeamService } from '@/lib/services/supabase-services'
+import { useSelectedTeam } from '@/components/dashboard/team-selector'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, ArrowRight } from 'lucide-react'
@@ -18,11 +18,28 @@ interface Team {
 }
 
 export default function RosterListPage() {
+  const selectedTeamId = useSelectedTeam()
   const [teams, setTeams] = useState<Team[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isTeamIdReady, setIsTeamIdReady] = useState(false)
+
+  // Track when selectedTeamId is initialized from localStorage
+  useEffect(() => {
+    // Give a moment for localStorage to be read by useSelectedTeam hook
+    const timer = setTimeout(() => {
+      setIsTeamIdReady(true)
+    }, 50)
+
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
+    // Don't load teams until selectedTeamId is ready from localStorage
+    if (!isTeamIdReady) {
+      return
+    }
+
     const loadTeams = async () => {
       try {
         const user = await getCurrentUser()
@@ -33,14 +50,12 @@ export default function RosterListPage() {
         }
 
         // Use Supabase client directly for user-specific team queries
-        // TODO: This currently uses team_registrations as a temporary solution
-        // Long-term should use team_members table for proper ownership model
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         )
 
-        const { data: registrationData, error: teamsError } = await supabase
+        let query = supabase
           .from('team_registrations')
           .select(`
             team_id,
@@ -54,12 +69,19 @@ export default function RosterListPage() {
           .eq('user_id', user.id)
           .not('team_id', 'is', null)
 
+        // Filter by selected team if one is selected
+        if (selectedTeamId) {
+          query = query.eq('team_id', selectedTeamId)
+        }
+
+        const { data: registrationData, error: teamsError } = await query
+
         if (teamsError) {
           throw teamsError
         }
 
         // Transform the nested data structure from team_registrations
-        const transformedTeams = registrationData?.map(reg => ({
+        const transformedTeams = registrationData?.map((reg: any) => ({
           id: reg.teams.id,
           sanity_team_id: reg.teams.id, // Using Supabase ID as sanity_team_id for now
           name: reg.teams.name,
@@ -77,7 +99,7 @@ export default function RosterListPage() {
     }
 
     loadTeams()
-  }, [])
+  }, [selectedTeamId, isTeamIdReady]) // Re-run when selected team changes or when team ID is ready
 
   if (isLoading) {
     return (
@@ -111,7 +133,7 @@ export default function RosterListPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Team Rosters</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Select a team to manage their roster
+          {selectedTeamId ? 'Manage your selected team\'s roster' : 'Select a team to manage their roster'}
         </p>
       </div>
 
@@ -120,9 +142,14 @@ export default function RosterListPage() {
         <Card>
           <CardContent className="p-8 text-center">
             <Users className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No teams found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              {selectedTeamId ? 'No roster found for selected team' : 'No teams found'}
+            </h3>
             <p className="mt-1 text-sm text-gray-500">
-              You don't have access to any teams yet.
+              {selectedTeamId
+                ? 'The selected team doesn\'t have an accessible roster yet.'
+                : 'You don\'t have access to any teams yet.'
+              }
             </p>
           </CardContent>
         </Card>

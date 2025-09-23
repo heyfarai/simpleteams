@@ -45,11 +45,16 @@ export default function PaymentsPage() {
       try {
         setIsLoading(true)
 
-        // Load payments for selected team
+        // Load payments for selected team (via rosters)
         const { data: paymentsData, error } = await supabase
           .from('team_payments')
-          .select('*')
-          .eq('team_id', selectedTeamId)
+          .select(`
+            *,
+            rosters!inner(
+              team_id
+            )
+          `)
+          .eq('rosters.team_id', selectedTeamId)
           .eq('status', 'completed') // Only show completed payments
           .order('created_at', { ascending: false })
 
