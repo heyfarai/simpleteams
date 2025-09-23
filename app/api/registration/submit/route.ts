@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import Stripe from "stripe";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from '@supabase/supabase-js';
+import { getReturnUrl } from '@/lib/utils/url-utils';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -160,24 +161,6 @@ export async function POST(request: Request) {
 
     // Note: Payment record will be created by webhook after successful Stripe payment
     // We'll store the registration ID in Stripe metadata for the webhook to use
-
-    // Get dynamic base URL for return URLs
-    const getReturnUrl = (path: string) => {
-      // On Netlify, prioritize deploy preview URL over main site URL
-      if (process.env.DEPLOY_PRIME_URL) {
-        return `${process.env.DEPLOY_PRIME_URL}${path}`;
-      }
-
-      // Fallback to main site URL on Netlify
-      if (process.env.URL) {
-        return `${process.env.URL}${path}`;
-      }
-
-      // Fallback for local development or other hosting
-      const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-      const host = process.env.VERCEL_URL || 'localhost:3000';
-      return `${protocol}://${host}${path}`;
-    };
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({

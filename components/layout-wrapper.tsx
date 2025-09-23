@@ -3,6 +3,7 @@
 import type React from "react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { DebugBanner } from "@/components/debug-banner";
 import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 
@@ -16,6 +17,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
 
   return (
     <>
+      <DebugBanner />
       {!isAdminPage && (
         <Suspense fallback={<div>Loading...</div>}>
           <Navigation />
