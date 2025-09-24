@@ -5,6 +5,7 @@ import { useServiceStatus } from "@/hooks/use-service-status";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useRegistrationForm } from "@/hooks/use-registration-form";
+import { useInstallmentPreference } from "@/hooks/use-installment-preference";
 import { getPackageDetails } from "./utils/packageDetails";
 import { TeamInformationSection } from "./components/TeamInformationSection";
 import { DivisionSection } from "./components/DivisionSection";
@@ -14,12 +15,12 @@ import { MobileSummary } from "./components/MobileSummary";
 import { SignInModal } from "./components/SignInModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getPackageConfig, isInstallmentAvailable, type PackageType } from "@/lib/config/packages";
 
 
 export function CheckoutForm() {
   const { user, signOut } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'full' | 'installments'>('full');
 
   // Service status monitoring
   useServiceStatus();
@@ -34,6 +35,17 @@ export function CheckoutForm() {
     isFormValid,
     handleSubmit: originalHandleSubmit,
   } = useRegistrationForm();
+
+  // Get payment method from user preferences
+  const packageForPreference = (formData.selectedPackage || 'full-season') as PackageType;
+  const { isInstallmentEnabled } = useInstallmentPreference(
+    packageForPreference,
+    user?.id
+  );
+
+  // Determine payment method based on preferences and availability
+  const installmentsAvailable = isInstallmentAvailable(packageForPreference);
+  const paymentMethod = (isInstallmentEnabled && installmentsAvailable) ? 'installments' : 'full';
 
   // Janky MVP: Override the submit to include payment method
   const handleSubmit = async () => {
@@ -138,33 +150,32 @@ export function CheckoutForm() {
           {/* Main Form Column */}
           <div className="lg:col-span-7">
             <div className="max-w-2xl mx-auto lg:max-w-none">
-              {/* Payment Method Toggle */}
-              {formData.selectedPackage === 'full-season' && (
+              {/* Payment Method Display */}
+              {installmentsAvailable && (
                 <Card className="bg-blue-50 border-blue-200 mb-6">
                   <CardContent className="p-6">
                     <div className="text-center space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Choose Your Payment Method</h3>
-                      <div className="flex justify-center space-x-4">
-                        <Button
-                          variant={paymentMethod === 'full' ? 'default' : 'outline'}
-                          onClick={() => setPaymentMethod('full')}
-                          className="px-8"
-                        >
-                          Pay Full Amount
-                        </Button>
-                        <Button
-                          variant={paymentMethod === 'installments' ? 'default' : 'outline'}
-                          onClick={() => setPaymentMethod('installments')}
-                          className="px-8"
-                        >
-                          Pay in 8 Installments
-                        </Button>
+                      <h3 className="text-lg font-semibold text-gray-900">Payment Method</h3>
+                      <div className="flex justify-center items-center space-x-2">
+                        <span className="text-sm text-gray-700">You chose:</span>
+                        <span className="font-semibold text-blue-600">
+                          {paymentMethod === 'installments' ? 'Monthly Installments' : 'Pay in Full'}
+                        </span>
                       </div>
                       {paymentMethod === 'installments' && (
-                        <p className="text-sm text-gray-600">
-                          Split your payment into 8 monthly installments. First payment due today.
-                        </p>
+                        <div className="bg-white/70 rounded-lg p-4 border">
+                          <p className="text-sm text-gray-700">
+                            {getPackageConfig()[packageForPreference]?.installments &&
+                              `Split into ${getPackageConfig()[packageForPreference]!.installments!.installments} monthly payments. First payment due today.`
+                            }
+                          </p>
+                        </div>
                       )}
+                      <p className="text-xs text-gray-500">
+                        <a href="/register" className="underline hover:text-gray-700">
+                          ← Go back to change your payment preference
+                        </a>
+                      </p>
                     </div>
                   </CardContent>
                 </Card>

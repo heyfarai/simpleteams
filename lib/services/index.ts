@@ -153,7 +153,15 @@ export class FilterService {
 export { gameService } from "./game-service";
 export { seasonService } from "./season-service";
 
+// Import new services
+export { PaymentService } from "./payment-service";
+export { RegistrationService } from "./registration-service";
+export { StripeService } from "./stripe-service";
+
 // Singleton service instances
 export const playerService = new PlayerService();
 export const teamService = new TeamService();
 export const filterService = new FilterService();
+
+// Note: PaymentService, RegistrationService, and StripeService require
+// repository/configuration injection and should be instantiated as needed

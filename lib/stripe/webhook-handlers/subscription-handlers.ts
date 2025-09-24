@@ -21,9 +21,23 @@ export async function handleInvoicePaymentSucceeded(event: Stripe.Event) {
       const registrationId = subscription.metadata?.registrationId;
 
       if (registrationId) {
+        // Find the roster associated with this registration
+        const { data: registration } = await supabase
+          .from("team_registrations")
+          .select(`
+            team_id,
+            teams!inner(
+              rosters(id)
+            )
+          `)
+          .eq("id", registrationId)
+          .single();
+
+        const rosterId = registration?.teams?.rosters?.[0]?.id;
+
         // Create payment record for this installment
         const paymentData = {
-          roster_id: null, // Will be set after registration completes
+          roster_id: rosterId || null,
           amount: invoice.amount_paid || 0,
           currency: invoice.currency?.toUpperCase() || "CAD",
           description: `Installment Payment - ${invoice.number}`,

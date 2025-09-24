@@ -203,3 +203,58 @@ export type StaffRole =
   | "trainer"
   | "volunteer";
 export type PlayerStatus = "active" | "inactive" | "injured";
+
+// Registration and Payment Models
+export interface TeamRegistration {
+  id: string;
+  userId: string;
+  teamName: string;
+  city: string;
+  region?: string;
+  phone?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  logoUrl?: string;
+  primaryContactName: string;
+  primaryContactEmail: string;
+  primaryContactPhone?: string;
+  primaryContactRole?: string;
+  headCoachName?: string;
+  headCoachEmail?: string;
+  headCoachPhone?: string;
+  headCoachCertifications?: string;
+  divisionPreference: string;
+  registrationNotes?: string;
+  selectedPackage: string;
+  status?: RegistrationStatus;
+  paymentStatus?: PaymentStatus;
+  stripeSessionId?: string;
+  teamId?: string;
+  approvedAt?: Date;
+  teamCreatedAt?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface TeamPayment {
+  id: string;
+  rosterId: string;
+  amount: number;
+  currency?: string;
+  description: string;
+  paymentType?: PaymentType;
+  status?: PaymentStatus;
+  dueDate?: Date;
+  paidAt?: Date;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+  receiptNumber?: string;
+  receiptUrl?: string;
+  notes?: string;
+  createdAt: Date;
+}
+
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
+export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
+export type PaymentType = 'registration' | 'installment' | 'late_fee' | 'refund';

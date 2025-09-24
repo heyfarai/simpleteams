@@ -145,6 +145,9 @@ async function handleRegistrationPayment(
           console.error("Error creating roster:", rosterError);
         } else {
           // Create payment record linked to roster
+          // Determine payment type based on session metadata
+          const isInstallment = session.metadata?.paymentType === 'installments';
+
           const paymentData = {
             roster_id: roster.id,
             amount: session.amount_total || 0,
@@ -154,7 +157,7 @@ async function handleRegistrationPayment(
             stripe_payment_intent_id: session.payment_intent as string,
             status: "completed",
             paid_at: new Date().toISOString(),
-            payment_type: "registration"
+            payment_type: isInstallment ? "installment" : "registration"
           };
 
           const { error: paymentError } = await supabase

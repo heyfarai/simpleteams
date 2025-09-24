@@ -89,3 +89,63 @@ When I ask you to refactor make my code:
 - Maintainable: Clear separation of concerns
 - Follows conventions: Uses existing project patterns (/lib, /hooks, etc.)
 - the big switch to supabase
+
+# Current Development Plans
+
+Check off completed items in this doc as you make progress.
+
+## ✅ Subscription Management (COMPLETED)
+
+- ✅ End-to-end subscription schedules working
+- ✅ Stripe Customer Portal integration working
+- ✅ Payment progress display working
+- ✅ Database query fixed for billing portal
+
+## ✅ Configurable Installments with Enhanced UX (COMPLETED)
+
+### 1. **Product Configuration System**
+
+- ✅ Add installment configuration to package definitions
+- ✅ Allow per-product installment settings (number of payments, eligibility)
+- ✅ Make installment availability configurable per package
+
+### 2. **User Preference Management**
+
+- ✅ Add installment toggle to package selection page
+- ✅ Store preference in localStorage with key like `payment-preference-${userId}`
+- ✅ Auto-restore preference on page reload
+- ✅ Don't ask again during checkout flow
+
+### 3. **Enhanced Package Selection UI**
+
+- ✅ Add toggle switch component (Monthly/Pay in Full)
+- ✅ Show monthly payment breakdown when installments selected
+- ✅ Visual indicator for savings/convenience
+- ✅ Toggle inspiration: Monthly/Annually switch with "Save up to 10%" badge
+
+### 4. **Payment Summary Enhancement**
+
+- ✅ Collapsible payment schedule section
+- ✅ Show all payment dates with amounts
+- ✅ Clear breakdown of total cost
+- ✅ Payment method preview (integrate into checkout)
+
+### 5. **Technical Implementation**
+
+- ✅ Create `useInstallmentPreference` hook for state management
+- ✅ Add package configuration interface
+- ✅ Update checkout logic to use configuration instead of hardcoded values
+- ✅ Add payment schedule calculation utilities
+- ✅ Remove toggle from checkout page (persist state from package selection)
+- ✅ Fix toggle visual state update issues
+
+## 📋 Architecture Cleanup (BACKLOG)
+
+### Issues to Fix (Architecture Violations)
+
+- ✅ Add Missing Repository Interfaces (`PaymentRepository`, `RegistrationRepository`)
+- ✅ Create Service Layer (`PaymentService`, `RegistrationService`, `StripeService`)
+- ✅ Add Domain Models (`Payment`, `Subscription`, `Registration`)
+- [ ] Refactor API Routes (move business logic to services)
+- [ ] Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
+- [ ] Update Components (remove direct Supabase calls)

@@ -5,36 +5,11 @@ import Stripe from "stripe";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from '@supabase/supabase-js';
 import { getReturnUrl } from '@/lib/utils/url-utils';
+import { getPackageConfig, isInstallmentAvailable, type PackageType } from '@/lib/config/packages';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-// Package pricing configuration with early bird logic
-const EARLY_BIRD_DEADLINE = new Date('2025-09-24T23:59:59'); // Sep 24, 2025
-
-const getPackageConfig = () => {
-  const isEarlyBird = new Date() <= EARLY_BIRD_DEADLINE;
-
-  return {
-    "full-season": {
-      priceId: isEarlyBird ? "price_1S9BXfIYuurzinGInwQywYOM" : "price_1S9BYNIYuurzinGIb7m1VWBK",
-      amount: isEarlyBird ? 349500 : 379500, // $3,495 CAD early bird / $3,795 CAD regular
-      name: `Full Season Team Registration${isEarlyBird ? ' (Early Bird)' : ''}`,
-      description: "12+ games + playoffs - Pick any 3 season sessions × 4 games each"
-    },
-    "two-session": {
-      priceId: "price_1S9BYVIYuurzinGISFMHrpHB",
-      amount: 179500, // $1,795.00 CAD
-      name: "Two Session Pack Registration",
-      description: "6 games max (3 per session)"
-    },
-    "pay-per-session": {
-      priceId: "price_1S9BXkIYuurzinGIg6NX0B6n",
-      amount: 89500, // $895.00 CAD
-      name: "Pay Per Session Registration",
-      description: "3 games max per session"
-    }
-  } as const;
-};
+// Package configuration now imported from /lib/config/packages.ts
 
 export async function POST(request: Request) {
   try {
@@ -50,16 +25,17 @@ export async function POST(request: Request) {
 
     // Get current package configuration (with early bird logic)
     const PACKAGE_CONFIG = getPackageConfig();
+    const selectedPackage = formData.selectedPackage as PackageType;
 
     // Validate selected package
-    if (!formData.selectedPackage || !(formData.selectedPackage in PACKAGE_CONFIG)) {
+    if (!selectedPackage || !(selectedPackage in PACKAGE_CONFIG)) {
       return NextResponse.json(
         { error: "Invalid package selection" },
         { status: 400 }
       );
     }
 
-    const packageConfig = PACKAGE_CONFIG[formData.selectedPackage as keyof typeof PACKAGE_CONFIG];
+    const packageConfig = PACKAGE_CONFIG[selectedPackage];
 
     // Create properly typed Supabase admin client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -178,12 +154,14 @@ export async function POST(request: Request) {
       return getReturnUrl(path);
     };
 
-    // Check if this should be an installment payment (janky MVP - hardcoded for full-season)
-    const isInstallment = formData.paymentMethod === 'installments' && formData.selectedPackage === 'full-season';
+    // Check if this should be an installment payment (using configuration)
+    const isInstallment = formData.paymentMethod === 'installments' && isInstallmentAvailable(selectedPackage);
 
     let session;
 
     if (isInstallment) {
+      const installmentConfig = packageConfig.installments!;
+
       // Create customer first for subscription schedule
       const customer = await stripe.customers.create({
         email: formData.contactEmail,
@@ -194,16 +172,15 @@ export async function POST(request: Request) {
         }
       });
 
-      // Create subscription schedule with immediate first payment + 7 monthly payments
+      // Create subscription schedule using package configuration
       const subscriptionSchedule = await stripe.subscriptionSchedules.create({
         customer: customer.id,
         start_date: 'now',
         end_behavior: 'cancel',
         phases: [
           {
-            // First payment - immediate
-            items: [{ price: 'price_1SAdMiIYuurzinGII9aloGAw', quantity: 1 }],
-            iterations: 8, // 8 total payments
+            items: [{ price: installmentConfig.installmentPriceId, quantity: 1 }],
+            iterations: installmentConfig.installments,
             billing_cycle_anchor: 'automatic',
           }
         ],
@@ -211,8 +188,9 @@ export async function POST(request: Request) {
           registrationId: registration.id,
           contactEmail: formData.contactEmail,
           teamName: formData.teamName,
-          selectedPackage: formData.selectedPackage,
-          paymentType: 'installments'
+          selectedPackage: selectedPackage,
+          paymentType: 'installments',
+          installmentCount: installmentConfig.installments.toString()
         }
       });
 
@@ -222,7 +200,7 @@ export async function POST(request: Request) {
         mode: "subscription",
         line_items: [
           {
-            price: 'price_1SAdMiIYuurzinGII9aloGAw',
+            price: installmentConfig.installmentPriceId,
             quantity: 1,
           },
         ],
@@ -233,8 +211,9 @@ export async function POST(request: Request) {
           registrationId: registration.id,
           contactEmail: formData.contactEmail,
           teamName: formData.teamName,
-          selectedPackage: formData.selectedPackage,
-          paymentType: 'installments'
+          selectedPackage: selectedPackage,
+          paymentType: 'installments',
+          installmentCount: installmentConfig.installments.toString()
         },
       });
     } else {

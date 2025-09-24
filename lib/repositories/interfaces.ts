@@ -10,6 +10,11 @@ import type {
   StatCategory,
   Official,
   Venue,
+  TeamRegistration,
+  TeamPayment,
+  PaymentStatus,
+  RegistrationStatus,
+  PaymentType,
 } from "../domain/models";
 
 export interface PlayerRepository {
@@ -123,4 +128,115 @@ export interface VenueRepository {
   findAll(): Promise<Venue[]>;
   findById(id: string): Promise<Venue | null>;
   search(query: string): Promise<Venue[]>;
+}
+
+// Registration Repository
+export interface RegistrationRepository {
+  findAll(): Promise<TeamRegistration[]>;
+  findById(id: string): Promise<TeamRegistration | null>;
+  findByUserId(userId: string): Promise<TeamRegistration[]>;
+  findByStatus(status: RegistrationStatus): Promise<TeamRegistration[]>;
+  findByStripeSessionId(sessionId: string): Promise<TeamRegistration | null>;
+  create(registrationData: CreateRegistrationRequest): Promise<TeamRegistration>;
+  update(id: string, updateData: UpdateRegistrationRequest): Promise<TeamRegistration>;
+  updateStatus(id: string, status: RegistrationStatus): Promise<TeamRegistration>;
+  updatePaymentStatus(id: string, paymentStatus: PaymentStatus): Promise<TeamRegistration>;
+  delete(id: string): Promise<void>;
+}
+
+export interface CreateRegistrationRequest {
+  userId: string;
+  teamName: string;
+  city: string;
+  region?: string;
+  phone?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  logoUrl?: string;
+  primaryContactName: string;
+  primaryContactEmail: string;
+  primaryContactPhone?: string;
+  primaryContactRole?: string;
+  headCoachName?: string;
+  headCoachEmail?: string;
+  headCoachPhone?: string;
+  headCoachCertifications?: string;
+  divisionPreference: string;
+  registrationNotes?: string;
+  selectedPackage: string;
+  status?: RegistrationStatus;
+  paymentStatus?: PaymentStatus;
+  stripeSessionId?: string;
+}
+
+export interface UpdateRegistrationRequest {
+  teamName?: string;
+  city?: string;
+  region?: string;
+  phone?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  logoUrl?: string;
+  primaryContactName?: string;
+  primaryContactEmail?: string;
+  primaryContactPhone?: string;
+  primaryContactRole?: string;
+  headCoachName?: string;
+  headCoachEmail?: string;
+  headCoachPhone?: string;
+  headCoachCertifications?: string;
+  divisionPreference?: string;
+  registrationNotes?: string;
+  selectedPackage?: string;
+  status?: RegistrationStatus;
+  paymentStatus?: PaymentStatus;
+  stripeSessionId?: string;
+  teamId?: string;
+}
+
+// Payment Repository
+export interface PaymentRepository {
+  findAll(): Promise<TeamPayment[]>;
+  findById(id: string): Promise<TeamPayment | null>;
+  findByRosterId(rosterId: string): Promise<TeamPayment[]>;
+  findByStatus(status: PaymentStatus): Promise<TeamPayment[]>;
+  findByPaymentType(paymentType: PaymentType): Promise<TeamPayment[]>;
+  findByStripeSessionId(sessionId: string): Promise<TeamPayment | null>;
+  findByStripePaymentIntentId(paymentIntentId: string): Promise<TeamPayment | null>;
+  findOverdue(): Promise<TeamPayment[]>;
+  create(paymentData: CreatePaymentRequest): Promise<TeamPayment>;
+  update(id: string, updateData: UpdatePaymentRequest): Promise<TeamPayment>;
+  updateStatus(id: string, status: PaymentStatus): Promise<TeamPayment>;
+  markAsPaid(id: string, paidAt?: Date, receiptUrl?: string): Promise<TeamPayment>;
+  delete(id: string): Promise<void>;
+}
+
+export interface CreatePaymentRequest {
+  rosterId: string;
+  amount: number;
+  currency?: string;
+  description: string;
+  paymentType?: PaymentType;
+  status?: PaymentStatus;
+  dueDate?: Date;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+  notes?: string;
+}
+
+export interface UpdatePaymentRequest {
+  amount?: number;
+  currency?: string;
+  description?: string;
+  paymentType?: PaymentType;
+  status?: PaymentStatus;
+  dueDate?: Date;
+  paidAt?: Date;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+  receiptNumber?: string;
+  receiptUrl?: string;
+  notes?: string;
 }

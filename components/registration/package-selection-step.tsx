@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ComparisonTable,
   PackageGrid,
@@ -8,8 +8,11 @@ import {
 } from "./package-selection";
 import { usePackageComparison } from "@/hooks/use-package-comparison";
 import type { PackageSelectionStepProps } from "./package-selection";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PaymentToggle } from "@/components/ui/payment-toggle";
+import { useInstallmentPreference } from "@/hooks/use-installment-preference";
+import { getPackageConfig, isInstallmentAvailable, getPackageInstallmentAmount, type PackageType } from "@/lib/config/packages";
+import { useAuth } from "@/hooks/use-auth";
 
 export function PackageSelectionStep({
   selectedPackage,
@@ -17,7 +20,30 @@ export function PackageSelectionStep({
   onNext,
 }: PackageSelectionStepProps) {
   const { packages } = usePackageComparison();
+  const { user } = useAuth();
+
+  // Use installment preference hook for the selected package (default to full-season if none selected)
+  const packageForPreference = (selectedPackage || 'full-season') as PackageType;
+  const { isInstallmentEnabled, setInstallmentPreference, isLoading } = useInstallmentPreference(
+    packageForPreference,
+    user?.id
+  );
+
+  // Initialize payment method from preferences
   const [paymentMethod, setPaymentMethod] = useState<'full' | 'installments'>('full');
+
+  // Update payment method when preferences load
+  useEffect(() => {
+    if (!isLoading) {
+      setPaymentMethod(isInstallmentEnabled ? 'installments' : 'full');
+    }
+  }, [isInstallmentEnabled, isLoading]);
+
+  const handlePaymentMethodChange = (enabled: boolean) => {
+    const newMethod = enabled ? 'installments' : 'full';
+    setPaymentMethod(newMethod);
+    setInstallmentPreference(enabled);
+  };
 
   const handlePackageSelect = (packageId: string) => {
     onPackageSelect(packageId);
@@ -29,6 +55,9 @@ export function PackageSelectionStep({
       }, 100);
     }
   };
+
+  // Check if installments are available for selected package
+  const installmentsAvailable = selectedPackage ? isInstallmentAvailable(selectedPackage as PackageType) : true;
 
   return (
     <div className="space-y-6 mt-16">
@@ -44,28 +73,35 @@ export function PackageSelectionStep({
       {/* Payment Method Toggle */}
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-6">
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-6">
             <h3 className="text-lg font-semibold text-gray-900">Choose Your Payment Method</h3>
-            <div className="flex justify-center space-x-4">
-              <Button
-                variant={paymentMethod === 'full' ? 'default' : 'outline'}
-                onClick={() => setPaymentMethod('full')}
-                className="px-8"
-              >
-                Pay Full Amount
-              </Button>
-              <Button
-                variant={paymentMethod === 'installments' ? 'default' : 'outline'}
-                onClick={() => setPaymentMethod('installments')}
-                className="px-8"
-              >
-                Pay in Installments
-              </Button>
-            </div>
-            {paymentMethod === 'installments' && (
-              <p className="text-sm text-gray-600">
-                Split your payment into 8 monthly installments. First payment due today.
-              </p>
+
+            <PaymentToggle
+              checked={paymentMethod === 'installments'}
+              onChange={handlePaymentMethodChange}
+              disabled={!installmentsAvailable || isLoading}
+              leftLabel="Pay in Full"
+              rightLabel="Monthly Installments"
+              badgeText="Easier budgeting"
+            />
+
+            {paymentMethod === 'installments' && installmentsAvailable && (
+              <div className="bg-white/70 rounded-lg p-4 border">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {selectedPackage && getPackageConfig()[selectedPackage as PackageType]?.installments ?
+                    `Split your payment into ${getPackageConfig()[selectedPackage as PackageType]!.installments!.installments} monthly payments of $${(getPackageInstallmentAmount(selectedPackage as PackageType) / 100).toFixed(2)} CAD. First payment due today.` :
+                    "Split your payment into convenient monthly installments. First payment due today."
+                  }
+                </p>
+              </div>
+            )}
+
+            {selectedPackage && !installmentsAvailable && (
+              <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                <p className="text-sm text-orange-700">
+                  Installment payments are not available for this package. Only full payment is accepted.
+                </p>
+              </div>
             )}
           </div>
         </CardContent>
