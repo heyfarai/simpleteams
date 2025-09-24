@@ -153,13 +153,58 @@ export class RegistrationService {
   }
 
   async canUserRegister(userId: string): Promise<boolean> {
-    const userRegistrations = await this.getRegistrationsByUserId(userId);
-    const activeRegistrations = userRegistrations.filter(
-      reg => reg.status === 'pending' || reg.status === 'approved'
-    );
+    // For now, allow users to register multiple teams
+    // In the future, we could add season-specific logic or reasonable limits
+    // const userRegistrations = await this.getRegistrationsByUserId(userId);
+    // const activeRegistrations = userRegistrations.filter(
+    //   reg => reg.status === 'pending' || reg.status === 'approved'
+    // );
 
-    // Business rule: Users can only have one active registration per season
-    return activeRegistrations.length === 0;
+    // Business rule: Allow multiple team registrations per user
+    return true;
+  }
+
+  async createRegistrationWithValidation(
+    userId: string,
+    formData: any,
+    packageSelection: any
+  ): Promise<TeamRegistration> {
+    // Validate user can register
+    const canRegister = await this.canUserRegister(userId);
+    if (!canRegister) {
+      throw new Error('User already has an active registration');
+    }
+
+    // Create registration data
+    const registrationData: any = {
+      userId,
+      teamName: formData.teamName,
+      city: formData.city,
+      region: formData.province,
+      phone: formData.phone || null,
+      primaryColor: formData.primaryColors?.[0] || '#1e40af',
+      secondaryColor: formData.primaryColors?.[1] || '#fbbf24',
+      accentColor: formData.primaryColors?.[2] || null,
+      primaryContactName: formData.primaryContactName,
+      primaryContactEmail: formData.contactEmail,
+      primaryContactPhone: formData.primaryContactPhone || null,
+      primaryContactRole: formData.primaryContactRole || 'manager',
+      headCoachName: formData.headCoachName || null,
+      headCoachEmail: formData.headCoachEmail || null,
+      headCoachPhone: formData.headCoachPhone || null,
+      headCoachCertifications: formData.headCoachCertifications || null,
+      divisionPreference: formData.divisionPreference,
+      registrationNotes: formData.registrationNotes || null,
+      selectedPackage: formData.selectedPackage,
+      status: 'pending' as const,
+      paymentStatus: 'pending' as const
+    };
+
+    return this.createRegistration(registrationData);
+  }
+
+  async linkStripeSession(registrationId: string, stripeSessionId: string): Promise<void> {
+    await this.registrationRepository.updateStripeSessionId(registrationId, stripeSessionId);
   }
 
   // Private validation methods

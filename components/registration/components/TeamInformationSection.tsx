@@ -27,6 +27,7 @@ export function TeamInformationSection({
         <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
           <div className="sm:col-span-2">
             <div className="flex justify-between items-center">
+              {/* TODO: Separate email without creating friction */}
               <Label htmlFor="contactEmail">
                 Contact Email *
                 {user && (

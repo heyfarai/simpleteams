@@ -9,6 +9,8 @@ import type {
   FilterRepository,
   OfficialRepository,
   VenueRepository,
+  RegistrationRepository,
+  PaymentRepository,
 } from "./interfaces";
 
 // Removed Sanity imports - using Supabase only
@@ -18,6 +20,8 @@ import { SupabaseTeamRepository } from "./supabase-team-repository";
 import { SupabaseSeasonRepository } from "./supabase-season-repository";
 import { SupabaseDivisionRepository } from "./supabase/supabase-division-repository";
 import { SupabasePlayerRepository } from "./supabase-player-repository";
+import { SupabaseRegistrationRepository } from "./supabase-registration-repository";
+import { SupabasePaymentRepository } from "./supabase-payment-repository";
 
 // Future implementations could be added here:
 // import { PostgreSQLPlayerRepository } from "./postgresql/postgresql-player-repository";
@@ -117,6 +121,32 @@ export class RepositoryFactory {
   createVenueRepository(): VenueRepository {
     throw new Error("VenueRepository not implemented yet");
   }
+
+  createRegistrationRepository(): RegistrationRepository {
+    switch (this.dbType) {
+      case "supabase":
+        return new SupabaseRegistrationRepository();
+      // case "postgresql":
+      //   return new PostgreSQLRegistrationRepository();
+      // case "mongodb":
+      //   return new MongoRegistrationRepository();
+      default:
+        return new SupabaseRegistrationRepository();
+    }
+  }
+
+  createPaymentRepository(): PaymentRepository {
+    switch (this.dbType) {
+      case "supabase":
+        return new SupabasePaymentRepository();
+      // case "postgresql":
+      //   return new PostgreSQLPaymentRepository();
+      // case "mongodb":
+      //   return new MongoPaymentRepository();
+      default:
+        return new SupabasePaymentRepository();
+    }
+  }
 }
 
 // Singleton instances for the app
@@ -127,6 +157,8 @@ export const playerRepository = factory.createPlayerRepository();
 export const teamRepository = factory.createTeamRepository();
 export const seasonRepository = factory.createSeasonRepository();
 export const divisionRepository = factory.createDivisionRepository();
+export const registrationRepository = factory.createRegistrationRepository();
+export const paymentRepository = factory.createPaymentRepository();
 // gameRepository and filterRepository not implemented for Supabase yet
 console.log('🏭 Singleton repository instances created');
 

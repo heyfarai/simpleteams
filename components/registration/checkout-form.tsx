@@ -15,8 +15,11 @@ import { MobileSummary } from "./components/MobileSummary";
 import { SignInModal } from "./components/SignInModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getPackageConfig, isInstallmentAvailable, type PackageType } from "@/lib/config/packages";
-
+import {
+  getPackageConfig,
+  isInstallmentAvailable,
+  type PackageType,
+} from "@/lib/config/packages";
 
 export function CheckoutForm() {
   const { user, signOut } = useAuth();
@@ -37,7 +40,8 @@ export function CheckoutForm() {
   } = useRegistrationForm();
 
   // Get payment method from user preferences
-  const packageForPreference = (formData.selectedPackage || 'full-season') as PackageType;
+  const packageForPreference = (formData.selectedPackage ||
+    "full-season") as PackageType;
   const { isInstallmentEnabled } = useInstallmentPreference(
     packageForPreference,
     user?.id
@@ -45,7 +49,8 @@ export function CheckoutForm() {
 
   // Determine payment method based on preferences and availability
   const installmentsAvailable = isInstallmentAvailable(packageForPreference);
-  const paymentMethod = (isInstallmentEnabled && installmentsAvailable) ? 'installments' : 'full';
+  const paymentMethod =
+    isInstallmentEnabled && installmentsAvailable ? "installments" : "full";
 
   // Janky MVP: Override the submit to include payment method
   const handleSubmit = async () => {
@@ -76,7 +81,7 @@ export function CheckoutForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           formData: registrationData,
-          currentUrl: window.location.href
+          currentUrl: window.location.href,
         }),
       });
 
@@ -136,7 +141,6 @@ export function CheckoutForm() {
     (d) => d.id === formData.divisionPreference
   );
 
-
   return (
     <div className="min-h-screen ">
       <div className="container mx-auto px-6 py-8">
@@ -151,28 +155,41 @@ export function CheckoutForm() {
           <div className="lg:col-span-7">
             <div className="max-w-2xl mx-auto lg:max-w-none">
               {/* Payment Method Display */}
+              {/* TODO: Remove once summary has full schedule */}
               {installmentsAvailable && (
-                <Card className="bg-blue-50 border-blue-200 mb-6">
+                <Card className="hidden bg-blue-50 border-blue-200 mb-6">
                   <CardContent className="p-6">
                     <div className="text-center space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Payment Method</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Payment Method
+                      </h3>
                       <div className="flex justify-center items-center space-x-2">
-                        <span className="text-sm text-gray-700">You chose:</span>
+                        <span className="text-sm text-gray-700">
+                          You chose:
+                        </span>
                         <span className="font-semibold text-blue-600">
-                          {paymentMethod === 'installments' ? 'Monthly Installments' : 'Pay in Full'}
+                          {paymentMethod === "installments"
+                            ? "Monthly Installments"
+                            : "Pay in Full"}
                         </span>
                       </div>
-                      {paymentMethod === 'installments' && (
+                      {paymentMethod === "installments" && (
                         <div className="bg-white/70 rounded-lg p-4 border">
                           <p className="text-sm text-gray-700">
-                            {getPackageConfig()[packageForPreference]?.installments &&
-                              `Split into ${getPackageConfig()[packageForPreference]!.installments!.installments} monthly payments. First payment due today.`
-                            }
+                            {getPackageConfig()[packageForPreference]
+                              ?.installments &&
+                              `Split into ${
+                                getPackageConfig()[packageForPreference]!
+                                  .installments!.installments
+                              } monthly payments. First payment due today.`}
                           </p>
                         </div>
                       )}
                       <p className="text-xs text-gray-500">
-                        <a href="/register" className="underline hover:text-gray-700">
+                        <a
+                          href="/register"
+                          className="underline hover:text-gray-700"
+                        >
                           ← Go back to change your payment preference
                         </a>
                       </p>

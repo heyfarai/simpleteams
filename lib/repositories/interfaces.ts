@@ -206,6 +206,7 @@ export interface PaymentRepository {
   findByStripeSessionId(sessionId: string): Promise<TeamPayment | null>;
   findByStripePaymentIntentId(paymentIntentId: string): Promise<TeamPayment | null>;
   findOverdue(): Promise<TeamPayment[]>;
+  findInstallmentPaymentByUserAndTeam(userId: string, teamId: string): Promise<TeamPayment | null>;
   create(paymentData: CreatePaymentRequest): Promise<TeamPayment>;
   update(id: string, updateData: UpdatePaymentRequest): Promise<TeamPayment>;
   updateStatus(id: string, status: PaymentStatus): Promise<TeamPayment>;

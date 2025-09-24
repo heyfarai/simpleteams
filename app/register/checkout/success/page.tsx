@@ -331,10 +331,10 @@ function CheckoutSuccessContent() {
 
           {/* Action Buttons */}
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/dashboard">
+            <Link href="/dashboard/roster">
               <Button
                 size="lg"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto hover:bg-primary/80"
               >
                 Go to Team Dashboard
               </Button>

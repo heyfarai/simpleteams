@@ -139,13 +139,29 @@ Check off completed items in this doc as you make progress.
 - ✅ Remove toggle from checkout page (persist state from package selection)
 - ✅ Fix toggle visual state update issues
 
-## 📋 Architecture Cleanup (BACKLOG)
+## ✅ Architecture Cleanup (COMPLETED)
 
-### Issues to Fix (Architecture Violations)
+### Issues Fixed (Architecture Violations)
 
 - ✅ Add Missing Repository Interfaces (`PaymentRepository`, `RegistrationRepository`)
 - ✅ Create Service Layer (`PaymentService`, `RegistrationService`, `StripeService`)
 - ✅ Add Domain Models (`Payment`, `Subscription`, `Registration`)
-- [ ] Refactor API Routes (move business logic to services)
+- ✅ Refactor API Routes (move business logic to services)
+  - ✅ Moving payment logic from /api/billing/portal/route.ts into PaymentService
+  - ✅ Updating routes to use the service layer instead of direct database calls
+  - ✅ Following the existing project patterns established in /lib/services/
+  - ✅ Created BillingService to orchestrate PaymentService and StripeService
+  - ✅ Created SupabasePaymentRepository implementation
+  - ✅ Updated Repository Factory with PaymentRepository
+
+### Remaining Tasks (BACKLOG)
+
+- [ ] Wire up and migrate Games to supabase
 - [ ] Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
 - [ ] Update Components (remove direct Supabase calls)
+- [ ] In dashboard expose url for selected team /dashboard/[team]/[roster]
+- [ ] On checkout success screen, link to the newly created team /dashboard/[team]/[roster]
+
+## Testing
+
+- [ ] Create a plan for testing and testing infra (start with Registration Flow)

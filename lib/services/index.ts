@@ -157,11 +157,17 @@ export { seasonService } from "./season-service";
 export { PaymentService } from "./payment-service";
 export { RegistrationService } from "./registration-service";
 export { StripeService } from "./stripe-service";
+export { BillingService } from "./billing-service";
 
 // Singleton service instances
 export const playerService = new PlayerService();
 export const teamService = new TeamService();
 export const filterService = new FilterService();
 
-// Note: PaymentService, RegistrationService, and StripeService require
+// Service instances with repository injection
+import { registrationRepository } from "../repositories/factory";
+import { RegistrationService } from "./registration-service";
+export const registrationService = new RegistrationService(registrationRepository);
+
+// Note: PaymentService and StripeService require
 // repository/configuration injection and should be instantiated as needed

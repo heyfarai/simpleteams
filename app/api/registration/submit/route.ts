@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import Stripe from "stripe";
-import type { Database } from "@/lib/supabase/database.types";
-import { createClient } from '@supabase/supabase-js';
 import { getReturnUrl } from '@/lib/utils/url-utils';
 import { getPackageConfig, isInstallmentAvailable, type PackageType } from '@/lib/config/packages';
+import { registrationService } from '@/lib/services';
+import { StripeService } from '@/lib/services/stripe-service';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-// Package configuration now imported from /lib/config/packages.ts
+// Initialize Stripe service
+const stripeService = new StripeService(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: Request) {
   try {
@@ -36,19 +34,6 @@ export async function POST(request: Request) {
     }
 
     const packageConfig = PACKAGE_CONFIG[selectedPackage];
-
-    // Create properly typed Supabase admin client
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json(
-        { error: "Database not configured" },
-        { status: 500 }
-      );
-    }
-
-    const supabase = createClient<Database>(supabaseUrl, serviceRoleKey);
 
     // Get user from session if authenticated
     const cookieStore = await cookies();
@@ -91,48 +76,12 @@ export async function POST(request: Request) {
       }, { status: 401 });
     }
 
-    // Create registration record (teams will be created after payment)
-    const registrationData = {
-      user_id: userId,
-      team_name: formData.teamName,
-      city: formData.city,
-      region: formData.province,
-      phone: formData.phone || null,
-      primary_color: formData.primaryColors?.[0] || '#1e40af',
-      secondary_color: formData.primaryColors?.[1] || '#fbbf24',
-      accent_color: formData.primaryColors?.[2] || null,
-      primary_contact_name: formData.primaryContactName,
-      primary_contact_email: formData.contactEmail,
-      primary_contact_phone: formData.primaryContactPhone || null,
-      primary_contact_role: formData.primaryContactRole || 'manager',
-      head_coach_name: formData.headCoachName || null,
-      head_coach_email: formData.headCoachEmail || null,
-      head_coach_phone: formData.headCoachPhone || null,
-      head_coach_certifications: formData.headCoachCertifications || null,
-      division_preference: formData.divisionPreference,
-      registration_notes: formData.registrationNotes || null,
-      selected_package: formData.selectedPackage,
-      status: 'pending',
-      payment_status: 'pending'
-    };
-
-    const { data: registration, error: registrationError } = await supabase
-      .from("team_registrations")
-      .insert(registrationData)
-      .select()
-      .single();
-
-    if (registrationError) {
-      console.error("Registration creation error:", registrationError);
-      return NextResponse.json({ error: registrationError.message }, { status: 500 });
-    }
-
-    if (!registration) {
-      return NextResponse.json(
-        { error: "Failed to create registration" },
-        { status: 500 }
-      );
-    }
+    // Create registration using service layer
+    const registration = await registrationService.createRegistrationWithValidation(
+      userId,
+      formData,
+      packageConfig
+    );
 
 
     // Note: Payment record will be created by webhook after successful Stripe payment
@@ -157,95 +106,25 @@ export async function POST(request: Request) {
     // Check if this should be an installment payment (using configuration)
     const isInstallment = formData.paymentMethod === 'installments' && isInstallmentAvailable(selectedPackage);
 
-    let session;
+    // Create Stripe checkout session using service
+    const session = await stripeService.createCheckoutSession({
+      packageType: selectedPackage,
+      paymentMethod: isInstallment ? 'installments' : 'full',
+      customerEmail: formData.contactEmail,
+      customerName: formData.teamName,
+      metadata: {
+        registrationId: registration.id,
+        contactEmail: formData.contactEmail,
+        teamName: formData.teamName,
+        selectedPackage: selectedPackage,
+        packageName: packageConfig.name,
+      },
+      successUrl: `${getReturnUrlForStripe('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: getReturnUrlForStripe('/register/checkout'),
+    });
 
-    if (isInstallment) {
-      const installmentConfig = packageConfig.installments!;
-
-      // Create customer first for subscription schedule
-      const customer = await stripe.customers.create({
-        email: formData.contactEmail,
-        name: formData.teamName,
-        metadata: {
-          registrationId: registration.id,
-          teamName: formData.teamName,
-        }
-      });
-
-      // Create subscription schedule using package configuration
-      const subscriptionSchedule = await stripe.subscriptionSchedules.create({
-        customer: customer.id,
-        start_date: 'now',
-        end_behavior: 'cancel',
-        phases: [
-          {
-            items: [{ price: installmentConfig.installmentPriceId, quantity: 1 }],
-            iterations: installmentConfig.installments,
-            billing_cycle_anchor: 'automatic',
-          }
-        ],
-        metadata: {
-          registrationId: registration.id,
-          contactEmail: formData.contactEmail,
-          teamName: formData.teamName,
-          selectedPackage: selectedPackage,
-          paymentType: 'installments',
-          installmentCount: installmentConfig.installments.toString()
-        }
-      });
-
-      // Create checkout session for the subscription schedule
-      session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        mode: "subscription",
-        line_items: [
-          {
-            price: installmentConfig.installmentPriceId,
-            quantity: 1,
-          },
-        ],
-        success_url: `${getReturnUrlForStripe('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: getReturnUrlForStripe('/register/checkout'),
-        customer: customer.id,
-        metadata: {
-          registrationId: registration.id,
-          contactEmail: formData.contactEmail,
-          teamName: formData.teamName,
-          selectedPackage: selectedPackage,
-          paymentType: 'installments',
-          installmentCount: installmentConfig.installments.toString()
-        },
-      });
-    } else {
-      // Regular one-time payment
-      session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price: packageConfig.priceId,
-            quantity: 1,
-          },
-        ],
-        mode: "payment",
-        success_url: `${getReturnUrlForStripe('/register/checkout/success')}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: getReturnUrlForStripe('/register/checkout'),
-        metadata: {
-          registrationId: registration.id,
-          contactEmail: formData.contactEmail,
-          teamName: formData.teamName,
-          selectedPackage: formData.selectedPackage,
-          packageName: packageConfig.name,
-          paymentType: 'one-time'
-        },
-        customer_email: formData.contactEmail,
-      });
-    }
-
-    // Update registration with Stripe session ID
-    await supabase
-      .from("team_registrations")
-      .update({ stripe_session_id: session.id })
-      .eq("id", registration.id);
+    // Update registration with Stripe session ID using service
+    await registrationService.linkStripeSession(registration.id, session.id);
 
     return NextResponse.json({
       checkoutUrl: session.url,
