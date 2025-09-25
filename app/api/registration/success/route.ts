@@ -66,7 +66,10 @@ export async function GET(request: Request) {
     // Get team via registration
     const { data: registration, error: registrationError } = await supabaseAdmin
       .from("team_registrations")
-      .select("*, teams(*)")
+      .select(`
+        *,
+        teams(*)
+      `)
       .eq("id", registrationId)
       .single();
 
@@ -77,31 +80,52 @@ export async function GET(request: Request) {
       );
     }
 
-    if (!registration.team_id || !registration.teams) {
-      return NextResponse.json(
-        { error: "Team not yet created for this registration" },
-        { status: 404 }
-      );
+    // Get selected sessions if any
+    let selectedSessions = [];
+    if (registration.selected_session_ids && registration.selected_session_ids.length > 0) {
+      const { data: sessionData } = await supabaseAdmin
+        .from("game_sessions")
+        .select(`
+          id,
+          name,
+          start_date,
+          end_date,
+          sequence,
+          type
+        `)
+        .in("id", registration.selected_session_ids)
+        .order("sequence");
+      selectedSessions = sessionData || [];
     }
 
-    const team = registration.teams;
+    // For team data, use registration data as fallback if team not created yet
+    const team = registration.teams || {
+      id: null,
+      name: registration.team_name,
+      city: registration.city,
+      region: registration.region,
+      status: registration.status,
+      payment_status: registration.payment_status,
+    };
 
-    // Get payment information via roster
+    // Get payment information via roster (only if team exists)
     let payment = null;
-    const { data: roster } = await supabaseAdmin
-      .from("rosters")
-      .select("id")
-      .eq("team_id", team.id)
-      .single();
-
-    if (roster) {
-      const { data: paymentData } = await supabaseAdmin
-        .from("team_payments")
-        .select("*")
-        .eq("roster_id", roster.id)
-        .eq("stripe_session_id", sessionId)
+    if (team.id) {
+      const { data: roster } = await supabaseAdmin
+        .from("rosters")
+        .select("id")
+        .eq("team_id", team.id)
         .single();
-      payment = paymentData;
+
+      if (roster) {
+        const { data: paymentData } = await supabaseAdmin
+          .from("team_payments")
+          .select("*")
+          .eq("roster_id", roster.id)
+          .eq("stripe_session_id", sessionId)
+          .single();
+        payment = paymentData;
+      }
     }
 
     // Add registration-specific fields to team object
@@ -115,14 +139,16 @@ export async function GET(request: Request) {
     if (paymentVerified && (team.payment_status === 'pending' || payment?.status === 'pending')) {
       console.log("Payment verified via Stripe API, updating database records...");
 
-      // Update team status
-      await supabaseAdmin
-        .from("teams")
-        .update({
-          payment_status: 'completed',
-          status: 'active'
-        })
-        .eq("id", team.id);
+      // Update team status (only if team exists)
+      if (team.id) {
+        await supabaseAdmin
+          .from("teams")
+          .update({
+            payment_status: 'completed',
+            status: 'active'
+          })
+          .eq("id", team.id);
+      }
 
       // Update payment record if it exists
       if (payment) {
@@ -166,7 +192,8 @@ export async function GET(request: Request) {
         id: sessionId,
         payment_status: session.payment_status,
         status: session.status,
-      }
+      },
+      selected_sessions: selectedSessions
     };
 
     return NextResponse.json(registrationData);

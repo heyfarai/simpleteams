@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useRegistrationForm } from "@/hooks/use-registration-form";
 import { useInstallmentPreference } from "@/hooks/use-installment-preference";
+import { useCurrentSeasonId } from "@/lib/hooks/use-current-season";
 import { getPackageDetails } from "./utils/packageDetails";
 import { TeamInformationSection } from "./components/TeamInformationSection";
 import { DivisionSection } from "./components/DivisionSection";
@@ -13,6 +14,7 @@ import { ContactInformationSection } from "./components/ContactInformationSectio
 import { OrderSummary } from "./components/OrderSummary";
 import { MobileSummary } from "./components/MobileSummary";
 import { SignInModal } from "./components/SignInModal";
+import { SessionSelection } from "./session-selection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -24,9 +26,13 @@ import {
 export function CheckoutForm() {
   const { user, signOut } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
 
   // Service status monitoring
   useServiceStatus();
+
+  // Get current season ID from database
+  const currentSeasonId = useCurrentSeasonId();
 
   const {
     formData,
@@ -72,6 +78,7 @@ export function CheckoutForm() {
         city: formData.city,
         province: formData.province,
         selectedPackage: formData.selectedPackage,
+        selectedSessionIds: selectedSessionIds.length > 0 ? selectedSessionIds : undefined,
         paymentMethod: paymentMethod, // Use our local state
         userId: user?.id,
       };
@@ -218,6 +225,16 @@ export function CheckoutForm() {
                     divisionsError={divisionsError}
                     onInputChange={handleInputChange}
                   />
+
+                  {/* Session Selection for session-based packages */}
+                  {formData.selectedPackage && ['two-session', 'pay-per-session'].includes(formData.selectedPackage) && (
+                    <SessionSelection
+                      packageType={formData.selectedPackage as 'two-session' | 'pay-per-session'}
+                      seasonId={currentSeasonId} // Dynamic active season from database
+                      selectedSessionIds={selectedSessionIds}
+                      onSelectionChange={setSelectedSessionIds}
+                    />
+                  )}
 
                   <ContactInformationSection
                     formData={formData}

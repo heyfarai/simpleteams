@@ -13,14 +13,15 @@ import {
 
 export async function sendConfirmationEmails(
   team: any,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
+  selectedSessions?: any[]
 ) {
   try {
     const packageDetails = getPackageDetails(
       session.metadata?.selectedPackage || ""
     );
 
-    const emailData = buildEmailData(team, session, packageDetails);
+    const emailData = buildEmailData(team, session, packageDetails, selectedSessions);
 
     console.log("Sending confirmation emails for team:", team.name);
 
@@ -66,7 +67,8 @@ export async function sendConfirmationEmails(
 function buildEmailData(
   team: any,
   session: Stripe.Checkout.Session,
-  packageDetails: any
+  packageDetails: any,
+  selectedSessions?: any[]
 ) {
   const dashboardUrl = `${process.env.NEXT_PUBLIC_URL}/dashboard`;
   const paymentAmount = (session.amount_total || 0) / 100;
@@ -90,6 +92,7 @@ function buildEmailData(
         ],
         dashboardUrl,
         supportEmail: process.env.SUPPORT_EMAIL || "support@yourleague.com",
+        selectedSessions: selectedSessions || undefined,
       } as TeamRegistrationData,
     },
 

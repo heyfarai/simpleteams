@@ -115,7 +115,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                   </div>
                 </div>
                 {game.score &&
-                (game.status === "final" || game.status === "in-progress") ? (
+                (game.status === "final" || game.status === "in-progress" || game.status === "completed") ? (
                   <span className="text-4xl font-extrabold grotesk text-primary">
                     {game.score.homeScore}
                   </span>
@@ -142,7 +142,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
 
               <div className="flex justify-between flex-1 items-center">
                 {game.score &&
-                (game.status === "final" || game.status === "in-progress") ? (
+                (game.status === "final" || game.status === "in-progress" || game.status === "completed") ? (
                   <span className="text-4xl font-extrabold text-primary order-2 md:order-1 grotesk">
                     {game.score.awayScore}
                   </span>

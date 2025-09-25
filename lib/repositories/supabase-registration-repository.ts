@@ -227,6 +227,7 @@ export class SupabaseRegistrationRepository implements RegistrationRepository {
       headCoachCertifications: dbRecord.head_coach_certifications,
       divisionPreference: dbRecord.division_preference,
       registrationNotes: dbRecord.registration_notes,
+      selectedSessionIds: dbRecord.selected_session_ids,
       selectedPackage: dbRecord.selected_package,
       status: dbRecord.status as RegistrationStatus,
       paymentStatus: dbRecord.payment_status as PaymentStatus,
@@ -260,6 +261,7 @@ export class SupabaseRegistrationRepository implements RegistrationRepository {
       division_preference: registration.divisionPreference,
       registration_notes: registration.registrationNotes,
       selected_package: registration.selectedPackage,
+      selected_session_ids: registration.selectedSessionIds,
       status: registration.status || 'pending',
       payment_status: registration.paymentStatus || 'pending',
     };

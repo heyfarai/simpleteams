@@ -77,6 +77,8 @@ export interface Game {
   awayTeam: Team;
   division: Division;
   season: Season;
+  sessionId?: string;
+  session?: GameSession;
   status: GameStatus;
   homeScore?: number;
   awayScore?: number;
@@ -175,12 +177,36 @@ export interface FilterOptions {
   positions: Position[];
 }
 
+export interface GameSession {
+  id: string;
+  seasonId: string;
+  name: string;
+  sequence: number;
+  startDate: string;
+  endDate: string;
+  type: SessionType;
+  maxTeams?: number;
+  isActive: boolean;
+  season?: Season;
+}
+
+// Legacy interface for backward compatibility
 export interface Session {
   id: string;
   name: string;
   type?: string;
   startDate?: string;
   isActive?: boolean;
+}
+
+export interface RosterSessionEnrollment {
+  id: string;
+  rosterId: string;
+  sessionId: string;
+  enrolledViaPackage: string;
+  enrollmentDate: Date;
+  roster?: Team;
+  session?: GameSession;
 }
 
 // Enums and types
@@ -203,6 +229,7 @@ export type StaffRole =
   | "trainer"
   | "volunteer";
 export type PlayerStatus = "active" | "inactive" | "injured";
+export type SessionType = "regular" | "playoffs";
 
 // Registration and Payment Models
 export interface TeamRegistration {
@@ -227,6 +254,7 @@ export interface TeamRegistration {
   divisionPreference: string;
   registrationNotes?: string;
   selectedPackage: string;
+  selectedSessionIds?: string[]; // For two-session and pay-per-session packages
   status?: RegistrationStatus;
   paymentStatus?: PaymentStatus;
   stripeSessionId?: string;

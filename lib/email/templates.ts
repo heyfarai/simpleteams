@@ -1,3 +1,12 @@
+export interface GameSession {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  sequence: number;
+  type: string;
+}
+
 export interface TeamRegistrationData {
   teamName: string;
   contactName: string;
@@ -8,6 +17,7 @@ export interface TeamRegistrationData {
   nextSteps: string[];
   dashboardUrl: string;
   supportEmail: string;
+  selectedSessions?: GameSession[];
 }
 
 export interface CoachWelcomeData {
@@ -26,6 +36,28 @@ export interface AdminNotificationData {
   paymentAmount: number;
   registrationId: string;
   adminDashboardUrl: string;
+}
+
+// Helper function to format date range for emails
+function formatSessionDateRange(startDate: string, endDate: string): string {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const options: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+  };
+
+  // If same month and year, show "Nov 1-2"
+  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+    if (start.getDate() === end.getDate()) {
+      return start.toLocaleDateString("en-US", options);
+    }
+    return `${start.toLocaleDateString("en-US", options).replace(/,.*/, "")} ${start.getDate()}-${end.getDate()}`;
+  }
+
+  // Different months, show "Dec 20 - Jan 2"
+  return `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
 }
 
 export function getTeamRegistrationConfirmationHtml(data: TeamRegistrationData): string {
@@ -59,6 +91,26 @@ export function getTeamRegistrationConfirmationHtml(data: TeamRegistrationData):
         <li><strong>Registration ID:</strong> ${data.registrationId}</li>
       </ul>
     </div>
+
+    ${data.selectedSessions && data.selectedSessions.length > 0 ? `
+    <div style="background: #eff6ff; padding: 20px; border-radius: 6px; border-left: 4px solid #2563eb; margin: 25px 0;">
+      <h3 style="margin-top: 0; color: #1d4ed8;">Your Selected Sessions (${data.selectedSessions.length})</h3>
+      <p style="margin-bottom: 15px; color: #374151;">You're automatically enrolled in games for these sessions:</p>
+      ${data.selectedSessions
+        .sort((a, b) => a.sequence - b.sequence)
+        .map(session => `
+          <div style="background: white; padding: 15px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #cbd5e1;">
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+              <div style="background: #2563eb; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; margin-right: 10px;">${session.sequence}</div>
+              <strong style="color: #1f2937;">${session.name}</strong>
+            </div>
+            <div style="font-size: 14px; color: #6b7280; margin-left: 34px;">
+              📅 ${formatSessionDateRange(session.start_date, session.end_date)} • ${session.type.charAt(0).toUpperCase() + session.type.slice(1)} Session
+            </div>
+          </div>
+        `).join('')}
+    </div>
+    ` : ''}
 
     <h3 style="color: #1e40af;">Next Steps</h3>
     <ol style="padding-left: 20px;">

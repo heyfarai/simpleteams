@@ -9,6 +9,8 @@ import type {
   CreateRegistrationRequest,
   UpdateRegistrationRequest
 } from "../repositories/interfaces";
+import { sessionEnrollmentService } from "./session-enrollment-service";
+import { league } from "./league";
 
 export class RegistrationService {
   constructor(private registrationRepository: RegistrationRepository) {}
@@ -196,6 +198,7 @@ export class RegistrationService {
       divisionPreference: formData.divisionPreference,
       registrationNotes: formData.registrationNotes || null,
       selectedPackage: formData.selectedPackage,
+      selectedSessionIds: formData.selectedSessionIds || null, // For session-based packages
       status: 'pending' as const,
       paymentStatus: 'pending' as const
     };
@@ -205,6 +208,33 @@ export class RegistrationService {
 
   async linkStripeSession(registrationId: string, stripeSessionId: string): Promise<void> {
     await this.registrationRepository.updateStripeSessionId(registrationId, stripeSessionId);
+  }
+
+  // Session-related helper methods
+  requiresSessionSelection(packageType: string): boolean {
+    return ['two-session', 'pay-per-session'].includes(packageType);
+  }
+
+  validateSessionSelection(packageType: string, selectedSessionIds?: string[]): void {
+    if (this.requiresSessionSelection(packageType)) {
+      if (!selectedSessionIds || selectedSessionIds.length === 0) {
+        throw new Error(`Session selection is required for ${packageType} package`);
+      }
+
+      // Validate session count based on package type
+      if (packageType === 'two-session' && selectedSessionIds.length !== 2) {
+        throw new Error('Two-session package requires exactly 2 sessions to be selected');
+      }
+
+      if (packageType === 'pay-per-session') {
+        if (selectedSessionIds.length === 0) {
+          throw new Error('Pay-per-session package requires exactly 1 session to be selected');
+        }
+        if (selectedSessionIds.length > 1) {
+          throw new Error('Pay-per-session package allows only 1 session to be selected');
+        }
+      }
+    }
   }
 
   // Private validation methods
@@ -232,6 +262,9 @@ export class RegistrationService {
     if (!data.selectedPackage.trim()) {
       throw new Error('Selected package is required');
     }
+
+    // Validate session selection for packages that require it
+    this.validateSessionSelection(data.selectedPackage, data.selectedSessionIds);
 
     // Check if user can register
     const canRegister = await this.canUserRegister(data.userId);
@@ -262,6 +295,8 @@ export class RegistrationService {
     // Handle side effects of status changes
     switch (newStatus) {
       case 'approved':
+        // Auto-enroll in sessions for full-season packages
+        await this.handleAutoEnrollment(registration);
         // TODO: Send approval email, create team record, etc.
         console.log(`Registration ${registration.id} approved - would send approval email`);
         break;
@@ -273,6 +308,64 @@ export class RegistrationService {
         // TODO: Handle cancellation logic (refunds, etc.)
         console.log(`Registration ${registration.id} cancelled - would handle cancellation`);
         break;
+    }
+  }
+
+  private async handleAutoEnrollment(registration: TeamRegistration): Promise<void> {
+    // Check if we have a teamId/rosterId to enroll
+    if (!registration.teamId) {
+      console.warn(`[DEBUG] No teamId found for registration ${registration.id}, skipping auto-enrollment`);
+      return;
+    }
+
+    // Need to determine the current season
+    try {
+      const currentSeason = await league.getCurrentSeason();
+      if (!currentSeason) {
+        console.warn(`[DEBUG] No current season found, skipping auto-enrollment for registration ${registration.id}`);
+        return;
+      }
+
+      // Handle different package types
+      switch (registration.selectedPackage) {
+        case 'full-season':
+          // Auto-enroll in all sessions for the current season
+          const allEnrollments = await sessionEnrollmentService.enrollTeamInAllSessions(
+            registration.teamId,
+            currentSeason.id
+          );
+          console.log(`[DEBUG] Auto-enrolled team ${registration.teamId} in ${allEnrollments.length} sessions for season ${currentSeason.id}`);
+          break;
+
+        case 'two-session':
+        case 'pay-per-session':
+          // Enroll in selected sessions only
+          if (registration.selectedSessionIds && registration.selectedSessionIds.length > 0) {
+            const enrollments = [];
+            for (const sessionId of registration.selectedSessionIds) {
+              try {
+                const enrollment = await sessionEnrollmentService.enrollRosterInSession(
+                  registration.teamId,
+                  sessionId
+                );
+                enrollments.push(enrollment);
+              } catch (error) {
+                console.error(`[ERROR] Failed to enroll team ${registration.teamId} in session ${sessionId}:`, error);
+              }
+            }
+            console.log(`[DEBUG] Enrolled team ${registration.teamId} in ${enrollments.length} selected sessions`);
+          } else {
+            console.warn(`[DEBUG] No sessions selected for ${registration.selectedPackage} package - registration ${registration.id}`);
+          }
+          break;
+
+        default:
+          console.log(`[DEBUG] Skipping auto-enrollment for package: ${registration.selectedPackage}`);
+          break;
+      }
+    } catch (error) {
+      console.error(`[ERROR] Auto-enrollment failed for registration ${registration.id}:`, error);
+      // Don't throw - we don't want to fail the approval process if enrollment fails
     }
   }
 }

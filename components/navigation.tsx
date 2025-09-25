@@ -10,6 +10,9 @@ export function Navigation() {
 
   // Hide nav links and register button during checkout
   const isCheckoutPage = pathname?.includes("/checkout");
+  // Disable register button when on register page
+  const isRegisterPage =
+    pathname === "/register" || pathname?.startsWith("/register/");
 
   const navItems = [
     { href: "/games", label: "Schedule" },
@@ -40,12 +43,18 @@ export function Navigation() {
 
         {!isCheckoutPage && (
           <div className="flex items-center gap-x-1 lg:gap-x-2 ms-auto py-1 lg:ps-6 md:order-3">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm  rounded-full border border-transparent bg-gray-800 font-bold text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
-            >
-              Register
-            </Link>
+            {isRegisterPage ? (
+              <span className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm rounded-full border border-transparent bg-gray-400 font-bold text-white opacity-50">
+                Register
+              </span>
+            ) : (
+              <Link
+                href="/register"
+                className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm rounded-full border border-transparent bg-gray-800 font-bold text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+              >
+                Register
+              </Link>
+            )}
             <div className="md:hidden">
               <button
                 type="button"
@@ -68,12 +77,12 @@ export function Navigation() {
           <>
             {/* Desktop Navigation */}
             <div className="hidden md:block md:order-2 md:col-start-2 md:col-end-3">
-              <div className="flex flex-row items-center justify-center gap-3 py-0 ps-7 lg:ps-0 lg:whitespace-nowrap">
+              <div className="flex flex-row items-center justify-center gap-x-5 gap-y-2 py-0 ps-7 lg:ps-0 lg:whitespace-nowrap">
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`py-3 px-1 border-b-2 tracking-wide font-bold ${
+                    className={`py-1 border-b-3 tracking-wide font-bold ${
                       pathname === item.href
                         ? "border-primary text-primary"
                         : "border-transparent text-foreground hover:text-gray-800"
@@ -141,22 +150,39 @@ export function Navigation() {
 
                 {/* Register Button */}
                 <div className="p-8">
-                  <Link
-                    href="/register"
-                    onClick={() => setIsOpen(false)}
-                    className={`block w-full text-center py-4 px-6 text-lg font-bold bg-white text-primary rounded-full hover:bg-white/90 transition-all duration-300 ease-out transform ${
-                      isOpen
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-8 opacity-0"
-                    }`}
-                    style={{
-                      transitionDelay: isOpen
-                        ? `${(navItems.length + 1) * 150}ms`
-                        : "0ms",
-                    }}
-                  >
-                    Register Now
-                  </Link>
+                  {isRegisterPage ? (
+                    <span
+                      className={`block w-full text-center py-4 px-6 text-lg font-bold bg-white/50 text-primary/60 rounded-full transition-all duration-300 ease-out transform ${
+                        isOpen
+                          ? "translate-y-0 opacity-100"
+                          : "translate-y-8 opacity-0"
+                      }`}
+                      style={{
+                        transitionDelay: isOpen
+                          ? `${(navItems.length + 1) * 150}ms`
+                          : "0ms",
+                      }}
+                    >
+                      Register Now
+                    </span>
+                  ) : (
+                    <Link
+                      href="/register"
+                      onClick={() => setIsOpen(false)}
+                      className={`block w-full text-center py-4 px-6 text-lg font-bold bg-white text-primary rounded-full hover:bg-white/90 transition-all duration-300 ease-out transform ${
+                        isOpen
+                          ? "translate-y-0 opacity-100"
+                          : "translate-y-8 opacity-0"
+                      }`}
+                      style={{
+                        transitionDelay: isOpen
+                          ? `${(navItems.length + 1) * 150}ms`
+                          : "0ms",
+                      }}
+                    >
+                      Register Now
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

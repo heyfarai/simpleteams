@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,74 +13,26 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useSelectedTeam } from "@/components/dashboard/team-selector";
-import { supabase } from "@/lib/supabase/client-safe";
-
-interface TeamPayment {
-  id: string;
-  amount: number;
-  currency: string;
-  description: string;
-  status:
-    | "pending"
-    | "processing"
-    | "completed"
-    | "failed"
-    | "cancelled"
-    | "refunded";
-  created_at: string;
-  paid_at?: string;
-  payment_type: string;
-  stripe_payment_intent_id?: string;
-  stripe_session_id?: string;
-}
+import { usePaymentsByTeam } from "@/lib/hooks/use-payments";
+import { useAuth } from "@/hooks/use-auth";
+import type { TeamPayment } from "@/lib/domain/models";
 
 export default function PaymentsPage() {
   const selectedTeamId = useSelectedTeam();
-  const [payments, setPayments] = useState<TeamPayment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const loadPaymentData = async () => {
-      if (!selectedTeamId || !supabase) {
-        setPayments([]);
-        setIsLoading(false);
-        return;
-      }
+  // Use our new hook instead of direct Supabase calls!
+  const {
+    data: paymentsData,
+    isLoading,
+    error
+  } = usePaymentsByTeam(selectedTeamId || '');
 
-      try {
-        setIsLoading(true);
-
-        // Load payments for selected team (via rosters)
-        const { data: paymentsData, error } = await supabase
-          .from("team_payments")
-          .select(
-            `
-            *,
-            rosters!inner(
-              team_id
-            )
-          `
-          )
-          .eq("rosters.team_id", selectedTeamId)
-          .in("status", ["completed", "pending"]) // Show completed and pending installments
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        setPayments(paymentsData || []);
-      } catch (error) {
-        console.error("Error loading payment data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPaymentData();
-  }, [selectedTeamId]);
+  const payments = paymentsData?.payments || [];
 
   const getStatusIcon = (status: TeamPayment["status"]) => {
     switch (status) {
-      case "completed":
+      case "paid":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case "pending":
         return <Clock className="w-4 h-4 text-yellow-500" />;
@@ -94,7 +45,7 @@ export default function PaymentsPage() {
 
   const getStatusColor = (status: TeamPayment["status"]) => {
     switch (status) {
-      case "completed":
+      case "paid":
         return "bg-green-100 text-green-800";
       case "pending":
         return "bg-yellow-100 text-yellow-800";
@@ -113,10 +64,10 @@ export default function PaymentsPage() {
 
   const handleViewReceipt = async (payment: TeamPayment) => {
     // Try to get official Stripe receipt URL first
-    if (payment.stripe_payment_intent_id) {
+    if (payment.stripePaymentIntentId) {
       try {
         const response = await fetch(
-          `/api/receipts/intent/${payment.stripe_payment_intent_id}`
+          `/api/receipts/intent/${payment.stripePaymentIntentId}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -131,12 +82,12 @@ export default function PaymentsPage() {
     }
 
     // Fallback to custom receipt page (for test mode or when no official receipt)
-    if (payment.stripe_session_id) {
-      const receiptUrl = `/api/receipts/${payment.stripe_session_id}`;
+    if (payment.stripeSessionId) {
+      const receiptUrl = `/api/receipts/${payment.stripeSessionId}`;
       window.open(receiptUrl, "_blank");
-    } else if (payment.stripe_payment_intent_id) {
+    } else if (payment.stripePaymentIntentId) {
       // Create a simple receipt fallback URL - we'll need to implement this
-      const receiptUrl = `/api/receipts/intent/${payment.stripe_payment_intent_id}`;
+      const receiptUrl = `/api/receipts/intent/${payment.stripePaymentIntentId}`;
       window.open(receiptUrl, "_blank");
     } else {
       console.error(
@@ -148,13 +99,6 @@ export default function PaymentsPage() {
 
   const handleManageSubscription = async () => {
     try {
-      // Get current user from Supabase
-      if (!supabase) {
-        console.error("Supabase client not initialized");
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error("No authenticated user found");
         return;
@@ -183,6 +127,20 @@ export default function PaymentsPage() {
       console.error("Error creating billing portal session:", error);
     }
   };
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading payments</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -223,7 +181,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Installment Status */}
-      {payments.some((p) => p.payment_type === "installment") && (
+      {payments.some((p) => p.paymentType === "installment") && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Installment Plan Status</CardTitle>
@@ -247,8 +205,8 @@ export default function PaymentsPage() {
                     {
                       payments.filter(
                         (p) =>
-                          p.payment_type === "installment" &&
-                          p.status === "completed"
+                          p.paymentType === "installment" &&
+                          p.status === "paid"
                       ).length
                     }
                     /8
@@ -314,7 +272,7 @@ export default function PaymentsPage() {
                   {payments.map((payment) => (
                     <tr key={payment.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(payment.created_at).toLocaleDateString()}
+                        {new Date(payment.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -326,7 +284,7 @@ export default function PaymentsPage() {
                                 : payment.description}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {payment.payment_type}
+                              {payment.paymentType}
                             </div>
                           </div>
                         </div>

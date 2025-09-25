@@ -171,8 +171,26 @@ async function handleRegistrationPayment(
       }
     }
 
-    // Send confirmation emails
-    await sendConfirmationEmails(team, session);
+    // Get selected sessions for email
+    let selectedSessions = [];
+    if (registration.selected_session_ids && registration.selected_session_ids.length > 0) {
+      const { data: sessionData } = await supabase
+        .from("game_sessions")
+        .select(`
+          id,
+          name,
+          start_date,
+          end_date,
+          sequence,
+          type
+        `)
+        .in("id", registration.selected_session_ids)
+        .order("sequence");
+      selectedSessions = sessionData || [];
+    }
+
+    // Send confirmation emails with session information
+    await sendConfirmationEmails(team, session, selectedSessions);
 
     console.log(`Registration ${registrationId} completed, team ${team.id} created successfully`);
     return NextResponse.json({ received: true, teamId: team.id, registrationId });

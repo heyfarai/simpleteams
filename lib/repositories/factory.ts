@@ -11,6 +11,8 @@ import type {
   VenueRepository,
   RegistrationRepository,
   PaymentRepository,
+  GameSessionRepository,
+  SessionEnrollmentRepository,
 } from "./interfaces";
 
 // Removed Sanity imports - using Supabase only
@@ -22,6 +24,9 @@ import { SupabaseDivisionRepository } from "./supabase/supabase-division-reposit
 import { SupabasePlayerRepository } from "./supabase-player-repository";
 import { SupabaseRegistrationRepository } from "./supabase-registration-repository";
 import { SupabasePaymentRepository } from "./supabase-payment-repository";
+import { SupabaseGameRepository } from "./supabase-game-repository";
+import { SupabaseGameSessionRepository } from "./supabase-game-session-repository";
+import { SupabaseSessionEnrollmentRepository } from "./supabase-session-enrollment-repository";
 
 // Future implementations could be added here:
 // import { PostgreSQLPlayerRepository } from "./postgresql/postgresql-player-repository";
@@ -81,7 +86,16 @@ export class RepositoryFactory {
   }
 
   createGameRepository(): GameRepository {
-    throw new Error("GameRepository not implemented for Supabase yet");
+    switch (this.dbType) {
+      case "supabase":
+        return new SupabaseGameRepository();
+      // case "postgresql":
+      //   return new PostgreSQLGameRepository();
+      // case "mongodb":
+      //   return new MongoGameRepository();
+      default:
+        return new SupabaseGameRepository();
+    }
   }
 
   createDivisionRepository(): DivisionRepository {
@@ -147,6 +161,32 @@ export class RepositoryFactory {
         return new SupabasePaymentRepository();
     }
   }
+
+  createGameSessionRepository(): GameSessionRepository {
+    switch (this.dbType) {
+      case "supabase":
+        return new SupabaseGameSessionRepository();
+      // case "postgresql":
+      //   return new PostgreSQLGameSessionRepository();
+      // case "mongodb":
+      //   return new MongoGameSessionRepository();
+      default:
+        return new SupabaseGameSessionRepository();
+    }
+  }
+
+  createSessionEnrollmentRepository(): SessionEnrollmentRepository {
+    switch (this.dbType) {
+      case "supabase":
+        return new SupabaseSessionEnrollmentRepository();
+      // case "postgresql":
+      //   return new PostgreSQLSessionEnrollmentRepository();
+      // case "mongodb":
+      //   return new MongoSessionEnrollmentRepository();
+      default:
+        return new SupabaseSessionEnrollmentRepository();
+    }
+  }
 }
 
 // Singleton instances for the app
@@ -159,7 +199,10 @@ export const seasonRepository = factory.createSeasonRepository();
 export const divisionRepository = factory.createDivisionRepository();
 export const registrationRepository = factory.createRegistrationRepository();
 export const paymentRepository = factory.createPaymentRepository();
-// gameRepository and filterRepository not implemented for Supabase yet
+export const gameRepository = factory.createGameRepository();
+export const gameSessionRepository = factory.createGameSessionRepository();
+export const sessionEnrollmentRepository = factory.createSessionEnrollmentRepository();
+// filterRepository not implemented for Supabase yet
 console.log('🏭 Singleton repository instances created');
 
 // Export factory for testing and advanced use cases

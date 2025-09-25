@@ -47,8 +47,8 @@ function transformToLegacyGame(domainGame: DomainGame): Game {
       year: domainGame.season.year,
       isActive: domainGame.season.status === "active",
     },
-    venue: domainGame.venue.name,
-    venueAddress: domainGame.venue.address,
+    venue: domainGame.venue?.name || "TBD",
+    venueAddress: domainGame.venue?.address || "",
   };
 }
 

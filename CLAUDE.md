@@ -154,14 +154,57 @@ Check off completed items in this doc as you make progress.
   - ✅ Created SupabasePaymentRepository implementation
   - ✅ Updated Repository Factory with PaymentRepository
 
+## ✅ Session-Based Game Scheduling (PHASE 1 - COMPLETED)
+
+- ✅ Database schema: game_sessions, roster_session_enrollments tables
+- ✅ Domain models: GameSession, RosterSessionEnrollment interfaces
+- ✅ Repository layer: GameSessionRepository, SessionEnrollmentRepository
+- ✅ Service layer: SessionService, SessionEnrollmentService
+- ✅ Game repository: session-aware queries (findBySession, findByTeamAndSession)
+- ✅ Repository factory: integrated new repositories
+
 ### Remaining Tasks (BACKLOG)
 
-- [ ] Wire up and migrate Games to supabase
-- [ ] Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
-- [ ] Update Components (remove direct Supabase calls)
-- [ ] In dashboard expose url for selected team /dashboard/[team]/[roster]
-- [ ] On checkout success screen, link to the newly created team /dashboard/[team]/[roster]
+- ✅ **Session Registration Integration (PHASE 1 - LAUNCH CRITICAL) - COMPLETED**
+
+  - ✅ Update RegistrationService for auto-enrollment in sessions
+  - ✅ Session selection UI for two-session and pay-per-session packages
+  - ✅ API routes for session management (/api/sessions/[seasonId])
+  - ✅ Data hooks: use-sessions.ts, use-session-enrollments.ts
+
+- [ ] **Session-Based UI Components (PHASE 2)**
+
+  - [ ] Game filtering by session in game lists
+  - [ ] Team profile showing sessions and games per session
+  - [ ] Admin game scheduling with session-based team eligibility
+  - [ ] Session management interface for league ops
+
+- [ ] **Advanced Session Features (PHASE 2)**
+
+  - [ ] Session capacity limits and waitlist management
+  - [ ] Game limits per team per session (12 max enforcement)
+  - [ ] Package upgrade/downgrade mid-season
+  - [ ] Complex eligibility rules based on division/skill level
+  - [ ] Session-specific venue preferences and scheduling algorithms
+
+- [ ] **Session Analytics & Reporting (PHASE 3)**
+
+  - [ ] Session utilization metrics and team participation tracking
+  - [ ] Revenue analysis per session vs full-season packages
+  - [ ] Scheduling efficiency reports and conflict resolution
+  - [ ] Playoff qualification tracking based on session participation
+
+- [ ] **General Infrastructure (ONGOING)**
+  - [ ] Wire up and migrate Games to supabase
+  - ✅ Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
+  - [ ] Update Components (remove direct Supabase calls)
+  - [ ] In dashboard expose url for selected team /dashboard/[team]/[roster]
+  - [ ] On checkout success screen, link to the newly created team /dashboard/[team]/[roster]
 
 ## Testing
 
 - [ ] Create a plan for testing and testing infra (start with Registration Flow)
+- [ ] Create a janky League Admin dashboard (List views with CRUD)
+  - [ ] Manage sessions
+  - [ ] Manage Teams
+  - [ ] Manage games

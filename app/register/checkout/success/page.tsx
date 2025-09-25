@@ -15,6 +15,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+interface GameSession {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  sequence: number;
+  type: string;
+}
+
 interface RegistrationData {
   team: {
     id: string;
@@ -38,6 +47,7 @@ interface RegistrationData {
     payment_status: string;
     status: string;
   };
+  selected_sessions: GameSession[];
 }
 
 function CheckoutSuccessContent() {
@@ -73,6 +83,37 @@ function CheckoutSuccessContent() {
         setLoading(false);
       });
   }, [sessionId]);
+
+  // Helper function to format date range
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Format options
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+    };
+
+    // If same month, show "Nov 1-3"
+    if (
+      start.getMonth() === end.getMonth() &&
+      start.getFullYear() === end.getFullYear()
+    ) {
+      if (start.getDate() === end.getDate()) {
+        return start.toLocaleDateString("en-US", options);
+      }
+      return `${start
+        .toLocaleDateString("en-US", options)
+        .replace(/,.*/, "")} ${start.getDate()}-${end.getDate()}`;
+    }
+
+    // Different months, show "Dec 20 - Jan 2"
+    return `${start.toLocaleDateString(
+      "en-US",
+      options
+    )} - ${end.toLocaleDateString("en-US", options)}`;
+  };
 
   const getPackageDetails = (packageType: string) => {
     switch (packageType) {
@@ -285,6 +326,54 @@ function CheckoutSuccessContent() {
                           </span>
                         </div>
                       </>
+                    )}
+
+                    {/* Selected Sessions */}
+                    {registrationData.selected_sessions &&
+                     registrationData.selected_sessions.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="mb-3">
+                          <span className="text-gray-600 font-medium">
+                            Your Selected Sessions ({registrationData.selected_sessions.length}):
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          {registrationData.selected_sessions
+                            .sort((a, b) => a.sequence - b.sequence)
+                            .map((session) => (
+                            <div key={session.id} className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full text-sm font-medium">
+                                    {session.sequence}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900 mb-1">
+                                      {session.name}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                      <Calendar className="w-4 h-4" />
+                                      <span>{formatDateRange(session.start_date, session.end_date)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                      <Trophy className="w-3 h-3" />
+                                      <span className="capitalize">{session.type} session</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="font-medium">
+                              You're automatically enrolled in games for these sessions
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </>
                 )}

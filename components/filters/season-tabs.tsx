@@ -42,14 +42,13 @@ export function SeasonTabs({
     >
       <Tabs.List className="flex h-10 items-center justify-start rounded-full bg-gray-200 p-1 overflow-x-auto">
         {seasons
-          .filter((season) => season.isActive)
-          .map((season, index, activeSeasons) => (
+          .map((season, index, allSeasons) => (
             <Tabs.Trigger
               key={`trigger-${season.id}`}
               value={season.id}
               className={cn(
                 "inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm  ring-offset-background transition-all  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-black data-[state=active]:font-bold text-gray-500 ",
-                activeSeasons.length > 1 ? "flex-1" : "min-w-[100px]"
+                allSeasons.length > 1 ? "flex-1" : "min-w-[100px]"
               )}
             >
               {season.name}
@@ -59,7 +58,6 @@ export function SeasonTabs({
 
       {/* Content area that expands to fill remaining space */}
       {seasons
-        .filter((season) => season.isActive)
         .map((season) => (
           <Tabs.Content
             key={`content-${season.id}`}

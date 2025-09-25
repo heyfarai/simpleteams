@@ -1,11 +1,15 @@
 // Supabase implementation of GameRepository
 import { createClient } from '@supabase/supabase-js';
 import type { Game, Team, Division, Season, Venue } from '@/lib/domain/models';
+import type { GameRepository } from './interfaces';
 
-const supabase = createClient(
-  process.env.SIMPLE_SUPABASE_URL!,
-  process.env.SIMPLE_SUPABASE_SERVICE_ROLE_KEY!
-);
+// Use service role key on server side, anon key on client side
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = typeof window === 'undefined'
+  ? process.env.SUPABASE_SERVICE_ROLE_KEY! // Server side
+  : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; // Client side
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export interface GameEvent {
   id: string;
@@ -22,8 +26,8 @@ export interface GameEvent {
   sequenceNumber: number;
 }
 
-export class SupabaseGameRepository {
-  async getAllGames(): Promise<Game[]> {
+export class SupabaseGameRepository implements GameRepository {
+  async findAll(): Promise<Game[]> {
     try {
       const { data: games, error } = await supabase
         .from('games')
@@ -31,6 +35,13 @@ export class SupabaseGameRepository {
           *,
           roster_home:rosters!roster_home_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -48,6 +59,13 @@ export class SupabaseGameRepository {
           ),
           roster_away:rosters!roster_away_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -62,20 +80,6 @@ export class SupabaseGameRepository {
                 description
               )
             )
-          ),
-          home_team:teams!home_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
-          ),
-          away_team:teams!away_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
           ),
           venue:venues(
             id,
@@ -95,38 +99,59 @@ export class SupabaseGameRepository {
     }
   }
 
-  async getGamesBySeason(seasonId: string): Promise<Game[]> {
+  async findBySeason(seasonId: string): Promise<Game[]> {
     try {
       const { data: games, error } = await supabase
         .from('games')
         .select(`
           *,
-          division:divisions!inner(
+          roster_home:rosters!roster_home_id(
             id,
-            name,
-            age_group,
-            skill_level,
-            season:seasons!inner(
+            team:teams(
               id,
               name,
-              year,
-              status,
-              is_active
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
             )
           ),
-          home_team:teams!home_team_id(
+          roster_away:rosters!roster_away_id(
             id,
-            name,
-            short_name,
-            logo_url,
-            city
-          ),
-          away_team:teams!away_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
           ),
           venue:venues(
             id,
@@ -135,7 +160,7 @@ export class SupabaseGameRepository {
             city
           )
         `)
-        .eq('division.season.id', seasonId)
+        .eq('roster_home.season_division.season.id', seasonId)
         .order('scheduled_at', { ascending: true });
 
       if (error) throw error;
@@ -147,7 +172,7 @@ export class SupabaseGameRepository {
     }
   }
 
-  async getGamesByTeam(teamId: string): Promise<Game[]> {
+  async findByTeam(teamId: string): Promise<Game[]> {
     try {
       const { data: games, error } = await supabase
         .from('games')
@@ -155,6 +180,13 @@ export class SupabaseGameRepository {
           *,
           roster_home:rosters!roster_home_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -172,6 +204,13 @@ export class SupabaseGameRepository {
           ),
           roster_away:rosters!roster_away_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -187,20 +226,6 @@ export class SupabaseGameRepository {
               )
             )
           ),
-          home_team:teams!home_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
-          ),
-          away_team:teams!away_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
-          ),
           venue:venues(
             id,
             name,
@@ -208,7 +233,7 @@ export class SupabaseGameRepository {
             city
           )
         `)
-        .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+        .or(`roster_home.team_id.eq.${teamId},roster_away.team_id.eq.${teamId}`)
         .order('scheduled_at', { ascending: true });
 
       if (error) throw error;
@@ -220,7 +245,7 @@ export class SupabaseGameRepository {
     }
   }
 
-  async getGameById(gameId: string): Promise<Game | null> {
+  async findById(gameId: string): Promise<Game | null> {
     try {
       const { data: game, error } = await supabase
         .from('games')
@@ -228,6 +253,13 @@ export class SupabaseGameRepository {
           *,
           roster_home:rosters!roster_home_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -245,6 +277,13 @@ export class SupabaseGameRepository {
           ),
           roster_away:rosters!roster_away_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -259,20 +298,6 @@ export class SupabaseGameRepository {
                 description
               )
             )
-          ),
-          home_team:teams!home_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
-          ),
-          away_team:teams!away_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
           ),
           venue:venues(
             id,
@@ -304,6 +329,13 @@ export class SupabaseGameRepository {
           *,
           roster_home:rosters!roster_home_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -321,6 +353,13 @@ export class SupabaseGameRepository {
           ),
           roster_away:rosters!roster_away_id(
             id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
             season_division:season_divisions(
               season:seasons(
                 id,
@@ -335,20 +374,6 @@ export class SupabaseGameRepository {
                 description
               )
             )
-          ),
-          home_team:teams!home_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
-          ),
-          away_team:teams!away_team_id(
-            id,
-            name,
-            short_name,
-            logo_url,
-            city
           ),
           venue:venues(
             id,
@@ -374,9 +399,8 @@ export class SupabaseGameRepository {
       const { data: game, error } = await supabase
         .from('games')
         .insert({
-          division_id: gameData.division?.id,
-          home_team_id: gameData.homeTeam?.id,
-          away_team_id: gameData.awayTeam?.id,
+          roster_home_id: gameData.homeRoster?.id,
+          roster_away_id: gameData.awayRoster?.id,
           venue_id: gameData.venue?.id,
           scheduled_at: gameData.date + 'T' + gameData.time,
           status: gameData.status || 'scheduled',
@@ -529,47 +553,47 @@ export class SupabaseGameRepository {
   // Transform Supabase row to domain Game model
   private transformToGame(row: any): Game {
     const homeTeam: Team = {
-      id: row.home_team.id,
-      name: row.home_team.name,
-      shortName: row.home_team.short_name,
-      logo: row.home_team.logo_url,
-      location: { city: row.home_team.city },
+      id: row.roster_home?.team.id,
+      name: row.roster_home?.team.name,
+      shortName: row.roster_home?.team.short_name,
+      logo: row.roster_home?.team.logo_url,
+      location: { city: row.roster_home?.team.city },
       status: 'active',
     };
 
     const awayTeam: Team = {
-      id: row.away_team.id,
-      name: row.away_team.name,
-      shortName: row.away_team.short_name,
-      logo: row.away_team.logo_url,
-      location: { city: row.away_team.city },
+      id: row.roster_away?.team.id,
+      name: row.roster_away?.team.name,
+      shortName: row.roster_away?.team.short_name,
+      logo: row.roster_away?.team.logo_url,
+      location: { city: row.roster_away?.team.city },
       status: 'active',
     };
 
     const division: Division = {
-      id: row.division.id,
-      name: row.division.name,
-      ageGroup: row.division.age_group,
-      skillLevel: row.division.skill_level,
+      id: row.roster_home?.season_division?.division?.id || '',
+      name: row.roster_home?.season_division?.division?.name || 'Unknown Division',
+      ageGroup: row.roster_home?.season_division?.division?.age_group || '',
+      skillLevel: row.roster_home?.season_division?.division?.skill_level || '',
       conference: {
-        id: row.division.season?.id || '',
-        name: row.division.season?.name || '',
+        id: row.roster_home?.season_division?.season?.id || '',
+        name: row.roster_home?.season_division?.season?.name || '',
         season: {
-          id: row.division.season?.id || '',
-          name: row.division.season?.name || '',
-          year: row.division.season?.year || 0,
-          status: row.division.season?.status || 'upcoming',
-          isActive: row.division.season?.is_active || false,
+          id: row.roster_home?.season_division?.season?.id || '',
+          name: row.roster_home?.season_division?.season?.name || '',
+          year: row.roster_home?.season_division?.season?.year || 0,
+          status: row.roster_home?.season_division?.season?.status || 'upcoming',
+          isActive: row.roster_home?.season_division?.season?.is_active || false,
         },
       },
     };
 
     const season: Season = {
-      id: row.division.season?.id || '',
-      name: row.division.season?.name || '',
-      year: row.division.season?.year || 0,
-      status: row.division.season?.status || 'upcoming',
-      isActive: row.division.season?.is_active || false,
+      id: row.roster_home?.season_division?.season?.id || '',
+      name: row.roster_home?.season_division?.season?.name || '',
+      year: row.roster_home?.season_division?.season?.year || 0,
+      status: row.roster_home?.season_division?.season?.status || 'upcoming',
+      isActive: row.roster_home?.season_division?.season?.is_active || false,
     };
 
     const venue: Venue | undefined = row.venue ? {
@@ -586,7 +610,7 @@ export class SupabaseGameRepository {
       title: `${awayTeam.name} @ ${homeTeam.name}`,
       date: scheduledDate.toISOString().split('T')[0],
       time: scheduledDate.toTimeString().split(' ')[0].slice(0, 5),
-      venue: venue!,
+      venue: venue || { id: 'tbd', name: 'TBD', address: '', city: '' },
       homeTeam,
       awayTeam,
       division,
@@ -673,5 +697,321 @@ export class SupabaseGameRepository {
         }
       })
       .subscribe();
+  }
+
+  // Interface methods that need basic implementation
+  async findByDivision(divisionId: string): Promise<Game[]> {
+    // For now, return empty array - can be implemented later with proper division filtering
+    return [];
+  }
+
+  async findByDateRange(startDate: string, endDate: string): Promise<Game[]> {
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select('*')
+        .gte('game_date', startDate)
+        .lte('game_date', endDate);
+
+      if (error) throw error;
+      return games?.map(this.mapGameFromDB) || [];
+    } catch (error) {
+      console.error('Error fetching games by date range:', error);
+      throw error;
+    }
+  }
+
+  async findUpcoming(limit = 10): Promise<Game[]> {
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select('*')
+        .gte('game_date', new Date().toISOString())
+        .order('game_date', { ascending: true })
+        .limit(limit);
+
+      if (error) throw error;
+      return games?.map(this.mapGameFromDB) || [];
+    } catch (error) {
+      console.error('Error fetching upcoming games:', error);
+      throw error;
+    }
+  }
+
+  async findCompleted(limit = 10): Promise<Game[]> {
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select('*')
+        .lt('game_date', new Date().toISOString())
+        .eq('status', 'completed')
+        .order('game_date', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return games?.map(this.mapGameFromDB) || [];
+    } catch (error) {
+      console.error('Error fetching completed games:', error);
+      throw error;
+    }
+  }
+
+  // Session-based query methods
+  async findBySession(sessionId: string): Promise<Game[]> {
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select(`
+          *,
+          roster_home:rosters!roster_home_id(
+            id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          venue:venues(
+            id,
+            name,
+            address,
+            city
+          ),
+          session:game_sessions(
+            id,
+            name,
+            sequence,
+            type
+          )
+        `)
+        .eq('session_id', sessionId)
+        .order('scheduled_at', { ascending: true });
+
+      if (error) throw error;
+
+      return games?.map(this.transformToGame) || [];
+    } catch (error) {
+      console.error('Error fetching games by session:', error);
+      throw error;
+    }
+  }
+
+  async findByTeamAndSession(rosterId: string, sessionId: string): Promise<Game[]> {
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select(`
+          *,
+          roster_home:rosters!roster_home_id(
+            id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          venue:venues(
+            id,
+            name,
+            address,
+            city
+          ),
+          session:game_sessions(
+            id,
+            name,
+            sequence,
+            type
+          )
+        `)
+        .eq('session_id', sessionId)
+        .or(`roster_home_id.eq.${rosterId},roster_away_id.eq.${rosterId}`)
+        .order('scheduled_at', { ascending: true });
+
+      if (error) throw error;
+
+      return games?.map(this.transformToGame) || [];
+    } catch (error) {
+      console.error('Error fetching games by team and session:', error);
+      throw error;
+    }
+  }
+
+  async findBySeasonAndSession(seasonId: string, sessionId: string): Promise<Game[]> {
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select(`
+          *,
+          roster_home:rosters!roster_home_id(
+            id,
+            season_division:season_divisions!inner(
+              season:seasons!inner(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            season_division:season_divisions!inner(
+              season:seasons!inner(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          venue:venues(
+            id,
+            name,
+            address,
+            city
+          ),
+          session:game_sessions(
+            id,
+            name,
+            sequence,
+            type
+          )
+        `)
+        .eq('session_id', sessionId)
+        .eq('roster_home.season_division.season.id', seasonId)
+        .order('scheduled_at', { ascending: true });
+
+      if (error) throw error;
+
+      return games?.map(this.transformToGame) || [];
+    } catch (error) {
+      console.error('Error fetching games by season and session:', error);
+      throw error;
+    }
+  }
+
+  // Helper method to map database records to domain Game objects
+  private mapGameFromDB(dbGame: any): Game {
+    return {
+      id: dbGame.id,
+      date: dbGame.game_date,
+      time: dbGame.game_time,
+      status: dbGame.status,
+      homeTeam: {
+        id: dbGame.roster_home_id,
+        name: dbGame.roster_home?.team?.name || 'Unknown Team',
+        logo: null
+      },
+      awayTeam: {
+        id: dbGame.roster_away_id,
+        name: dbGame.roster_away?.team?.name || 'Unknown Team',
+        logo: null
+      },
+      homeScore: dbGame.home_score,
+      awayScore: dbGame.away_score,
+      season: {
+        id: dbGame.season_id || 'unknown',
+        name: 'Season',
+        year: new Date().getFullYear(),
+        status: 'active'
+      },
+      venue: {
+        id: dbGame.venue_id || 'unknown',
+        name: dbGame.venue?.name || 'TBD',
+        address: dbGame.venue?.address || ''
+      }
+    } as Game;
   }
 }

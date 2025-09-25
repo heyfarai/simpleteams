@@ -15,6 +15,8 @@ import type {
   PaymentStatus,
   RegistrationStatus,
   PaymentType,
+  GameSession,
+  RosterSessionEnrollment,
 } from "../domain/models";
 
 export interface PlayerRepository {
@@ -91,6 +93,10 @@ export interface GameRepository {
   findByDateRange(startDate: string, endDate: string): Promise<Game[]>;
   findUpcoming(limit?: number): Promise<Game[]>;
   findCompleted(limit?: number): Promise<Game[]>;
+  // Session-based queries
+  findBySession(sessionId: string): Promise<Game[]>;
+  findByTeamAndSession(rosterId: string, sessionId: string): Promise<Game[]>;
+  findBySeasonAndSession(seasonId: string, sessionId: string): Promise<Game[]>;
 }
 
 export interface DivisionRepository {
@@ -165,6 +171,7 @@ export interface CreateRegistrationRequest {
   divisionPreference: string;
   registrationNotes?: string;
   selectedPackage: string;
+  selectedSessionIds?: string[];
   status?: RegistrationStatus;
   paymentStatus?: PaymentStatus;
   stripeSessionId?: string;
@@ -240,4 +247,56 @@ export interface UpdatePaymentRequest {
   receiptNumber?: string;
   receiptUrl?: string;
   notes?: string;
+}
+
+// Game Session Repository
+export interface GameSessionRepository {
+  findAll(): Promise<GameSession[]>;
+  findById(id: string): Promise<GameSession | null>;
+  findBySeason(seasonId: string): Promise<GameSession[]>;
+  findBySeasonAndType(seasonId: string, type: 'regular' | 'playoffs'): Promise<GameSession[]>;
+  findActive(): Promise<GameSession[]>;
+  create(sessionData: CreateGameSessionRequest): Promise<GameSession>;
+  update(id: string, updateData: UpdateGameSessionRequest): Promise<GameSession>;
+  delete(id: string): Promise<void>;
+}
+
+export interface CreateGameSessionRequest {
+  seasonId: string;
+  name: string;
+  sequence: number;
+  startDate: string;
+  endDate: string;
+  type: 'regular' | 'playoffs';
+  maxTeams?: number;
+  isActive?: boolean;
+}
+
+export interface UpdateGameSessionRequest {
+  name?: string;
+  sequence?: number;
+  startDate?: string;
+  endDate?: string;
+  type?: 'regular' | 'playoffs';
+  maxTeams?: number;
+  isActive?: boolean;
+}
+
+// Session Enrollment Repository
+export interface SessionEnrollmentRepository {
+  findAll(): Promise<RosterSessionEnrollment[]>;
+  findById(id: string): Promise<RosterSessionEnrollment | null>;
+  findByRoster(rosterId: string): Promise<RosterSessionEnrollment[]>;
+  findBySession(sessionId: string): Promise<RosterSessionEnrollment[]>;
+  findByRosterAndSession(rosterId: string, sessionId: string): Promise<RosterSessionEnrollment | null>;
+  create(enrollmentData: CreateSessionEnrollmentRequest): Promise<RosterSessionEnrollment>;
+  delete(id: string): Promise<void>;
+  deleteByRosterAndSession(rosterId: string, sessionId: string): Promise<void>;
+}
+
+export interface CreateSessionEnrollmentRequest {
+  rosterId: string;
+  sessionId: string;
+  enrolledViaPackage: string;
+  enrollmentDate?: Date;
 }

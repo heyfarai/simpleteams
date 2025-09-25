@@ -1,5 +1,5 @@
 // Service layer - business logic without database coupling
-import { playerRepository, teamRepository, filterRepository } from "../repositories/factory";
+import { playerRepository, teamRepository } from "../repositories/factory";
 import type {
   Player,
   Team,
@@ -135,7 +135,36 @@ export class TeamService {
 
 export class FilterService {
   async getFilterOptions(): Promise<FilterOptions> {
-    return filterRepository.getFilterOptions();
+    // Build filter options from existing services instead of using filterRepository
+    try {
+      // Import services here to avoid circular dependency
+      const { seasonService } = await import("./season-service");
+
+      const seasons = await seasonService.getAllSeasons();
+
+      return {
+        sessions: [], // TODO: Add once session service is integrated
+        seasons: seasons.map(season => ({
+          id: season.id,
+          name: season.name,
+          year: season.year,
+          status: season.status,
+          isActive: season.isActive,
+        })),
+        divisions: [], // TODO: Add once division service is integrated
+        teams: [], // TODO: Add once team filtering is needed
+        positions: ["PG", "SG", "SF", "PF", "C"], // Static for now
+      };
+    } catch (error) {
+      console.warn("FilterService: Using fallback filter options due to error:", error);
+      return {
+        sessions: [],
+        seasons: [],
+        divisions: [],
+        teams: [],
+        positions: ["PG", "SG", "SF", "PF", "C"]
+      };
+    }
   }
 
   async getActiveSeasons(): Promise<FilterOptions["seasons"]> {
@@ -145,7 +174,7 @@ export class FilterService {
 
   async getDivisionsByConference(conferenceId: string): Promise<FilterOptions["divisions"]> {
     const options = await this.getFilterOptions();
-    return options.divisions.filter(division => division.conference.id === conferenceId);
+    return options.divisions.filter(division => division.conference?.id === conferenceId);
   }
 }
 
