@@ -62,9 +62,9 @@ export function GameCard({ game, loading = false }: GameCardProps) {
     switch (status) {
       case "scheduled":
         return <Badge variant="outline">Scheduled</Badge>;
-      case "in-progress":
+      case "live":
         return <Badge variant="default">Live</Badge>;
-      case "final":
+      case "completed":
         return <Badge variant="secondary">Final</Badge>;
       case "cancelled":
         return <Badge variant="destructive">Cancelled</Badge>;
@@ -113,11 +113,11 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                   </div>
                 </div>
                 {game.score &&
-                (game.status === "final" || game.status === "in-progress" || game.status === "completed") ? (
+                (game.status === "completed" || game.status === "live") ? (
                   <span className="text-4xl font-extrabold grotesk text-primary">
                     {game.score.homeScore}
                   </span>
-                ) : game.status === "final" ? (
+                ) : game.status === "completed" ? (
                   <span className="text-2xl font-bold text-muted-foreground">
                     -
                   </span>
@@ -130,9 +130,9 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                 {getStatusBadge(game.status)}
 
                 <div className="hidden text-muted-foreground font-medium">
-                  {game.status === "final"
+                  {game.status === "completed"
                     ? "FINAL"
-                    : game.status === "in-progress"
+                    : game.status === "live"
                     ? "LIVE"
                     : "VS"}
                 </div>
@@ -140,11 +140,11 @@ export function GameCard({ game, loading = false }: GameCardProps) {
 
               <div className="flex justify-between flex-1 items-center">
                 {game.score &&
-                (game.status === "final" || game.status === "in-progress" || game.status === "completed") ? (
+                (game.status === "completed" || game.status === "live") ? (
                   <span className="text-4xl font-extrabold text-primary order-2 md:order-1 grotesk">
                     {game.score.awayScore}
                   </span>
-                ) : game.status === "final" ? (
+                ) : game.status === "completed" ? (
                   <span className="text-2xl font-bold text-muted-foreground order-2 md:order-1">
                     -
                   </span>

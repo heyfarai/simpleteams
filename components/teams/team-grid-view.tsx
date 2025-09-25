@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy } from "lucide-react";
 import { Team } from "@/lib/types/teams";
-import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
+import { TeamLogo } from "@/components/team-logo";
 
 interface TeamGridViewProps {
   teams: Team[];
@@ -54,13 +54,12 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4 mb-4">
                     {/* Team Logo */}
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                      <img
-                        src={getTeamLogoUrl(team.logo, "small")}
-                        alt={`${team.name} logo`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <TeamLogo
+                      teamName={team.name}
+                      logoUrl={team.logo}
+                      size="md"
+                      className="w-12 h-12"
+                    />
 
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-foreground">

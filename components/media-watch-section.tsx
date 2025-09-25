@@ -11,9 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Play, Menu, X } from "lucide-react";
-import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
+import { TeamLogo } from "@/components/team-logo";
 import { fetchTeams } from "@/lib/data/fetch-teams";
-import type { Team } from "@/lib/sanity/display-types";
+import type { Team } from "@/lib/domain/models";
 
 interface Video {
   id: string;
@@ -336,13 +336,12 @@ export function MediaWatchSection() {
                 key={team._id}
                 className="flex flex-col items-center space-y-2 cursor-pointer group"
               >
-                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-muted group-hover:border-primary transition-colors">
-                  <img
-                    src={getTeamLogoUrl(team.logo, "small")}
-                    alt={team.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <TeamLogo
+                  teamName={team.name}
+                  logoUrl={team.logo}
+                  size="lg"
+                  className="w-16 h-16 border-2 border-muted group-hover:border-primary transition-colors"
+                />
                 <span className="text-xs text-center font-medium group-hover:text-primary transition-colors">
                   {team.name}
                 </span>

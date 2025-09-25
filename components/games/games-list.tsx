@@ -11,7 +11,7 @@ import { fetchGames } from "@/lib/data/fetch-games";
 import { useToast } from "@/hooks/use-toast";
 import { SeasonTabs } from "@/components/filters/season-tabs";
 import { Season } from "@/lib/utils/season-filters";
-import type { Game } from "@/lib/sanity/display-types";
+import type { Game } from "@/lib/domain/models";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -241,7 +241,7 @@ export function GamesList({ filterData }: GamesListProps) {
                   {Object.entries(
                     // Group games by date
                     allGames.reduce((acc, game) => {
-                      const date = new Date(game.gameDate);
+                      const date = new Date(game.date);
                       const dateKey = date.toISOString().split("T")[0];
                       if (!acc[dateKey]) acc[dateKey] = [];
                       acc[dateKey].push(game);
@@ -290,13 +290,13 @@ export function GamesList({ filterData }: GamesListProps) {
                             {gamesForDate
                               .sort((a, b) => {
                                 // Sort by game time within the same date
-                                const timeA = a.gameTime || "";
-                                const timeB = b.gameTime || "";
+                                const timeA = a.time || "";
+                                const timeB = b.time || "";
                                 return timeA.localeCompare(timeB);
                               })
                               .map((game: Game) => (
                                 <GameCard
-                                  key={game._id}
+                                  key={game.id}
                                   game={game}
                                   loading={false}
                                 />

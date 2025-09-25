@@ -1,6 +1,0 @@
-id,season_id,name,age_group,skill_level,description
-0a87e23d-3863-4377-bbeb-229bdae96ab7,01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad,Premier,premier,elite,Premier division for elite level players
-5b7b2a26-a27e-4600-abf2-72ccd3cd9460,01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad,Supreme,supreme,elite,Supreme division for elite level players
-28911442-9414-45ea-8207-cfd06e9a8175,01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad,Diamond,diamond,elite,Diamond division for elite level players
-9ab1bba5-6798-4208-914b-ece4cec17672,01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad,Ascent,ascent,elite,Ascent division for elite level players
-d2fa82dc-b059-4294-af57-531ad34333a5,01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad,Initial,diamond,elite,Initial division for elite level players

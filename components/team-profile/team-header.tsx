@@ -1,5 +1,5 @@
 "use client";
-import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
+import { TeamLogo } from "@/components/team-logo";
 
 interface TeamHeaderProps {
   team: {
@@ -19,13 +19,12 @@ interface TeamHeaderProps {
 export function TeamHeader({ team }: TeamHeaderProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-6 mb-6 w-full text-center">
-      <div className="w-24 h-24 flex items-center justify-center overflow-hidden">
-        <img
-          src={getTeamLogoUrl(team.logo, "small")}
-          alt={`${team.name} logo`}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <TeamLogo
+        teamName={team.name}
+        logoUrl={team.logo}
+        size="lg"
+        className="w-24 h-24"
+      />
 
       <div className="">
         <h1 className="pageTitle mt-8 lg:mt-24 font-black lg:text-8xl md:text-6xl text-5xl tracking-tight text-foreground mb-2">

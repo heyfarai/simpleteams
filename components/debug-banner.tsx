@@ -25,9 +25,17 @@ export function DebugBanner() {
   // Fetch debug info from server-side API
   useEffect(() => {
     fetch("/api/debug/environment")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(setDebugInfo)
-      .catch(console.error);
+      .catch((error) => {
+        console.warn("Debug banner failed to load environment info:", error);
+        setDebugInfo(null);
+      });
 
     // Get client-side URL
     setClientUrl(getClientReturnUrl());

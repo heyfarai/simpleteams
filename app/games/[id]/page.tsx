@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
+import { TeamLogo } from "@/components/team-logo";
 
 export const metadata = {
   title: "Game Details | NCHC League",
@@ -33,7 +32,7 @@ export default async function GamePage({ params }: GamePageProps) {
   metadata.description = `View details for the game between ${
     game.homeTeam.name
   } and ${game.awayTeam.name} on ${new Date(
-    game.gameDate
+    game.date
   ).toLocaleDateString()}.`;
 
   return (
@@ -55,18 +54,18 @@ export default async function GamePage({ params }: GamePageProps) {
           <div className="flex items-center gap-2">
             <Badge
               variant={
-                game.status === "in-progress"
+                game.status === "live"
                   ? "default"
-                  : game.status === "final"
+                  : game.status === "completed"
                   ? "secondary"
                   : game.status === "cancelled"
                   ? "destructive"
                   : "outline"
               }
             >
-              {game.status === "in-progress"
+              {game.status === "live"
                 ? "Live"
-                : game.status === "final"
+                : game.status === "completed"
                 ? "Final"
                 : game.status === "cancelled"
                 ? "Cancelled"
@@ -95,15 +94,14 @@ export default async function GamePage({ params }: GamePageProps) {
                 {/* Home Team Logo */}
                 <div className="flex-shrink-0">
                   <Link
-                    href={`/teams/${game.homeTeam._id}`}
+                    href={`/teams/${game.homeTeam.id}`}
                     className="hover:opacity-80 transition-opacity"
                   >
-                    <Image
-                      src={getTeamLogoUrl(game.homeTeam.logo, "small")}
-                      alt={`${game.homeTeam.name} logo`}
-                      width={64}
-                      height={64}
-                      className="rounded-full"
+                    <TeamLogo
+                      teamName={game.homeTeam.name}
+                      logoUrl={game.homeTeam.logo}
+                      size="lg"
+                      className="w-16 h-16"
                     />
                   </Link>
                 </div>
@@ -129,15 +127,14 @@ export default async function GamePage({ params }: GamePageProps) {
                 {/* Away Team Logo */}
                 <div className="flex-shrink-0">
                   <Link
-                    href={`/teams/${game.awayTeam._id}`}
+                    href={`/teams/${game.awayTeam.id}`}
                     className="hover:opacity-80 transition-opacity"
                   >
-                    <Image
-                      src={getTeamLogoUrl(game.awayTeam.logo, "small")}
-                      alt={`${game.awayTeam.name} logo`}
-                      width={64}
-                      height={64}
-                      className="rounded-full"
+                    <TeamLogo
+                      teamName={game.awayTeam.name}
+                      logoUrl={game.awayTeam.logo}
+                      size="lg"
+                      className="w-16 h-16"
                     />
                   </Link>
                 </div>
@@ -150,18 +147,18 @@ export default async function GamePage({ params }: GamePageProps) {
                 <div>
                   <dt className="text-sm text-muted-foreground">Date & Time</dt>
                   <dd className="font-medium">
-                    {game.gameDate !== "TBD" ? (
+                    {game.date !== "TBD" ? (
                       <>
-                        {new Date(game.gameDate).toLocaleDateString("en-US", {
+                        {new Date(game.date).toLocaleDateString("en-US", {
                           weekday: "long",
                           year: "numeric",
                           month: "long",
                           day: "numeric",
                         })}
-                        {game.gameTime !== "TBD" && (
+                        {game.time !== "TBD" && (
                           <>
                             {" at "}
-                            {game.gameTime}
+                            {game.time}
                           </>
                         )}
                       </>

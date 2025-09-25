@@ -1,35 +1,69 @@
 export function formatGameDate(date: string | null | undefined) {
   if (!date) return "TBD"
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(date))
+  try {
+    const parsedDate = new Date(date)
+    if (isNaN(parsedDate.getTime())) {
+      console.warn(`Invalid date format received: ${date}`)
+      return "TBD"
+    }
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }).format(parsedDate)
+  } catch (error) {
+    console.warn(`Error formatting date: ${date}`, error)
+    return "TBD"
+  }
 }
 
 export function formatGameTime(time: string | null | undefined) {
   if (!time) return "TBD"
-  const match = time.match(/^(\d{1,2}):(\d{2})$/)
-  if (!match) return time
+  try {
+    const match = time.match(/^(\d{1,2}):(\d{2})$/)
+    if (!match) {
+      console.warn(`Invalid time format received: ${time}`)
+      return time // Return as-is if format doesn't match
+    }
 
-  const [_, hours, minutes] = match
-  const date = new Date()
-  date.setHours(parseInt(hours, 10), parseInt(minutes, 10))
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
+    const [_, hours, minutes] = match
+    const date = new Date()
+    date.setHours(parseInt(hours, 10), parseInt(minutes, 10))
+
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid time values: ${hours}:${minutes}`)
+      return time
+    }
+
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+  } catch (error) {
+    console.warn(`Error formatting time: ${time}`, error)
+    return time
+  }
 }
 
 export function formatFullGameDate(date: string | null | undefined) {
   if (!date) return "TBD"
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(date))
+  try {
+    const parsedDate = new Date(date)
+    if (isNaN(parsedDate.getTime())) {
+      console.warn(`Invalid date format received in formatFullGameDate: ${date}`)
+      return "TBD"
+    }
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(parsedDate)
+  } catch (error) {
+    console.warn(`Error formatting full date: ${date}`, error)
+    return "TBD"
+  }
 }
 
 export function isGameInProgress(game: { gameDate: string; status: string }) {
