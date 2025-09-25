@@ -29,12 +29,14 @@ export function TeamLogo({
   const displayLogoUrl = logoUrl || TeamLogoService.getDefaultLogoUrl(teamName);
 
   return (
-    <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden bg-gray-100 ${className}`}>
+    <div
+      className={`${sizeClasses[size]} relative rounded-lg overflow-hidden ${className}`}
+    >
       <Image
         src={displayLogoUrl}
         alt={`${teamName} logo`}
         fill
-        className="object-cover"
+        className="object-cover rounded-full"
         sizes="(max-width: 768px) 100px, 200px"
         priority={priority}
       />

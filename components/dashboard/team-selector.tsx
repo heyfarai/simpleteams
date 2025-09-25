@@ -43,8 +43,17 @@ export function TeamSelector({ onTeamChange }: TeamSelectorProps) {
           return;
         }
 
-        // Call admin endpoint to get user teams
-        const response = await fetch(`/api/admin/user-teams?userId=${user.id}`);
+        // Check if user is admin
+        const isAdmin = user.email === 'farai@me.com';
+
+        // Use appropriate endpoint for admin vs regular users
+        const endpoint = isAdmin
+          ? '/api/teams/all-teams'
+          : `/api/admin/user-teams?userId=${user.id}`;
+
+        console.log('TeamSelector: Admin check:', { userEmail: user.email, isAdmin, endpoint });
+
+        const response = await fetch(endpoint);
 
         if (!response.ok) {
           console.error(
@@ -58,24 +67,39 @@ export function TeamSelector({ onTeamChange }: TeamSelectorProps) {
 
         const result = await response.json();
 
-        if (!result.success) {
-          console.error("❌ TeamSelector: Error from admin API:", result.error);
-          setIsLoading(false);
-          return;
+        let teams: TeamData[];
+
+        if (isAdmin) {
+          // all-teams endpoint returns array directly, need to transform format
+          teams = result.map((team: any) => ({
+            id: team.id,
+            name: team.name,
+            sanity_team_id: team.id, // Use Supabase ID as sanity_team_id for now
+            logo_url: team.logo_url,
+          }));
+        } else {
+          // admin endpoint returns { success, teams } format
+          if (!result.success) {
+            console.error("❌ TeamSelector: Error from admin API:", result.error);
+            setIsLoading(false);
+            return;
+          }
+          teams = result.teams || [];
         }
 
-        setTeams(result.teams || []);
+        console.log('TeamSelector: Teams loaded:', teams.length);
+        setTeams(teams);
 
         // Set selected team from localStorage or default to first team
         const storedTeamId = localStorage.getItem("selectedTeamId");
         const teamToSelect =
           storedTeamId &&
-          result.teams?.find((t: TeamData) => t.id === storedTeamId)
+          teams.find((t: TeamData) => t.id === storedTeamId)
             ? storedTeamId
-            : result.teams?.[0]?.id || null;
+            : teams[0]?.id || null;
 
         if (teamToSelect) {
-          const selectedTeamData = result.teams.find(
+          const selectedTeamData = teams.find(
             (t: TeamData) => t.id === teamToSelect
           );
 

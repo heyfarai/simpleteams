@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Upload, X, Check, AlertCircle } from "lucide-react";
 import { TeamLogoService } from "@/lib/services/team-logo-service";
@@ -27,6 +27,11 @@ export function TeamLogoUpload({
   const [logoUrl, setLogoUrl] = useState(currentLogoUrl);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync internal logoUrl state with currentLogoUrl prop changes (e.g., team switching)
+  useEffect(() => {
+    setLogoUrl(currentLogoUrl);
+  }, [currentLogoUrl]);
 
   const sizeClasses = {
     sm: "w-16 h-16",

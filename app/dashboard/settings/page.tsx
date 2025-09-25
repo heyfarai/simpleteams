@@ -6,15 +6,23 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { 
-  Save, 
-  Upload, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Save,
+  Upload,
   Palette,
   Settings as SettingsIcon,
   User,
   Mail,
   Phone,
-  MapPin
+  MapPin,
+  Shield
 } from 'lucide-react'
 import { useSelectedTeam } from '@/components/dashboard/team-selector'
 import { supabase } from '@/lib/supabase/client-safe'
@@ -40,6 +48,7 @@ interface TeamSettingsForm {
   head_coach_email: string
   head_coach_phone: string
   head_coach_certifications: string
+  status: string
 }
 
 export default function TeamSettingsPage() {
@@ -90,7 +99,8 @@ export default function TeamSettingsPage() {
           head_coach_name: userTeam.head_coach_name || '',
           head_coach_email: userTeam.head_coach_email || '',
           head_coach_phone: userTeam.head_coach_phone || '',
-          head_coach_certifications: userTeam.head_coach_certifications || ''
+          head_coach_certifications: userTeam.head_coach_certifications || '',
+          status: userTeam.status || 'active'
         })
         
         if (userTeam.logo_url) {
@@ -246,6 +256,38 @@ export default function TeamSettingsPage() {
                   placeholder="https://your-team-website.com"
                 />
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Team Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Shield className="w-5 h-5 mr-2" />
+              Team Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleInputChange('status', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500 mt-1">
+                Inactive teams won't appear on the public site but remain visible in admin dashboard
+              </p>
             </div>
           </CardContent>
         </Card>

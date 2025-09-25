@@ -99,7 +99,7 @@ export async function fetchTeams(seasonId?: string, activeOnly: boolean = false)
 
 export async function fetchTeamDetails(teamId: string) {
   try {
-    const team = await teamService.getTeamById(teamId);
+    const team = await teamService.getTeam(teamId);
 
     if (!team) {
       throw new Error(`Team not found: ${teamId}`);

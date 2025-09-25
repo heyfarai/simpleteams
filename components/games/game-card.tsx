@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import Image from "next/image";
 import { Calendar, Clock, MapPin, Plus, Trophy } from "lucide-react";
-import type { Game } from "@/lib/sanity/display-types";
+import type { Game } from "@/lib/domain/models";
 import { formatGameDate, formatGameTime } from "@/lib/utils/date";
-import { getTeamLogoUrl } from "@/lib/utils/sanity-image";
+import { TeamLogo } from "@/components/team-logo";
 
 interface GameCardProps {
   game: Game;
@@ -86,7 +85,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                   variant="outline"
                   className="text-xs bg-primary/10 text-primary border-primary/20"
                 >
-                  {game.session.type === "playoff" && (
+                  {game.session.type === "playoffs" && (
                     <Trophy className="h-3 w-3 mr-1" />
                   )}
                   {game.session.name}
@@ -98,12 +97,11 @@ export function GameCard({ game, loading = false }: GameCardProps) {
             <div className="flex flex-col md:flex-row justify-center gap-4 mb-4">
               <div className="flex justify-between flex-1 items-center">
                 <div className="team-lockup flex items-center gap-6 p-0">
-                  <Image
-                    src={getTeamLogoUrl(game.homeTeam.logo, "thumbnail")}
-                    alt={game.homeTeam.name || "Home Team"}
-                    width={72}
-                    height={72}
-                    className="w-10 h-10 md:w-20 md:h-20"
+                  <TeamLogo
+                    teamName={game.homeTeam.name || "Home Team"}
+                    logoUrl={game.homeTeam.logo}
+                    size="md"
+                    className="w-10 h-10 md:w-20 md:h-20 rounded-full"
                   />
                   <div className="flex flex-col">
                     <span className="font-semibold text-sm">
@@ -154,12 +152,11 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                   <span className="text-sm font-medium text-muted-foreground order-2 md:order-1"></span>
                 )}
                 <div className="team-lockup md:p-2 p-0 flex items-center justify-end  gap-6 order-1 md:order-2">
-                  <Image
-                    src={getTeamLogoUrl(game.awayTeam.logo, "thumbnail")}
-                    alt={game.awayTeam.name || "Away Team"}
-                    width={72}
-                    height={72}
-                    className="md:order-2 w-10 h-10 md:w-20 md:h-20"
+                  <TeamLogo
+                    teamName={game.awayTeam.name || "Away Team"}
+                    logoUrl={game.awayTeam.logo}
+                    size="md"
+                    className="md:order-2 w-10 h-10 md:w-20 md:h-20 rounded-full"
                   />
                   <div className="flex flex-col md:items-end md:text-right gap-0">
                     <span className="font-semibold text-sm">
@@ -177,14 +174,14 @@ export function GameCard({ game, loading = false }: GameCardProps) {
             <div className="flex justify-center flex-wrap gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                <span>{formatGameDate(game.gameDate)}</span>
+                <span>{formatGameDate(game.date)}</span>
                 <Clock className="h-4 w-4 ml-2" />
-                <span>{formatGameTime(game.gameTime)}</span>
+                <span>{formatGameTime(game.time)}</span>
               </div>
               {game.venue && (
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{game.venue}</span>
+                  <span>{game.venue.name}</span>
                 </div>
               )}
             </div>

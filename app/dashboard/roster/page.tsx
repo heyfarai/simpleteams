@@ -61,18 +61,30 @@ const formatDateRange = (startDate: string, endDate: string) => {
 function useUserTeamsWithEnrollments(selectedTeamId: string | null) {
   const { user } = useAuth()
 
+  // Check if user is admin
+  const isAdmin = user?.email === 'farai@me.com'
+
   return useQuery({
-    queryKey: ['user-teams', user?.id, selectedTeamId],
+    queryKey: isAdmin ? ['admin-all-teams', selectedTeamId] : ['user-teams', user?.id, selectedTeamId],
     queryFn: async (): Promise<TeamWithEnrollments[]> => {
       if (!user?.id) {
         throw new Error('Not authenticated')
       }
 
-      const response = await fetch(`/api/teams/user-teams?userId=${user.id}${selectedTeamId ? `&teamId=${selectedTeamId}` : ''}`)
+      // Use all-teams endpoint for admin, user-teams for regular users
+      const endpoint = isAdmin
+        ? '/api/teams/all-teams'
+        : `/api/teams/user-teams?userId=${user.id}${selectedTeamId ? `&teamId=${selectedTeamId}` : ''}`
+
+      console.log('Admin check:', { userEmail: user.email, isAdmin, endpoint })
+
+      const response = await fetch(endpoint)
       if (!response.ok) {
-        throw new Error('Failed to fetch user teams')
+        throw new Error(`Failed to fetch ${isAdmin ? 'all' : 'user'} teams`)
       }
-      return response.json()
+      const data = await response.json()
+      console.log('Teams fetched:', data.length, 'teams')
+      return data
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -81,11 +93,14 @@ function useUserTeamsWithEnrollments(selectedTeamId: string | null) {
 
 export default function RosterListPage() {
   const selectedTeamId = useSelectedTeam()
+  const { user } = useAuth()
   const {
     data: teams = [],
     isLoading,
     error
   } = useUserTeamsWithEnrollments(selectedTeamId)
+
+  const isAdmin = user?.email === 'farai@me.com'
 
   if (isLoading) {
     return (
@@ -120,9 +135,14 @@ export default function RosterListPage() {
     <div className="p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Team Rosters</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {isAdmin ? 'All Team Rosters (Admin)' : 'Team Rosters'}
+        </h1>
         <p className="mt-1 text-sm text-gray-500">
-          {selectedTeamId ? 'Manage your selected team\'s roster' : 'Select a team to manage their roster'}
+          {isAdmin
+            ? 'Manage any team\'s roster and details'
+            : selectedTeamId ? 'Manage your selected team\'s roster' : 'Select a team to manage their roster'
+          }
         </p>
       </div>
 

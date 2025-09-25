@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { teamService } from "@/lib/services";
 import { Team } from "@/lib/domain/models";
-import Image from "next/image";
 import Link from "next/link";
+import { TeamLogo } from "@/components/team-logo";
 
 export function LeagueTeamSpotlight() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -15,7 +15,8 @@ export function LeagueTeamSpotlight() {
     async function loadTeams() {
       try {
         const activeTeams = await teamService.getActiveTeams();
-        const limitedTeams = activeTeams.slice(0, 32);
+        const sortedTeams = activeTeams.sort((a, b) => a.name.localeCompare(b.name));
+        const limitedTeams = sortedTeams.slice(0, 32);
         setTeams(limitedTeams);
         setError(null);
       } catch (err) {
@@ -75,17 +76,16 @@ export function LeagueTeamSpotlight() {
             href={`/teams/${team.id}`}
             className="text-center block transition-transform hover:scale-105 hover:opacity-80"
           >
-            <div className="flex justify-center items-center size-32  mx-auto dark:bg-neutral-800  overflow-hidden">
-              <Image
-                src={team.logo || "/placeholder-team-logo.png"}
-                alt={`${team.name} logo`}
-                width={96}
-                height={96}
-                className="object-fill rounded-full"
+            <div className="flex justify-center items-center mx-auto">
+              <TeamLogo
+                teamName={team.name}
+                logoUrl={team.logo}
+                size="md"
+                className="rounded-full"
               />
             </div>
-            <div className="-mt-2">
-              <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
+            <div className="mt-2">
+              <h3 className="text-sm font-medium text-gray-800 dark:text-white">
                 {team.name}
               </h3>
             </div>
