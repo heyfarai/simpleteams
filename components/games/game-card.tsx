@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,14 +14,6 @@ interface GameCardProps {
 }
 
 export function GameCard({ game, loading = false }: GameCardProps) {
-  const [showMap, setShowMap] = useState(false);
-
-  const handleMapClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowMap(!showMap);
-  };
-
   if (loading) {
     return (
       <Card className="hover:shadow-md transition-shadow duration-300">
@@ -185,18 +176,6 @@ export function GameCard({ game, loading = false }: GameCardProps) {
             </div>
           </div>
         </div>
-
-        {/* Map Section */}
-        {showMap && game.venue && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="bg-muted rounded-lg h-48 flex items-center justify-center mb-2">
-              <MapPin className="h-6 w-6 text-muted-foreground" />
-              <span className="ml-2 text-muted-foreground">
-                Map view coming soon
-              </span>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
