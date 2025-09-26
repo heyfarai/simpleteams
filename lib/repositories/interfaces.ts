@@ -85,18 +85,43 @@ export interface TeamRepository {
 }
 
 export interface GameRepository {
-  findAll(): Promise<Game[]>;
+  findAll(includeArchived?: boolean): Promise<Game[]>;
   findById(id: string): Promise<Game | null>;
-  findBySeason(seasonId: string): Promise<Game[]>;
-  findByTeam(teamId: string): Promise<Game[]>;
-  findByDivision(divisionId: string): Promise<Game[]>;
-  findByDateRange(startDate: string, endDate: string): Promise<Game[]>;
-  findUpcoming(limit?: number): Promise<Game[]>;
-  findCompleted(limit?: number): Promise<Game[]>;
+  findBySeason(seasonId: string, includeArchived?: boolean): Promise<Game[]>;
+  findByTeam(teamId: string, includeArchived?: boolean): Promise<Game[]>;
+  findByDivision(divisionId: string, includeArchived?: boolean): Promise<Game[]>;
+  findByDateRange(startDate: string, endDate: string, includeArchived?: boolean): Promise<Game[]>;
+  findUpcoming(limit?: number, includeArchived?: boolean): Promise<Game[]>;
+  findCompleted(limit?: number, includeArchived?: boolean): Promise<Game[]>;
   // Session-based queries
-  findBySession(sessionId: string): Promise<Game[]>;
-  findByTeamAndSession(rosterId: string, sessionId: string): Promise<Game[]>;
-  findBySeasonAndSession(seasonId: string, sessionId: string): Promise<Game[]>;
+  findBySession(sessionId: string, includeArchived?: boolean): Promise<Game[]>;
+  findByTeamAndSession(rosterId: string, sessionId: string, includeArchived?: boolean): Promise<Game[]>;
+  findBySeasonAndSession(seasonId: string, sessionId: string, includeArchived?: boolean): Promise<Game[]>;
+  // Update operations
+  update(id: string, gameData: UpdateGameRequest): Promise<Game>;
+  create(gameData: CreateGameRequest): Promise<Game>;
+}
+
+export interface UpdateGameRequest {
+  date?: string;
+  time?: string;
+  status?: string;
+  homeScore?: number;
+  awayScore?: number;
+  venueId?: string;
+  isArchived?: boolean;
+}
+
+export interface CreateGameRequest {
+  date: string;
+  time: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  seasonId: string;
+  divisionId?: string;
+  venueId?: string;
+  status?: string;
+  isArchived?: boolean;
 }
 
 export interface DivisionRepository {

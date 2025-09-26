@@ -1,29 +1,27 @@
 // Game service - all game business logic, database agnostic
 import type { Game } from "../domain/models";
+import type { UpdateGameRequest, CreateGameRequest } from "../repositories/interfaces";
 import { gameRepository } from "../repositories/factory";
 
 export class GameService {
-  async getAllGames(): Promise<Game[]> {
-    return gameRepository.findAll();
+  async getAllGames(includeArchived = false): Promise<Game[]> {
+    return gameRepository.findAll(includeArchived);
   }
 
   async getGameById(id: string): Promise<Game | null> {
     return gameRepository.findById(id);
   }
 
-  async getGamesBySeason(seasonId: string): Promise<Game[]> {
-    console.log('[DEBUG] GameService.getGamesBySeason called with:', seasonId);
-    const games = await gameRepository.findBySeason(seasonId);
-    console.log('[DEBUG] GameRepository returned:', games.length, 'games');
-    return games;
+  async getGamesBySeason(seasonId: string, includeArchived = false): Promise<Game[]> {
+    return gameRepository.findBySeason(seasonId, includeArchived);
   }
 
   async getGamesByTeam(teamId: string): Promise<Game[]> {
     return gameRepository.findByTeam(teamId);
   }
 
-  async getGamesByDivision(divisionId: string): Promise<Game[]> {
-    return gameRepository.findByDivision(divisionId);
+  async getGamesByDivision(divisionId: string, includeArchived = false): Promise<Game[]> {
+    return gameRepository.findByDivision(divisionId, includeArchived);
   }
 
   async getUpcomingGames(limit = 10): Promise<Game[]> {
@@ -36,6 +34,39 @@ export class GameService {
 
   async getGamesByDateRange(startDate: string, endDate: string): Promise<Game[]> {
     return gameRepository.findByDateRange(startDate, endDate);
+  }
+
+  // Update operations
+  async updateGame(id: string, gameData: UpdateGameRequest): Promise<Game> {
+    // Add business logic validations here if needed
+    if (gameData.homeScore !== undefined && gameData.homeScore < 0) {
+      throw new Error('Home score cannot be negative');
+    }
+    if (gameData.awayScore !== undefined && gameData.awayScore < 0) {
+      throw new Error('Away score cannot be negative');
+    }
+
+    return gameRepository.update(id, gameData);
+  }
+
+  async createGame(gameData: CreateGameRequest): Promise<Game> {
+    // Add business logic validations here if needed
+    if (!gameData.date || !gameData.time) {
+      throw new Error('Date and time are required');
+    }
+    if (!gameData.homeTeamId || !gameData.awayTeamId) {
+      throw new Error('Home and away teams are required');
+    }
+    if (gameData.homeTeamId === gameData.awayTeamId) {
+      throw new Error('Home and away teams cannot be the same');
+    }
+
+    // Set default status if not provided
+    if (!gameData.status) {
+      gameData.status = 'upcoming';
+    }
+
+    return gameRepository.create(gameData);
   }
 
   // Business logic methods

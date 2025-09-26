@@ -195,8 +195,8 @@ Check off completed items in this doc as you make progress.
   - [ ] Playoff qualification tracking based on session participation
 
 - [ ] **General Infrastructure (ONGOING)**
-  - [ ] Wire up and migrate Games to supabase
-  - ✅ Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
+  - ✅ Wire up and migrate Games to supabase
+  - [ ] Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
   - [ ] Update Components (remove direct Supabase calls)
   - [ ] In dashboard expose url for selected team /dashboard/[team]/[roster]
   - [ ] On checkout success screen, link to the newly created team /dashboard/[team]/[roster]
@@ -208,3 +208,14 @@ Check off completed items in this doc as you make progress.
   - [ ] Manage sessions
   - [ ] Manage Teams
   - [ ] Manage games
+
+## Favouriting
+
+- [ ] Enable site visitors to favourite a team
+
+## Next potential implementations for session enrollment hooks:
+
+1. Registration flow enhancement - Add real-time enrollment status during package
+   selection
+2. Admin session management - Build CRUD interfaces for session enrollment oversight
+3. Game filtering - Filter games by enrolled sessions only

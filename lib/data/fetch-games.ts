@@ -15,6 +15,7 @@ interface GameFilters {
   status?: string;
   page?: number;
   pageSize?: number;
+  includeArchived?: boolean;
 }
 
 // Database-agnostic functions using service layer
@@ -26,17 +27,18 @@ export async function fetchGames({
   status,
   page = 1,
   pageSize = 50,
+  includeArchived = false,
 }: GameFilters = {}): Promise<PaginatedGames> {
   try {
     let games: Game[];
 
     // Apply filters using service layer
     if (season) {
-      games = await gameService.getGamesBySeason(season);
+      games = await gameService.getGamesBySeason(season, includeArchived);
     } else if (division) {
-      games = await gameService.getGamesByDivision(division);
+      games = await gameService.getGamesByDivision(division, includeArchived);
     } else {
-      games = await gameService.getAllGames();
+      games = await gameService.getAllGames(includeArchived);
     }
 
     // Apply status filter

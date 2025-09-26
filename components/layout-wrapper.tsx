@@ -13,7 +13,7 @@ interface LayoutWrapperProps {
 
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
-  const isAdminPage = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
+  const isAdminPage = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/front-office');
 
   return (
     <>

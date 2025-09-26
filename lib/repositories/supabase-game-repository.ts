@@ -1,7 +1,7 @@
 // Supabase implementation of GameRepository
 import { createClient } from '@supabase/supabase-js';
 import type { Game, Team, Division, Season, Venue } from '@/lib/domain/models';
-import type { GameRepository } from './interfaces';
+import type { GameRepository, CreateGameRequest } from './interfaces';
 
 // Use service role key on server side, anon key on client side
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -27,9 +27,9 @@ export interface GameEvent {
 }
 
 export class SupabaseGameRepository implements GameRepository {
-  async findAll(): Promise<Game[]> {
+  async findAll(includeArchived = false): Promise<Game[]> {
     try {
-      const { data: games, error } = await supabase
+      let query = supabase
         .from('games')
         .select(`
           *,
@@ -43,13 +43,6 @@ export class SupabaseGameRepository implements GameRepository {
               city
             ),
             season_division:season_divisions(
-              season:seasons(
-                id,
-                name,
-                year,
-                status,
-                is_active
-              ),
               division:league_divisions(
                 id,
                 name,
@@ -67,13 +60,6 @@ export class SupabaseGameRepository implements GameRepository {
               city
             ),
             season_division:season_divisions(
-              season:seasons(
-                id,
-                name,
-                year,
-                status,
-                is_active
-              ),
               division:league_divisions(
                 id,
                 name,
@@ -86,9 +72,25 @@ export class SupabaseGameRepository implements GameRepository {
             name,
             address,
             city
+          ),
+          game_session:game_sessions!session_id(
+            id,
+            name,
+            season:seasons(
+              id,
+              name,
+              year,
+              status,
+              is_active
+            )
           )
-        `)
-        .order('scheduled_at', { ascending: true });
+        `);
+
+      if (!includeArchived) {
+        query = query.eq('is_archived', false);
+      }
+
+      const { data: games, error } = await query.order('scheduled_at', { ascending: true });
 
       if (error) throw error;
 
@@ -99,9 +101,9 @@ export class SupabaseGameRepository implements GameRepository {
     }
   }
 
-  async findBySeason(seasonId: string): Promise<Game[]> {
+  async findBySeason(seasonId: string, includeArchived = false): Promise<Game[]> {
     try {
-      const { data: games, error } = await supabase
+      let query = supabase
         .from('games')
         .select(`
           *,
@@ -158,10 +160,26 @@ export class SupabaseGameRepository implements GameRepository {
             name,
             address,
             city
+          ),
+          session:game_sessions!inner(
+            id,
+            name,
+            season:seasons!inner(
+              id,
+              name,
+              year,
+              status,
+              is_active
+            )
           )
         `)
-        .eq('roster_home.season_division.season.id', seasonId)
-        .order('scheduled_at', { ascending: true });
+        .eq('session.season.id', seasonId);
+
+      if (!includeArchived) {
+        query = query.eq('is_archived', false);
+      }
+
+      const { data: games, error } = await query.order('scheduled_at', { ascending: true });
 
       if (error) throw error;
 
@@ -576,24 +594,24 @@ export class SupabaseGameRepository implements GameRepository {
       ageGroup: row.roster_home?.season_division?.division?.age_group || '',
       skillLevel: row.roster_home?.season_division?.division?.skill_level || '',
       conference: {
-        id: row.roster_home?.season_division?.season?.id || '',
-        name: row.roster_home?.season_division?.season?.name || '',
+        id: row.session?.season?.id || '',
+        name: row.session?.season?.name || '',
         season: {
-          id: row.roster_home?.season_division?.season?.id || '',
-          name: row.roster_home?.season_division?.season?.name || '',
-          year: row.roster_home?.season_division?.season?.year || 0,
-          status: row.roster_home?.season_division?.season?.status || 'upcoming',
-          isActive: row.roster_home?.season_division?.season?.is_active || false,
+          id: row.session?.season?.id || '',
+          name: row.session?.season?.name || '',
+          year: row.session?.season?.year || 0,
+          status: row.session?.season?.status || 'upcoming',
+          isActive: row.session?.season?.is_active || false,
         },
       },
     };
 
     const season: Season = {
-      id: row.roster_home?.season_division?.season?.id || '',
-      name: row.roster_home?.season_division?.season?.name || '',
-      year: row.roster_home?.season_division?.season?.year || 0,
-      status: row.roster_home?.season_division?.season?.status || 'upcoming',
-      isActive: row.roster_home?.season_division?.season?.is_active || false,
+      id: row.session?.season?.id || '',
+      name: row.session?.season?.name || '',
+      year: row.session?.season?.year || 0,
+      status: row.session?.season?.status || 'upcoming',
+      isActive: row.session?.season?.is_active || false,
     };
 
     const venue: Venue | undefined = row.venue ? {
@@ -982,6 +1000,104 @@ export class SupabaseGameRepository implements GameRepository {
     }
   }
 
+  // Update operation
+  async update(id: string, gameData: import('./interfaces').UpdateGameRequest): Promise<Game> {
+    try {
+      // Build update object with only provided fields that exist in database
+      const updateData: any = {};
+
+      // Note: title field doesn't exist in games table, so we skip it
+      if (gameData.status !== undefined) updateData.status = gameData.status;
+      if (gameData.homeScore !== undefined) updateData.home_score = gameData.homeScore;
+      if (gameData.awayScore !== undefined) updateData.away_score = gameData.awayScore;
+      if (gameData.venueId !== undefined) updateData.venue_id = gameData.venueId;
+      if (gameData.isArchived !== undefined) updateData.is_archived = gameData.isArchived;
+
+      // Handle date and time updates - combine into scheduled_at timestamp
+      if (gameData.date !== undefined || gameData.time !== undefined) {
+        const currentGame = await this.findById(id);
+        if (!currentGame) throw new Error(`Game with id ${id} not found`);
+
+        const currentDate = gameData.date || currentGame.date;
+        const currentTime = gameData.time || currentGame.time;
+
+        // Combine date and time into scheduled_at timestamp
+        updateData.scheduled_at = new Date(`${currentDate}T${currentTime}:00`).toISOString();
+      }
+
+      const { data: updatedGame, error } = await supabase
+        .from('games')
+        .update(updateData)
+        .eq('id', id)
+        .select(`
+          *,
+          roster_home:rosters!roster_home_id(
+            id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          roster_away:rosters!roster_away_id(
+            id,
+            team:teams(
+              id,
+              name,
+              short_name,
+              logo_url,
+              city
+            ),
+            season_division:season_divisions(
+              season:seasons(
+                id,
+                name,
+                year,
+                status,
+                is_active
+              ),
+              division:league_divisions(
+                id,
+                name,
+                description
+              )
+            )
+          ),
+          venue:venues(
+            id,
+            name,
+            address,
+            city
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+      if (!updatedGame) throw new Error(`Failed to update game ${id}`);
+
+      return this.transformToGame(updatedGame);
+    } catch (error) {
+      console.error('Error updating game:', error);
+      throw error;
+    }
+  }
+
   // Helper method to map database records to domain Game objects
   private mapGameFromDB(dbGame: any): Game {
     return {
@@ -1013,5 +1129,52 @@ export class SupabaseGameRepository implements GameRepository {
         address: dbGame.venue?.address || ''
       }
     } as Game;
+  }
+
+  async create(gameData: CreateGameRequest): Promise<Game> {
+    try {
+      // Import the roster repository at runtime to avoid circular dependencies
+      const { SupabaseRosterRepository } = await import('./roster-repository');
+      const rosterRepo = new SupabaseRosterRepository();
+
+      // Resolve team IDs to roster IDs
+      const homeRoster = await rosterRepo.getRosterByTeamSeason(gameData.homeTeamId, gameData.seasonId);
+      const awayRoster = await rosterRepo.getRosterByTeamSeason(gameData.awayTeamId, gameData.seasonId);
+
+      if (!homeRoster) {
+        throw new Error(`No roster found for home team ${gameData.homeTeamId} in season ${gameData.seasonId}`);
+      }
+      if (!awayRoster) {
+        throw new Error(`No roster found for away team ${gameData.awayTeamId} in season ${gameData.seasonId}`);
+      }
+
+      // Combine date and time into scheduled_at timestamp
+      const scheduledAt = `${gameData.date}T${gameData.time}:00Z`;
+
+      const { data: game, error } = await supabase
+        .from('games')
+        .insert({
+          scheduled_at: scheduledAt,
+          roster_home_id: homeRoster.id,
+          roster_away_id: awayRoster.id,
+          venue_id: gameData.venueId,
+          status: gameData.status || 'upcoming',
+          is_archived: gameData.isArchived || false,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (!game) throw new Error('Failed to create game');
+
+      // Fetch the full game with related data
+      const fullGame = await this.findById(game.id);
+      if (!fullGame) throw new Error('Failed to fetch created game');
+
+      return fullGame;
+    } catch (error) {
+      console.error('Error creating game:', error);
+      throw error;
+    }
   }
 }

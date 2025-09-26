@@ -87,6 +87,7 @@ export interface Game {
     awayScore: number;
   };
   officials?: Official[];
+  isArchived?: boolean;
 }
 
 export interface Venue {

@@ -8,6 +8,7 @@ interface UseGamesOptions {
   division?: string
   status?: string
   pageSize?: number
+  includeArchived?: boolean
 }
 
 interface GamesQueryResult {
@@ -21,9 +22,10 @@ export function useGames({
   division,
   status,
   pageSize = 50,
+  includeArchived = false,
 }: UseGamesOptions = {}) {
   return useQuery({
-    queryKey: ['games', season || 'all', session || 'all', division || 'all', status || 'all'],
+    queryKey: ['games', season || 'all', session || 'all', division || 'all', status || 'all', includeArchived ? 'archived' : 'active'],
     queryFn: () => fetchGames({
       season,
       session,

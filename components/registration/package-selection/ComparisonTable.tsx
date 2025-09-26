@@ -42,7 +42,7 @@ export function ComparisonTable() {
 
   return (
     <div className="mb-36 md:mb-44 mt-24 md:mt-36">
-      <h2 className="md:text-3xl text-2xl text-center mb-12 grotesk">
+      <h2 className="md:text-3xl text-2xl text-center mb-12">
         Full Package Comparison
       </h2>
 

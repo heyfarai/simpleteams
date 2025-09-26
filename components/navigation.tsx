@@ -50,7 +50,7 @@ export function Navigation() {
             ) : (
               <Link
                 href="/register"
-                className="w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm rounded-full border border-transparent bg-gray-800 font-bold text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+                className="uppercase tracking-wide w-full sm:w-auto whitespace-nowrap py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm rounded-full border border-transparent bg-gray-800 font-bold text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
               >
                 Register
               </Link>

@@ -70,7 +70,7 @@ export function NextSessionCard() {
         <div className="flex justify-center">
           <Link
             href="/register"
-            className="whitespace-nowrap py-2 px-4 rounded-full  inline-flex justify-center items-center gap-x-2 text-sm font-medium  border border-transparent bg-primary text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
+            className="uppercase tracking-wide whitespace-nowrap py-2 px-4 rounded-full  inline-flex justify-center items-center gap-x-2 text-sm font-medium  border border-transparent bg-primary text-white hover:bg-gray-900 focus:outline-none focus:bg-primary/80 disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200"
           >
             Register your Team
           </Link>

@@ -75,7 +75,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
 
   return (
     <Card className="bg-gray-50">
-      <CardContent className="p-4 lg:p-6">
+      <CardContent className="p-5 lg:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="flex-1">
             {/* Status and Session */}
@@ -96,12 +96,12 @@ export function GameCard({ game, loading = false }: GameCardProps) {
             {/* Teams and Score */}
             <div className="flex flex-col md:flex-row justify-center gap-4 mb-4">
               <div className="flex justify-between flex-1 items-center">
-                <div className="team-lockup flex items-center gap-6 p-0">
+                <div className="team-lockup flex items-center gap-4 p-0">
                   <TeamLogo
                     teamName={game.homeTeam.name || "Home Team"}
                     logoUrl={game.homeTeam.logo}
-                    size="md"
-                    className="w-10 h-10 md:w-20 md:h-20 rounded-full"
+                    size="sm"
+                    className="w-6 h-6 md:w-12 md:h-12 rounded-full"
                   />
                   <div className="flex flex-col">
                     <span className="font-semibold text-sm">
@@ -114,7 +114,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                 </div>
                 {game.score &&
                 (game.status === "completed" || game.status === "live") ? (
-                  <span className="text-4xl font-extrabold grotesk text-primary">
+                  <span className="lg:text-4xl text-2xl font-extrabold text-primary">
                     {game.score.homeScore}
                   </span>
                 ) : game.status === "completed" ? (
@@ -141,7 +141,7 @@ export function GameCard({ game, loading = false }: GameCardProps) {
               <div className="flex justify-between flex-1 items-center">
                 {game.score &&
                 (game.status === "completed" || game.status === "live") ? (
-                  <span className="text-4xl font-extrabold text-primary order-2 md:order-1 grotesk">
+                  <span className="lg:text-4xl text-2xl font-extrabold text-primary order-2 md:order-1">
                     {game.score.awayScore}
                   </span>
                 ) : game.status === "completed" ? (
@@ -151,12 +151,12 @@ export function GameCard({ game, loading = false }: GameCardProps) {
                 ) : (
                   <span className="text-sm font-medium text-muted-foreground order-2 md:order-1"></span>
                 )}
-                <div className="team-lockup md:p-2 p-0 flex items-center justify-end  gap-6 order-1 md:order-2">
+                <div className="team-lockup md:p-2 p-0 flex items-center justify-end  gap-4 order-1 md:order-2">
                   <TeamLogo
                     teamName={game.awayTeam.name || "Away Team"}
                     logoUrl={game.awayTeam.logo}
-                    size="md"
-                    className="md:order-2 w-10 h-10 md:w-20 md:h-20 rounded-full"
+                    size="sm"
+                    className="md:order-2 w-12 h-12 md:w-20 md:h-20 rounded-full"
                   />
                   <div className="flex flex-col md:items-end md:text-right gap-0">
                     <span className="font-semibold text-sm">

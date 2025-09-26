@@ -87,7 +87,7 @@ export default function AboutPage() {
           </div>
           <div className="hidden md:grid-cols-2 gap-8">
             <div className=" p-8 rounded-lg shadow-lg">
-              <div className="md:text-8xl text-6xl font-extrabold text-primary mb-4 grotesk">
+              <div className="md:text-8xl text-6xl font-extrabold text-primary mb-4">
                 97%
               </div>
               <p className="text-sm text-gray-700">
@@ -95,7 +95,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg">
-              <div className="md:text-8xl text-6xl font-extrabold text-primary mb-4 grotesk">
+              <div className="md:text-8xl text-6xl font-extrabold text-primary mb-4">
                 93%
               </div>
               <p className="text-sm text-gray-700">
@@ -246,9 +246,7 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-3">NCHC President & Founder</h2>
           <div className="mb-20">
-            <p className="text-2xl grotesk mb-4 text-secondary">
-              Andrew DiMillo
-            </p>
+            <p className="text-2xl mb-4 text-secondary">Andrew DiMillo</p>
           </div>
           <blockquote className="text-xl italic text-gray-300 max-w-xl mx-auto leading-relaxed">
             "When the final NCHC buzzer sounds, one program will be crowned in

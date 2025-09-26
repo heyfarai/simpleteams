@@ -9,7 +9,6 @@ import { useGames } from "@/hooks/use-games";
 import { Hydrate } from "@/components/hydrate";
 import { fetchGames } from "@/lib/data/fetch-games";
 import { useToast } from "@/hooks/use-toast";
-import { SeasonTabs } from "@/components/filters/season-tabs";
 import { Season } from "@/lib/utils/season-filters";
 import type { Game } from "@/lib/domain/models";
 import { cn } from "@/lib/utils";
@@ -17,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UpcomingSeason } from "./upcoming-season";
 import { useSticky } from "@/hooks/use-sticky";
+import { SeasonContent } from "./season-content";
+import * as Tabs from "@radix-ui/react-tabs";
 
 interface DateSectionProps {
   date: string;
@@ -141,6 +142,19 @@ export function GamesList({ filterData }: GamesListProps) {
 
   const allGames = gamesData?.games || [];
 
+  // Debug total games fetched
+  console.log(`[DEBUG] Total games fetched: ${allGames.length}`);
+  console.log(`[DEBUG] Filter params: season=${season}, session=${session}, division=${division}, status=${status}`);
+
+  // Debug first few games structure
+  if (allGames.length > 0) {
+    console.log(`[DEBUG] First game structure:`, {
+      id: allGames[0].id,
+      rosterHome: allGames[0].rosterHome,
+      rosterAway: allGames[0].rosterAway
+    });
+  }
+
   // Convert filter data seasons to Season format for SeasonTabs
   const availableSeasons: Season[] = (filterData.seasons || []).map(
     (season) => ({
@@ -193,124 +207,60 @@ export function GamesList({ filterData }: GamesListProps) {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Season Tabs with content */}
-      <SeasonTabs
-        selectedSeason={season === "all" ? (availableSeasons.find(s => s.isActive)?.id || "") : season}
-        seasons={availableSeasons}
-        onSeasonChange={(value) => handleFilterChange("season", value || "all")}
-        className="flex-1 p-2"
+      {/* Season Tabs - each tab gets its own content */}
+      <Tabs.Root
+        value={season === "all" ? (availableSeasons.find(s => s.isActive)?.id || "") : season}
+        onValueChange={(value) => handleFilterChange("season", value || "all")}
+        className="w-full h-full flex-1 p-2"
       >
-        <div className="flex-1">
-          {season === "01ecf97e-2b9a-49eb-a80a-3fe2be6a36ad" ? (
-            <UpcomingSeason />
-          ) : (
-            <Hydrate<
-              ["games", string, string, string, string],
-              { games: Game[]; total: number }
-            >
-              queryKey={["games", season, session, division, status]}
-              queryFn={() =>
-                fetchGames({
-                  season: season === "all" ? undefined : season,
-                  session: session === "all" ? undefined : session,
-                  division: division === "all" ? undefined : division,
-                  status: status === "all" ? undefined : status,
-                })
-              }
-            >
-              {isLoading ? (
-                <div className="grid gap-4">
-                  {Array(3)
-                    .fill(null)
-                    .map((_, i) => (
-                      <GameCard
-                        key={`skeleton-${i}`}
-                        game={allGames[0] ?? ({} as Game)}
-                        loading={true}
-                      />
-                    ))}
-                </div>
-              ) : allGames.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">
-                    No games found
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-8">
-                  {Object.entries(
-                    // Group games by date
-                    allGames.reduce((acc, game) => {
-                      const date = new Date(game.date);
-                      const dateKey = date.toISOString().split("T")[0];
-                      if (!acc[dateKey]) acc[dateKey] = [];
-                      acc[dateKey].push(game);
-                      return acc;
-                    }, {} as Record<string, Game[]>)
-                  )
-                    // Sort dates newest first
-                    .sort(
-                      ([dateA], [dateB]) =>
-                        new Date(dateB).getTime() - new Date(dateA).getTime()
-                    )
-                    .map(([date, gamesForDate]) => {
-                      const gameDate = new Date(date);
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      const tomorrow = new Date(today);
-                      tomorrow.setDate(tomorrow.getDate() + 1);
-                      const yesterday = new Date(today);
-                      yesterday.setDate(yesterday.getDate() - 1);
-
-                      let relativeDate = "";
-                      if (gameDate.getTime() === today.getTime()) {
-                        relativeDate = "Today";
-                      } else if (gameDate.getTime() === tomorrow.getTime()) {
-                        relativeDate = "Tomorrow";
-                      } else if (gameDate.getTime() === yesterday.getTime()) {
-                        relativeDate = "Yesterday";
-                      }
-
-                      const formattedDate = new Intl.DateTimeFormat("en-US", {
-                        weekday: "long",
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      }).format(gameDate);
-
-                      return (
-                        <DateSection
-                          key={date}
-                          date={date}
-                          relativeDate={relativeDate}
-                          formattedDate={formattedDate}
-                          gamesCount={gamesForDate.length}
-                        >
-                          <div className="grid gap-4">
-                            {gamesForDate
-                              .sort((a, b) => {
-                                // Sort by game time within the same date
-                                const timeA = a.time || "";
-                                const timeB = b.time || "";
-                                return timeA.localeCompare(timeB);
-                              })
-                              .map((game: Game) => (
-                                <GameCard
-                                  key={game.id}
-                                  game={game}
-                                  loading={false}
-                                />
-                              ))}
-                          </div>
-                        </DateSection>
-                      );
-                    })}
-                </div>
+        <Tabs.List className="flex h-10 items-center justify-start rounded-full bg-gray-200 p-1 overflow-x-auto">
+          {availableSeasons.map((seasonTab) => (
+            <Tabs.Trigger
+              key={`trigger-${seasonTab.id}`}
+              value={seasonTab.id}
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-black data-[state=active]:font-bold text-gray-500",
+                availableSeasons.length > 1 ? "flex-1" : "min-w-[100px]"
               )}
-            </Hydrate>
-          )}
-        </div>
-      </SeasonTabs>
+            >
+              {seasonTab.name}
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+
+        {/* Each season gets its own content with its own query */}
+        {availableSeasons.map((seasonTab) => {
+          const filteredGames = allGames.filter(game => {
+            // Filter games to only show ones that belong to this season tab
+            const gameSeasonId = game.season?.id;
+            const matches = gameSeasonId === seasonTab.id;
+
+            // Debug logging
+            if (game.id) {
+              console.log(`[DEBUG] Game ${game.id}: gameSeasonId=${gameSeasonId}, seasonTab.id=${seasonTab.id}, matches=${matches}`);
+            }
+
+            return matches;
+          });
+
+          console.log(`[DEBUG] Season "${seasonTab.name}" (${seasonTab.id}): Found ${filteredGames.length} games`);
+
+          return (
+            <Tabs.Content
+              key={`content-${seasonTab.id}`}
+              value={seasonTab.id}
+              className="flex-1 outline-none mt-4"
+            >
+              <SeasonContent
+                seasonId={seasonTab.id}
+                games={filteredGames}
+                isLoading={isLoading}
+                error={isError ? error : null}
+              />
+            </Tabs.Content>
+          );
+        })}
+      </Tabs.Root>
     </div>
   );
 }
