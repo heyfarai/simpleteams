@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
-import { Calendar, Clock, MapPin, Plus, Trophy } from "lucide-react";
+import { Calendar, Clock, MapPin, Trophy } from "lucide-react";
 import type { Game } from "@/lib/domain/models";
 import { formatGameDate, formatGameTime } from "@/lib/utils/date";
 import { TeamLogo } from "@/components/team-logo";
