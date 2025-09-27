@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard } from "lucide-react";
+import { getInstallmentDetails } from "@/lib/config/packages";
 import type { FormData } from "@/hooks/use-registration-form";
 import type { Division } from "@/lib/domain/models";
 import type { PackageDetails } from "../utils/packageDetails";
@@ -25,6 +26,10 @@ export function OrderSummary({
   onSubmit,
   paymentMethod = 'full',
 }: OrderSummaryProps) {
+  // Get installment details from config for full-season package
+  const installmentDetails = formData.selectedPackage === 'full-season'
+    ? getInstallmentDetails('full-season')
+    : null;
   return (
     <div className="sticky top-8">
       <Card className="bg-black text-white">
@@ -101,17 +106,17 @@ export function OrderSummary({
           </div>
 
           {/* Installment Schedule */}
-          {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && (
+          {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && installmentDetails && (
             <div className="space-y-3 pt-4 border-t border-primary/20">
               <h4 className="font-medium">Payment Schedule</h4>
               <div className="text-sm space-y-2">
                 <div className="flex justify-between">
                   <span>Today</span>
-                  <span className="font-bold">$437</span>
+                  <span className="font-bold">${installmentDetails.installmentAmount.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
-                  <span>Months 2-8</span>
-                  <span>$437/month</span>
+                  <span>Months 2-{installmentDetails.installments}</span>
+                  <span>${installmentDetails.installmentAmount.toLocaleString()}/month</span>
                 </div>
               </div>
             </div>
@@ -126,8 +131,8 @@ export function OrderSummary({
                   : 'Total'}
               </span>
               <span className="font-bold">
-                {paymentMethod === 'installments' && formData.selectedPackage === 'full-season'
-                  ? '$437'
+                {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && installmentDetails
+                  ? `$${installmentDetails.installmentAmount.toLocaleString()}`
                   : `$${packageDetails.amount.toLocaleString()}`}
               </span>
             </div>

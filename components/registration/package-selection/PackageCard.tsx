@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X, AlertTriangle } from "lucide-react";
+import { getInstallmentDetails, isInstallmentAvailable } from "@/lib/config/packages";
 import type { PackageOption } from "./types";
 
 interface PackageCardProps {
@@ -18,6 +19,10 @@ export function PackageCard({
   onClick,
   paymentMethod = "full",
 }: PackageCardProps) {
+  // Get installment details from config
+  const installmentDetails = getInstallmentDetails(pkg.id as any);
+  const hasInstallments = isInstallmentAvailable(pkg.id as any);
+
   const renderFeatureIcon = (feature: PackageOption["features"][0]) => {
     if (feature.included) {
       return <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />;
@@ -50,16 +55,16 @@ export function PackageCard({
             <h3 className="text-lg font-medium mb-0">{pkg.name}</h3>
             <p className="text-sm ">{pkg.games}</p>
             <div className="price-container mt-3 flex flex-row justify-between items-end">
-              {paymentMethod === "installments" && pkg.id === "full-season" ? (
+              {paymentMethod === "installments" && hasInstallments && installmentDetails ? (
                 <div className="flex flex-col w-full">
                   <span className="text-3xl font-bold">
-                    $1265{" "}
+                    ${installmentDetails.installmentAmount.toLocaleString()}{" "}
                     <span className="text-sm text-gray-500 font-normal">
                       /month
                     </span>
                   </span>
                   <span className="text-sm text-gray-500">
-                    3 payments (${pkg.price.toLocaleString()} total)
+                    {installmentDetails.installments} payments (${installmentDetails.totalAmount.toLocaleString()} total)
                   </span>
                 </div>
               ) : (
@@ -114,8 +119,8 @@ export function PackageCard({
             className={`cursor-pointer w-full mt-auto transition-all duration-200 bg-foreground text-[#ff9408] hover:text-foreground hover:bg-secondary`}
             size="lg"
           >
-            {paymentMethod === "installments" && pkg.id === "full-season"
-              ? "Pay in 8 installments"
+            {paymentMethod === "installments" && hasInstallments && installmentDetails
+              ? `Pay in ${installmentDetails.installments} installments`
               : `Register with ${pkg.name}`}
           </Button>
         </CardContent>

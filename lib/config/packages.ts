@@ -65,9 +65,9 @@ export const getPackageConfig = (): Record<PackageType, PackageConfig> => {
       description: "12+ games + playoffs - Pick any 3 season sessions × 4 games each",
       installments: {
         enabled: true,
-        installments: 8,
-        installmentPriceId: 'price_1SAdMiIYuurzinGII9aloGAw', // $437 CAD monthly
-        description: '8 monthly payments'
+        installments: 4,
+        installmentPriceId: 'price_1SAdMiIYuurzinGII9aloGAw', // $437 CAD monthly (4 payments)
+        description: '4 monthly payments'
       }
     },
     "two-session": {
@@ -102,6 +102,20 @@ export const getPackageInstallmentAmount = (packageType: PackageType): number =>
 export const isInstallmentAvailable = (packageType: PackageType): boolean => {
   const config = getPackageConfig()[packageType];
   return config.installments?.enabled ?? false;
+};
+
+export const getInstallmentDetails = (packageType: PackageType) => {
+  const config = getPackageConfig()[packageType];
+  if (!config.installments?.enabled) return null;
+
+  const installmentAmount = Math.round(config.amount / config.installments.installments);
+
+  return {
+    installments: config.installments.installments,
+    installmentAmount: Math.round(installmentAmount / 100), // Convert cents to dollars
+    description: config.installments.description,
+    totalAmount: Math.round(config.amount / 100) // Convert cents to dollars
+  };
 };
 
 // ===========================
