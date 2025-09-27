@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useServiceStatus } from "@/hooks/use-service-status";
 import { useAuth } from "@/hooks/use-auth";
-import { toast } from "sonner";
 import { useRegistrationForm } from "@/hooks/use-registration-form";
 import { useInstallmentPreference } from "@/hooks/use-installment-preference";
 import { useCurrentSeasonId } from "@/lib/hooks/use-current-season";
 import { getPackageDetails } from "@/lib/config/packages";
+import { ContactEmailSection } from "./contact-email-section";
 import { TeamInformationSection } from "./team-information-section";
 import { DivisionSection } from "./division-section";
 import { ContactInformationSection } from "./contact-information-section";
@@ -15,7 +15,6 @@ import { OrderSummary } from "./order-summary";
 import { MobileSummary } from "./mobile-summary";
 import { SignInModal } from "./sign-in-modal";
 import { SessionSelection } from "./session-selection";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   getPackageConfig,
@@ -24,8 +23,9 @@ import {
 } from "@/lib/config/packages";
 
 export function CheckoutForm() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [signInModalEmail, setSignInModalEmail] = useState<string>("");
   const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
 
   // Service status monitoring
@@ -42,7 +42,6 @@ export function CheckoutForm() {
     divisionsError,
     isSubmitting,
     isFormValid,
-    handleSubmit: originalHandleSubmit,
   } = useRegistrationForm();
 
   // Get payment method from user preferences
@@ -112,7 +111,19 @@ export function CheckoutForm() {
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "auth-success") {
-        window.location.reload();
+        // Provide immediate feedback before reload
+        const toastModule = import("sonner");
+        toastModule.then(({ toast }) => {
+          toast.success("Email verified successfully!", {
+            description: "Your form is now unlocked. Please complete your registration.",
+            duration: 3000,
+          });
+        });
+
+        // Small delay to show the toast before reload
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     };
 
@@ -127,20 +138,10 @@ export function CheckoutForm() {
     };
   }, []);
 
-  const handleChangeEmail = async () => {
-    try {
-      await signOut();
-      handleInputChange("contactEmail", "");
-      setShowSignInModal(true);
-      toast.success("Signed out successfully", {
-        description: "You can now enter a different email address.",
-      });
-    } catch (error) {
-      console.error("Error signing out:", error);
-      toast.error("Failed to sign out", {
-        description: "Please try again.",
-      });
-    }
+
+  const handleShowSignIn = (email?: string) => {
+    setSignInModalEmail(email || formData.contactEmail);
+    setShowSignInModal(true);
   };
 
   const packageDetails = getPackageDetails(formData.selectedPackage);
@@ -211,11 +212,16 @@ export function CheckoutForm() {
                 }}
               >
                 <div className="space-y-6 md:space-y-8">
+                  <ContactEmailSection
+                    formData={formData}
+                    onInputChange={handleInputChange}
+                    onShowSignIn={handleShowSignIn}
+                  />
+
                   <TeamInformationSection
                     formData={formData}
                     onInputChange={handleInputChange}
-                    onChangeEmail={handleChangeEmail}
-                    onShowSignIn={() => setShowSignInModal(true)}
+                    disabled={!user}
                   />
 
                   <DivisionSection
@@ -224,6 +230,7 @@ export function CheckoutForm() {
                     divisionsLoading={divisionsLoading}
                     divisionsError={divisionsError}
                     onInputChange={handleInputChange}
+                    disabled={!user}
                   />
 
                   {/* Session Selection for session-based packages */}
@@ -239,6 +246,7 @@ export function CheckoutForm() {
                   <ContactInformationSection
                     formData={formData}
                     onInputChange={handleInputChange}
+                    disabled={!user}
                   />
                 </div>
               </form>
@@ -258,12 +266,26 @@ export function CheckoutForm() {
             />
           </div>
         </div>
+
+        {/* Mobile Order Summary with Submit - Bottom */}
+        <div className="lg:hidden mt-8 max-w-2xl mx-auto">
+          <OrderSummary
+            formData={formData}
+            packageDetails={packageDetails}
+            selectedDivision={selectedDivision}
+            isFormValid={isFormValid()}
+            isSubmitting={isSubmitting}
+            onSubmit={handleSubmit}
+            paymentMethod={paymentMethod}
+          />
+        </div>
       </div>
 
       <SignInModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
         selectedPackage={formData.selectedPackage}
+        initialEmail={signInModalEmail}
       />
     </div>
   );

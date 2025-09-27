@@ -23,7 +23,7 @@ export interface PlayerRepository {
   findAll(): Promise<Player[]>;
   findById(id: string): Promise<Player | null>;
   findBySeason(seasonId: string): Promise<Player[]>;
-  findByTeam(teamId: string): Promise<Player[]>;
+  findByTeam(teamId: string, includeInactive?: boolean): Promise<Player[]>;
   findStatLeaders(seasonId?: string): Promise<Player[]>;
   findLeadersByCategory(category: StatCategory, seasonId?: string): Promise<Player[]>;
   findFeatured(count: number): Promise<Player[]>;

@@ -202,9 +202,9 @@ export class SupabasePlayerRepository implements PlayerRepository {
     }
   }
 
-  async findByTeam(teamId: string): Promise<Player[]> {
+  async findByTeam(teamId: string, includeInactive: boolean = false): Promise<Player[]> {
     try {
-      const { data: rosterPlayers, error } = await supabase
+      let query = supabase
         .from('roster_players')
         .select(`
           id,
@@ -244,9 +244,14 @@ export class SupabasePlayerRepository implements PlayerRepository {
             )
           )
         `)
-        .eq('rosters.teams.id', teamId)
-        .eq('status', 'active')
-        .order('jersey_number', { ascending: true });
+        .eq('rosters.teams.id', teamId);
+
+      // Only filter by active status if includeInactive is false
+      if (!includeInactive) {
+        query = query.eq('status', 'active');
+      }
+
+      const { data: rosterPlayers, error } = await query.order('jersey_number', { ascending: true });
 
       if (error) throw error;
 
@@ -450,6 +455,23 @@ export class SupabasePlayerRepository implements PlayerRepository {
           throw new Error(`Failed to find roster: ${rosterError.message}`);
         }
 
+        // Check if jersey number is already taken
+        const { data: existingPlayer, error: checkError } = await supabase
+          .from('roster_players')
+          .select('jersey_number')
+          .eq('roster_id', roster.id)
+          .eq('jersey_number', playerData.rosterData.jerseyNumber)
+          .maybeSingle();
+
+        if (checkError) {
+          console.error('Error checking jersey number:', checkError);
+          throw new Error('Failed to validate jersey number');
+        }
+
+        if (existingPlayer) {
+          throw new Error(`Jersey number ${playerData.rosterData.jerseyNumber} is already taken by another player on this roster`);
+        }
+
         // Create the roster player entry
         const { data: rosterPlayer, error: rosterPlayerError } = await supabase
           .from('roster_players')
@@ -465,6 +487,10 @@ export class SupabasePlayerRepository implements PlayerRepository {
 
         if (rosterPlayerError) {
           console.error('Error creating roster player:', rosterPlayerError);
+          // Provide more specific error messages
+          if (rosterPlayerError.code === '23505' && rosterPlayerError.message.includes('jersey_number')) {
+            throw new Error(`Jersey number ${playerData.rosterData.jerseyNumber} is already taken by another player on this roster`);
+          }
           throw new Error(`Failed to create roster player: ${rosterPlayerError.message}`);
         }
 

@@ -63,8 +63,8 @@ export default function TeamRosterPage() {
       }
 
       try {
-        // Get players for this team
-        const playersData = await playerRepository.findByTeam(teamId);
+        // Get players for this team (including inactive players)
+        const playersData = await playerRepository.findByTeam(teamId, true);
 
         // Sort by jersey number
         const sortedPlayers = playersData.sort((a, b) => {
@@ -108,7 +108,7 @@ export default function TeamRosterPage() {
       await playerRepository.softDelete(playerId);
 
       // Refresh the roster data to reflect the removal
-      const playersData = await playerRepository.findByTeam(teamId);
+      const playersData = await playerRepository.findByTeam(teamId, true);
       const sortedPlayers = playersData.sort((a, b) => {
         const aNum = a.jersey || 999;
         const bNum = b.jersey || 999;
@@ -134,8 +134,10 @@ export default function TeamRosterPage() {
         return "bg-red-100 text-red-800";
       case "inactive":
         return "bg-gray-100 text-gray-800";
+      case "removed":
+        return "bg-gray-100 text-gray-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-green-100 text-green-800"; // Default to active
     }
   };
 
@@ -218,7 +220,7 @@ export default function TeamRosterPage() {
             <CardContent className="p-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {players.length}
+                  {players.filter(p => p.status === 'active').length}
                 </div>
                 <div className="text-sm text-gray-500">Active</div>
               </div>
@@ -227,7 +229,9 @@ export default function TeamRosterPage() {
           <Card>
             <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">0</div>
+                <div className="text-2xl font-bold text-yellow-600">
+                  {players.filter(p => p.status === 'injured').length}
+                </div>
                 <div className="text-sm text-gray-500">Injured</div>
               </div>
             </CardContent>
@@ -235,8 +239,10 @@ export default function TeamRosterPage() {
           <Card>
             <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">0</div>
-                <div className="text-sm text-gray-500">Suspended</div>
+                <div className="text-2xl font-bold text-gray-600">
+                  {players.filter(p => p.status === 'inactive' || p.status === 'removed').length}
+                </div>
+                <div className="text-sm text-gray-500">Inactive</div>
               </div>
             </CardContent>
           </Card>
@@ -297,8 +303,8 @@ export default function TeamRosterPage() {
                           <h3 className="text-lg font-semibold text-gray-900">
                             {player.name}
                           </h3>
-                          <Badge className="bg-green-100 text-green-800">
-                            active
+                          <Badge className={getStatusColor(player.status)}>
+                            {player.status || 'active'}
                           </Badge>
                         </div>
 

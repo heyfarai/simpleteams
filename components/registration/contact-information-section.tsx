@@ -12,11 +12,13 @@ import type { FormData } from "@/hooks/use-registration-form";
 interface ContactInformationSectionProps {
   formData: FormData;
   onInputChange: (field: string, value: string) => void;
+  disabled?: boolean;
 }
 
 export function ContactInformationSection({
   formData,
   onInputChange,
+  disabled = false,
 }: ContactInformationSectionProps) {
   return (
     <div>
@@ -38,7 +40,10 @@ export function ContactInformationSection({
                 onChange={(e) =>
                   onInputChange("primaryContactName", e.target.value)
                 }
-                className="mt-1 bg-primary/10 shadow-none"
+                className={`mt-1 bg-primary/10 shadow-none ${
+                  disabled ? "cursor-not-allowed opacity-50" : ""
+                }`}
+                disabled={disabled}
                 required
               />
             </div>
@@ -50,7 +55,10 @@ export function ContactInformationSection({
                 onChange={(e) =>
                   onInputChange("primaryContactPhone", e.target.value)
                 }
-                className="mt-1 bg-primary/10 shadow-none"
+                className={`mt-1 bg-primary/10 shadow-none ${
+                  disabled ? "cursor-not-allowed opacity-50" : ""
+                }`}
+                disabled={disabled}
               />
             </div>
             <div>
@@ -60,8 +68,11 @@ export function ContactInformationSection({
                 onValueChange={(value) =>
                   onInputChange("primaryContactRole", value)
                 }
+                disabled={disabled}
               >
-                <SelectTrigger className="mt-1 bg-primary/10 shadow-none w-full">
+                <SelectTrigger className={`mt-1 bg-primary/10 shadow-none w-full ${
+                  disabled ? "cursor-not-allowed opacity-50" : ""
+                }`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

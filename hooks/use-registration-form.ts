@@ -73,7 +73,16 @@ export function useRegistrationForm() {
   }, [user?.email]);
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+
+      // Auto-populate primaryContactEmail when contactEmail changes for unauthenticated users
+      if (field === "contactEmail" && !user) {
+        updated.primaryContactEmail = value;
+      }
+
+      return updated;
+    });
   };
 
   const isFormValid = () => {
@@ -138,6 +147,14 @@ export function useRegistrationForm() {
               label: "Need help?",
               onClick: () => {},
             },
+          });
+          return;
+        }
+
+        if (data.error === "authentication_required") {
+          toast.error("Email Verification Required", {
+            description: data.message,
+            duration: 8000,
           });
           return;
         }

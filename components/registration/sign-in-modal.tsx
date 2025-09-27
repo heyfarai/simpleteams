@@ -5,9 +5,10 @@ interface SignInModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedPackage: string;
+  initialEmail?: string;
 }
 
-export function SignInModal({ isOpen, onClose, selectedPackage }: SignInModalProps) {
+export function SignInModal({ isOpen, onClose, selectedPackage, initialEmail }: SignInModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -38,6 +39,7 @@ export function SignInModal({ isOpen, onClose, selectedPackage }: SignInModalPro
         <div className="py-4">
           <InlineMagicLinkSignIn
             returnTo={`/register/checkout?package=${selectedPackage}`}
+            initialEmail={initialEmail}
             onSuccess={() => {
               onClose();
               toast.success("Magic link sent!", {

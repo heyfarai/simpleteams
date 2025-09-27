@@ -164,14 +164,16 @@ interface InlineMagicLinkSignInProps {
   onSuccess?: () => void;
   className?: string;
   returnTo?: string;
+  initialEmail?: string;
 }
 
 export function InlineMagicLinkSignIn({
   onSuccess,
   className = "",
   returnTo,
+  initialEmail = "",
 }: InlineMagicLinkSignInProps) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
 
@@ -218,12 +220,6 @@ export function InlineMagicLinkSignIn({
 
   return (
     <Card className={className}>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg">Sign in to add another team</CardTitle>
-        <CardDescription>
-          Enter your email to receive a magic link
-        </CardDescription>
-      </CardHeader>
       <CardContent>
         <form
           onSubmit={handleSignIn}

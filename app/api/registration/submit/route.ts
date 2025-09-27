@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { supabaseAdmin } from "@/lib/supabase/client-safe";
 import { getReturnUrl } from '@/lib/utils/url-utils';
 import { getPackageConfig, isInstallmentAvailable, type PackageType } from '@/lib/config/packages';
 import { registrationService } from '@/lib/services';
@@ -68,11 +69,11 @@ export async function POST(request: Request) {
       userId = formData.userId;
       console.log("Using client-provided authenticated user:", userId);
     } else {
-      // No authenticated user - this should require sign-in first
+      // No authenticated user - require authentication for all registrations
       return NextResponse.json({
         error: "authentication_required",
-        message: "Please sign in to register your team. We'll send you a magic link to complete authentication.",
-        suggestion: "login_required"
+        message: "Please verify your email address to continue with registration.",
+        suggestion: "email_verification_required"
       }, { status: 401 });
     }
 

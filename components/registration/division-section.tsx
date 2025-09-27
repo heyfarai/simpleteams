@@ -9,6 +9,7 @@ interface DivisionSectionProps {
   divisionsLoading: boolean;
   divisionsError: any;
   onInputChange: (field: string, value: string) => void;
+  disabled?: boolean;
 }
 
 export function DivisionSection({
@@ -17,6 +18,7 @@ export function DivisionSection({
   divisionsLoading,
   divisionsError,
   onInputChange,
+  disabled = false,
 }: DivisionSectionProps) {
   return (
     <div>
@@ -44,7 +46,8 @@ export function DivisionSection({
             onValueChange={(value) =>
               onInputChange("divisionPreference", value)
             }
-            className="space-y-3"
+            className={`space-y-3 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={disabled}
           >
             {divisions
               .filter((division) => division.isActive)
@@ -57,10 +60,11 @@ export function DivisionSection({
                     value={division.id}
                     id={division.id}
                     className="bg-primary/10 shadow-none"
+                    disabled={disabled}
                   />
                   <Label
                     htmlFor={division.id}
-                    className="cursor-pointer"
+                    className={disabled ? "cursor-not-allowed" : "cursor-pointer"}
                   >
                     <div>
                       <div className="font-medium">{division.name}</div>
