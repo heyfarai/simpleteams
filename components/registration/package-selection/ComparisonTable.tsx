@@ -1,10 +1,10 @@
 "use client";
 
-import { comparisonRows } from "./data/comparisonFeatures";
-import type { ComparisonRow } from "./types";
+import { getComparisonRows } from "@/lib/config/packages";
+import type { ComparisonRow } from "@/lib/config/packages";
 
 export function ComparisonTable() {
-  const visibleRows = comparisonRows;
+  const visibleRows = getComparisonRows();
   const renderTableCell = (
     value: string | boolean | undefined,
     type: "full" | "two" | "per",

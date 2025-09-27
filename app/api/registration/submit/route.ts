@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const { formData, currentUrl } = await request.json();
 
     // Validate required fields
-    if (!formData.teamName || !formData.contactEmail || !formData.city || !formData.province) {
+    if (!formData.teamName || !formData.contactEmail || !formData.city) {
       return NextResponse.json(
         { error: "Missing required team information" },
         { status: 400 }

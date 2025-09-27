@@ -87,14 +87,13 @@ export function TeamInformationSection({
               required
             />
           </div>
-          <div className="sm:col-span-2">
-            <Label htmlFor="province">Province *</Label>
+          <div className="hidden sm:col-span-2">
+            <Label htmlFor="province">Province</Label>
             <Input
               id="province"
               value={formData.province}
               onChange={(e) => onInputChange("province", e.target.value)}
               className="mt-1 bg-primary/10 shadow-none"
-              required
             />
           </div>
         </div>

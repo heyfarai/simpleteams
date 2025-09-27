@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Package } from "lucide-react";
+import { getPackageDisplayDetails } from "@/lib/config/packages";
 
 interface SelectedPackageDisplayProps {
   selectedPackage: string;
@@ -15,40 +16,7 @@ export function SelectedPackageDisplay({
   onChangePackage,
   showChangeButton = true,
 }: SelectedPackageDisplayProps) {
-  const getPackageDetails = (packageId: string) => {
-    switch (packageId) {
-      case "full-season":
-        return {
-          name: "Full Season Team",
-          price: "$3,495",
-          originalPrice: "$3,795",
-          games: "12+ games + playoffs",
-          badge: "🥇 BEST VALUE",
-          description: "Pick any 3 season sessions × 4 games each",
-          isRecommended: true,
-        };
-      case "two-session":
-        return {
-          name: "Two Session Pack",
-          price: "$1,795",
-          games: "6 games max (3 per session)",
-          description: "Registration deadline: Oct 5",
-          isRecommended: false,
-        };
-      case "pay-per-session":
-        return {
-          name: "Pay Per Session",
-          price: "$895",
-          games: "3 games max per session",
-          description: "Individual sessions • Various deadlines",
-          isRecommended: false,
-        };
-      default:
-        return null;
-    }
-  };
-
-  const packageDetails = getPackageDetails(selectedPackage);
+  const packageDetails = getPackageDisplayDetails(selectedPackage);
 
   if (!packageDetails) {
     return null;

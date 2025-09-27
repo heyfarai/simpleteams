@@ -1,12 +1,11 @@
 import { useMemo } from "react";
-import { packages } from "@/components/registration/package-selection/data/packages";
-import { comparisonRows } from "@/components/registration/package-selection/data/comparisonFeatures";
-import type { PackageOption } from "@/components/registration/package-selection/types";
+import { getPackageOptions, getComparisonRows } from "@/lib/config/packages";
+import type { PackageOption } from "@/lib/config/packages";
 
 export function usePackageComparison() {
-  const packageData = useMemo(() => packages, []);
+  const packageData = useMemo(() => getPackageOptions(), []);
 
-  const comparisonData = useMemo(() => comparisonRows, []);
+  const comparisonData = useMemo(() => getComparisonRows(), []);
 
   const getPackageById = useMemo(() => {
     return (id: string): PackageOption | undefined => {

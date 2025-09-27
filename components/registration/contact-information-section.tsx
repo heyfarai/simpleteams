@@ -8,7 +8,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { FormData } from "@/hooks/use-registration-form";
-import { useAuth } from "@/hooks/use-auth";
 
 interface ContactInformationSectionProps {
   formData: FormData;
@@ -19,7 +18,6 @@ export function ContactInformationSection({
   formData,
   onInputChange,
 }: ContactInformationSectionProps) {
-  const { user } = useAuth();
   return (
     <div>
       <h2 className="text-lg md:text-xl text-gray-900 mb-4">
@@ -41,23 +39,6 @@ export function ContactInformationSection({
                   onInputChange("primaryContactName", e.target.value)
                 }
                 className="mt-1 bg-primary/10 shadow-none"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="primaryContactEmail">
-                Email Address *
-                {user && <span className="text-xs text-gray-500 ml-2">(from your account)</span>}
-              </Label>
-              <Input
-                id="primaryContactEmail"
-                type="email"
-                value={formData.primaryContactEmail}
-                onChange={(e) =>
-                  onInputChange("primaryContactEmail", e.target.value)
-                }
-                className={`mt-1 shadow-none ${user ? "bg-gray-50 text-gray-600" : "bg-primary/10"}`}
-                disabled={!!user}
                 required
               />
             </div>
@@ -94,9 +75,12 @@ export function ContactInformationSection({
         </div>
 
         {/* Head Coach */}
-        <div>
+        <div className="hidden">
           <h3 className="text-base font-medium text-gray-900 mb-4">
-            Head Coach <span className="text-sm font-normal text-gray-500">(optional)</span>
+            Head Coach{" "}
+            <span className="text-sm font-normal text-gray-500">
+              (optional)
+            </span>
           </h3>
           <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
             <div>

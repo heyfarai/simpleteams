@@ -1,7 +1,0 @@
-"use client";
-
-import { CheckoutForm } from "@/components/registration/checkout-form";
-
-export default function RegistrationStepPage() {
-  return <CheckoutForm />;
-}

@@ -44,6 +44,17 @@ async function handleRegistrationPayment(
       );
     }
 
+    // Check if team already exists for this registration (idempotency protection)
+    if (registration.team_id) {
+      console.log(`Team already exists for registration ${registrationId}: ${registration.team_id}`);
+      return NextResponse.json({
+        received: true,
+        teamId: registration.team_id,
+        registrationId,
+        message: "Team already exists"
+      });
+    }
+
     // Update registration payment status
     const { error: updateRegistrationError } = await supabase
       .from("team_registrations")
@@ -79,7 +90,7 @@ async function handleRegistrationPayment(
       head_coach_email: registration.head_coach_email,
       head_coach_phone: registration.head_coach_phone,
       head_coach_certifications: registration.head_coach_certifications,
-      status: "active"
+      status: "inactive"
     };
 
     const { data: team, error: teamError } = await supabase

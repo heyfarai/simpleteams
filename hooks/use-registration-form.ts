@@ -81,7 +81,6 @@ export function useRegistrationForm() {
       formData.selectedPackage &&
       formData.teamName &&
       formData.city &&
-      formData.province &&
       formData.contactEmail &&
       formData.divisionPreference &&
       formData.primaryContactName &&

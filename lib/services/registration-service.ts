@@ -10,6 +10,7 @@ import type {
   UpdateRegistrationRequest
 } from "../repositories/interfaces";
 import { sessionEnrollmentService } from "./session-enrollment-service";
+import { sessionService } from "./session-service";
 import { league } from "./league";
 
 export class RegistrationService {
@@ -177,12 +178,30 @@ export class RegistrationService {
       throw new Error('User already has an active registration');
     }
 
+    // Handle session selection based on package type
+    let selectedSessionIds = formData.selectedSessionIds || null;
+
+    // For full-season packages, automatically select all sessions
+    if (formData.selectedPackage === 'full-season') {
+      try {
+        const currentSeason = await league.getCurrentSeason();
+        if (currentSeason) {
+          const allSessions = await sessionService.getSessionsBySeason(currentSeason.id);
+          selectedSessionIds = allSessions.map(session => session.id);
+          console.log(`[DEBUG] Auto-populated ${selectedSessionIds.length} sessions for full-season package`);
+        }
+      } catch (error) {
+        console.error('[ERROR] Failed to auto-populate sessions for full-season package:', error);
+        // Continue with null - the validation will handle this appropriately
+      }
+    }
+
     // Create registration data
     const registrationData: any = {
       userId,
       teamName: formData.teamName,
       city: formData.city,
-      region: formData.province,
+      region: formData.province || null,
       phone: formData.phone || null,
       primaryColor: formData.primaryColors?.[0] || '#1e40af',
       secondaryColor: formData.primaryColors?.[1] || '#fbbf24',
@@ -198,7 +217,7 @@ export class RegistrationService {
       divisionPreference: formData.divisionPreference,
       registrationNotes: formData.registrationNotes || null,
       selectedPackage: formData.selectedPackage,
-      selectedSessionIds: formData.selectedSessionIds || null, // For session-based packages
+      selectedSessionIds: selectedSessionIds, // Now properly handled for all package types
       status: 'pending' as const,
       paymentStatus: 'pending' as const
     };
@@ -235,6 +254,9 @@ export class RegistrationService {
         }
       }
     }
+
+    // For full-season packages, sessions should be auto-populated (no validation needed)
+    // The system automatically selects all available sessions
   }
 
   // Private validation methods

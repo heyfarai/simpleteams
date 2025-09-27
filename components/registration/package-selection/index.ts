@@ -5,8 +5,8 @@ export { PackageGrid } from "./PackageGrid";
 export { PricingTable } from "./PricingTable";
 
 // Data
-export { packages } from "./data/packages";
-export { comparisonRows } from "./data/comparisonFeatures";
+export { getPackageOptions as packages } from "@/lib/config/packages";
+export { getComparisonRows as comparisonRows } from "@/lib/config/packages";
 
 // Hooks
 export { usePackageComparison } from "@/hooks/use-package-comparison";
@@ -16,5 +16,7 @@ export type {
   PackageOption,
   PackageFeature,
   ComparisonRow,
+} from "@/lib/config/packages";
+export type {
   PackageSelectionStepProps,
 } from "./types";

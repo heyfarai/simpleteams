@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { sendEmail } from "./postmark";
-import { getPackageDetails } from "@/lib/stripe/utils/package-details";
+import { getPackageInfo } from "@/lib/config/packages";
 import {
   getTeamRegistrationConfirmationHtml,
   getCoachWelcomeHtml,
@@ -17,7 +17,7 @@ export async function sendConfirmationEmails(
   selectedSessions?: any[]
 ) {
   try {
-    const packageDetails = getPackageDetails(
+    const packageDetails = getPackageInfo(
       session.metadata?.selectedPackage || ""
     );
 
