@@ -96,7 +96,7 @@ export function SeasonContent({
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 flex items-center justify-center pt-24">
         <p>Loading games...</p>
       </div>
     );

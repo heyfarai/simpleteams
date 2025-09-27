@@ -60,7 +60,7 @@ export function LeagueDivisions() {
   };
 
   return (
-    <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto mt-24">
+    <div className="max-w-[85rem] px-2 py-10 sm:px-4 lg:px-8 lg:py-14 mx-auto mt-24">
       <div className="text-center mb-24 space-y-4">
         <div className="heading-highlight-container">
           <h1 className="display-heading heading-highlight px-4">

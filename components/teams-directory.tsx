@@ -62,7 +62,7 @@ export function TeamsDirectory() {
   const seasonFromUrl = searchParams.get("season");
   const viewModeFromUrl = searchParams.get("view") as ViewMode;
   const [viewMode, setViewMode] = useState<ViewMode>(
-    viewModeFromUrl || "standings"
+    viewModeFromUrl || "grid"
   );
 
   useEffect(() => {

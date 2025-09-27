@@ -20,7 +20,7 @@ export function DivisionTab({ division, isActive, onClick }: DivisionTabProps) {
     <div>
       <div
         className={cn(
-          "p-4 md:p-5 rounded-xl transition-all",
+          "p-0 py-2 md:p-5 rounded-xl transition-all",
           !isActive && "hover:bg-amber-950 dark:hover:bg-neutral-800",
           "focus-within:outline-none focus-within:ring-2 focus-within:ring-amber-950/20 dark:focus-within:bg-neutral-800",
           isActive &&
@@ -41,14 +41,14 @@ export function DivisionTab({ division, isActive, onClick }: DivisionTabProps) {
             <Icon className="iconDivision hidden h-5 w-5 mt-0.5" />
             <span className="grow">
               {division.isNew ? (
-                <h2 className="flex flex-row items-center mb-3 text-3xl font-normal tracking-wide">
+                <h2 className="flex flex-row items-center mb-3 text-2xl font-bold tracking-wide">
                   {division.name}
                   <Badge className="ml-2 bg-amber-200 text-amber-950">
                     New
                   </Badge>
                 </h2>
               ) : (
-                <h2 className="block text-3xl font-normal tracking-wide">
+                <h2 className="block text-2xl font-bold tracking-wide">
                   {division.name}
                 </h2>
               )}

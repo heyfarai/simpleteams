@@ -16,7 +16,7 @@ export interface Division {
 export const divisions: Division[] = [
   {
     id: "tab-1",
-    name: "Diamond Division",
+    name: "Diamond  ",
     displayName: "Diamond",
     icon: Trophy,
     categories: ["U19/Mens", "Grade 12 AAA+", "Senior Prep", "CEGEP D1"],
@@ -24,15 +24,21 @@ export const divisions: Division[] = [
   },
   {
     id: "tab-2",
-    name: "Premier Division",
+    name: "Premier",
     displayName: "Premier",
     icon: Users2,
-    categories: ["U17-U18", "Grade 11", "Grade 12 AA", "Junior Prep", "CEGEP D2"],
+    categories: [
+      "U17-U18",
+      "Grade 11",
+      "Grade 12 AA",
+      "Junior Prep",
+      "CEGEP D2",
+    ],
     videoSrc: "/clips/clip2.mp4",
   },
   {
     id: "tab-3",
-    name: "Supreme Division",
+    name: "Supreme",
     displayName: "Supreme",
     icon: CalendarDays,
     categories: ["U16 AAA", "Grade 10+", "Junior Prep", "Juvenile Gars"],
@@ -40,7 +46,7 @@ export const divisions: Division[] = [
   },
   {
     id: "tab-4",
-    name: "Ascent Division",
+    name: "Ascent",
     displayName: "Ascent",
     icon: CalendarDays,
     categories: ["U15 AAA", "U16 AA", "Grade 9+", "Cadet Gars"],

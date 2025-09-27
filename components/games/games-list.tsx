@@ -142,19 +142,6 @@ export function GamesList({ filterData }: GamesListProps) {
 
   const allGames = gamesData?.games || [];
 
-  // Debug total games fetched
-  console.log(`[DEBUG] Total games fetched: ${allGames.length}`);
-  console.log(`[DEBUG] Filter params: season=${season}, session=${session}, division=${division}, status=${status}`);
-
-  // Debug first few games structure
-  if (allGames.length > 0) {
-    console.log(`[DEBUG] First game structure:`, {
-      id: allGames[0].id,
-      rosterHome: allGames[0].rosterHome,
-      rosterAway: allGames[0].rosterAway
-    });
-  }
-
   // Convert filter data seasons to Season format for SeasonTabs
   const availableSeasons: Season[] = (filterData.seasons || []).map(
     (season) => ({
@@ -209,7 +196,11 @@ export function GamesList({ filterData }: GamesListProps) {
     <div className="h-full flex flex-col">
       {/* Season Tabs - each tab gets its own content */}
       <Tabs.Root
-        value={season === "all" ? (availableSeasons.find(s => s.isActive)?.id || "") : season}
+        value={
+          season === "all"
+            ? availableSeasons.find((s) => s.isActive)?.id || ""
+            : season
+        }
         onValueChange={(value) => handleFilterChange("season", value || "all")}
         className="w-full h-full flex-1 p-2"
       >
@@ -230,26 +221,19 @@ export function GamesList({ filterData }: GamesListProps) {
 
         {/* Each season gets its own content with its own query */}
         {availableSeasons.map((seasonTab) => {
-          const filteredGames = allGames.filter(game => {
+          const filteredGames = allGames.filter((game) => {
             // Filter games to only show ones that belong to this season tab
             const gameSeasonId = game.season?.id;
             const matches = gameSeasonId === seasonTab.id;
 
-            // Debug logging
-            if (game.id) {
-              console.log(`[DEBUG] Game ${game.id}: gameSeasonId=${gameSeasonId}, seasonTab.id=${seasonTab.id}, matches=${matches}`);
-            }
-
             return matches;
           });
-
-          console.log(`[DEBUG] Season "${seasonTab.name}" (${seasonTab.id}): Found ${filteredGames.length} games`);
 
           return (
             <Tabs.Content
               key={`content-${seasonTab.id}`}
               value={seasonTab.id}
-              className="flex-1 outline-none mt-4"
+              className="flex-1 outline-none"
             >
               <SeasonContent
                 seasonId={seasonTab.id}

@@ -20,7 +20,7 @@ export function LeagueStructure() {
       {/* End Title */}
       <div className="w-full lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
         <div className="lg:col-span-7">
-          <div className="grid grid-cols-12 gap-2 sm:gap-6 items-center lg:-translate-x-10">
+          <div className="grid grid-cols-12 gap-2 sm:gap-6 items-center">
             <div className="col-span-3">
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl">
                 <Image

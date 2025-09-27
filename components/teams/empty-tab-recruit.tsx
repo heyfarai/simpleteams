@@ -35,16 +35,13 @@ const benefits = [
 
 export function EmptyTabRecruit() {
   return (
-    <div className="text-center py-12 space-y-12">
+    <div className="text-center py-0 space-y-12">
       {/* Hero Challenge */}
       <div className="">
         <div className="space-y-2">
           <h2 className="text-4xl font-normal text-foreground">
             Your Competition Awaits
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Elite teams are registering for the 2025-26 circuit.
-          </p>
         </div>
 
         <div className="flex justify-center">

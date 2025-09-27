@@ -49,8 +49,6 @@ const season = {
 export function UpcomingSeason() {
   return (
     <div className="text-center py-8 space-y-8">
-      <HowTheCircuitWorks />
-
       <div className="seasonteaser">
         <div className="space-y-4">
           <p className="text-normal text-foreground/50">
@@ -66,11 +64,11 @@ export function UpcomingSeason() {
           </div>
         </div>
       </div>
-      <div className="seasonsessions mt-12 p-2">
+      <div className="seasonsessions p-2">
         {season.sessions.map((session, index) => (
           <div
             key={session._id}
-            className={`session flex flex-col md:flex-row justify-between gap-4 border border-b-0 border-[#e0ddd9] p-6 ${
+            className={`session flex flex-row justify-between gap-4 border border-b-0 border-[#e0ddd9] p-4 md:p-6 ${
               index === 0 ? "rounded-t-lg" : ""
             } ${
               index === season.sessions.length - 1
@@ -92,12 +90,13 @@ export function UpcomingSeason() {
             </div>
             <div className="flex items-center gap-2">
               <p className="text-sm text-muted-foreground">
-                Games and Location: {session.location}
+                Games: {session.location}
               </p>
             </div>
           </div>
         ))}
       </div>
+      <HowTheCircuitWorks />
     </div>
   );
 }

@@ -17,8 +17,8 @@ export default function AboutPage() {
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="lg:order-first">
             <Image
-              src="/nchh-logo.webp"
-              alt="NCHH Logo"
+              src="/nchc-logo.webp"
+              alt="nchc Logo"
               width={120}
               height={120}
               className="w-full max-w-44 mx-auto"
@@ -85,29 +85,11 @@ export default function AboutPage() {
               duration={3000}
             />
           </div>
-          <div className="hidden md:grid-cols-2 gap-8">
-            <div className=" p-8 rounded-lg shadow-lg">
-              <div className="md:text-8xl text-6xl font-extrabold text-primary mb-4">
-                97%
-              </div>
-              <p className="text-sm text-gray-700">
-                Coaches and team staff called their NCHC experience "excellent".
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-lg shadow-lg">
-              <div className="md:text-8xl text-6xl font-extrabold text-primary mb-4">
-                93%
-              </div>
-              <p className="text-sm text-gray-700">
-                Confirmed they would take part again.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
       <section className="w-full min-h-screen bg-foreground flex items-center justify-center">
-        <div className="max-w-3xl mx-auto px-16">
-          <h3 className="text-4xl md:text-4xl font-normal mb-12 text-foreground">
+        <div className="max-w-3xl mx-auto md:px-16 px-8">
+          <h3 className="text-3xl md:text-4xl font-normal mb-12 text-foreground">
             <span className="text-[#dbe0e1]">
               <span className="text-secondary pr-2 text-5xl md:text-7xl">
                 <span className="mutant-outline">97%</span>
@@ -116,7 +98,7 @@ export default function AboutPage() {
               <span className="pl-2 text-secondary"> “excellent”</span>.
             </span>
           </h3>
-          <h3 className="text-4xl md:text-4xl font-normal mb-0 text-foreground">
+          <h3 className="text-3xl md:text-4xl font-normal mb-0 text-foreground">
             <span className="text-[#dbe0e1]">
               <span className="text-secondary pr-2 text-5xl md:text-7xl">
                 <span className="mutant-outline">93%</span>
@@ -130,7 +112,7 @@ export default function AboutPage() {
         </div>
       </section>
       {/* Season 2 */}
-      <section className="py-44 px-16">
+      <section className="py-44 md:px-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl md:text-3xl font-normal mb-0 text-center text-foreground">
             <span className="text-primary">Season 2</span>
@@ -183,13 +165,13 @@ export default function AboutPage() {
           </div>
 
           <div className="space-y-8 max-w-3xl mx-auto">
-            <div className="p-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-black rounded-full flex-shrink-0 flex items-center justify-center">
+            <div className="p-2 md:p-8">
+              <div className="flex flex-col md:flex-row items-center md:items-start space-x-4">
+                <div className="w-8 h-8 mb-2 md:mb-0 bg-black rounded-full flex-shrink-0 flex items-center justify-center">
                   <span className="text-white font-bold">1</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-2">
+                  <h3 className="text-xl font-bold text-center md:text-left mb-2">
                     Organization & Commitment
                   </h3>
                   <p className="text-gray-700">
@@ -201,13 +183,13 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="p-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-black rounded-full flex-shrink-0 flex items-center justify-center">
+            <div className="p-2 md:p-8">
+              <div className="flex flex-col md:flex-row items-center md:items-start space-x-4">
+                <div className="w-8 h-8 mb-2 md:mb-0 bg-black rounded-full flex-shrink-0 flex items-center justify-center">
                   <span className="text-white font-bold">2</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-2">
+                  <h3 className="text-xl font-bold mb-2 text-center md:text-left">
                     We make it feel Pro.
                   </h3>
                   <p className="text-gray-700">
@@ -219,13 +201,13 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="p-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-black rounded-full flex-shrink-0 flex items-center justify-center">
+            <div className="p-2 md:p-8">
+              <div className="flex flex-col md:flex-row items-center md:items-start space-x-4">
+                <div className="w-8 h-8 mb-2 md:mb-0 bg-black rounded-full flex-shrink-0 flex items-center justify-center">
                   <span className="text-white font-bold">3</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-2">
+                  <h3 className="text-xl font-bold mb-2 text-center md:text-left">
                     Exposure & Recognition
                   </h3>
                   <p className="text-gray-700">

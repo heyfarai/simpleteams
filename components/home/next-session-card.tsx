@@ -38,7 +38,7 @@ export function NextSessionCard() {
   }, []);
 
   return (
-    <Card className="border-0 shadow-none bg-none -mt-12 md:mt-0">
+    <Card className="border-0 shadow-none bg-none md:mt-0">
       <CardHeader>
         <CardTitle className="hidden md:text-2xl text-xl font-bold text-center">
           Game Time. <span className="font-light">Session #1</span>

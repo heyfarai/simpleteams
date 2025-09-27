@@ -6,7 +6,8 @@ import { generateMetadata as generateSiteMetadata } from "@/lib/metadata";
 
 export const metadata = generateSiteMetadata({
   title: "Game Schedules & Tournaments",
-  description: "View all National Capital Hoops Circuit games, schedules, and tournament brackets. Follow your favorite teams and stay updated on game results, upcoming matches, and championship tournaments."
+  description:
+    "View all National Capital Hoops Circuit games, schedules, and tournament brackets. Follow your favorite teams and stay updated on game results, upcoming matches, and championship tournaments.",
 });
 
 export default async function GamesPage() {
@@ -14,8 +15,8 @@ export default async function GamesPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-18 mt-16 md:mt-24 text-center">
+      <div className="container mx-auto px-1 py-8">
+        <div className="mb-12 mt-12 md:mt-24 text-center">
           <div className="heading-highlight-container">
             <h1 className="display-heading heading-highlight">
               Game Schedules

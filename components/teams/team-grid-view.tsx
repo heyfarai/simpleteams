@@ -51,13 +51,13 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                 key={team.id}
                 className="bg-white border-0"
               >
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center gap-4 mb-1">
                     {/* Team Logo */}
                     <TeamLogo
                       teamName={team.name}
                       logoUrl={team.logo}
-                      size="md"
+                      size="sm"
                       className="w-12 h-12"
                     />
 
@@ -65,14 +65,6 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                       <h3 className="font-bold text-lg text-foreground">
                         {team.name}
                       </h3>
-                      {team.division && (
-                        <Badge
-                          variant="secondary"
-                          className="mb-2 hidden "
-                        >
-                          {team.division.name}
-                        </Badge>
-                      )}
                     </div>
                   </div>
 
@@ -103,7 +95,7 @@ export function TeamGridView({ teams }: TeamGridViewProps) {
                   )}
 
                   {/* Team Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-center">
+                  <div className="grid grid-cols-3 gap-4 mb-0 text-center">
                     <div>
                       <div className="text-xl font-bold text-primary">
                         {team.stats?.wins || 0}-{team.stats?.losses || 0}

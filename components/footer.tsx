@@ -11,10 +11,10 @@ export function Footer() {
             <Link
               href="/"
               className="flex-none text-xl font-semibold text-white focus:outline-none focus:opacity-80"
-              aria-label="NCHH"
+              aria-label="NCHC"
             >
               <Image
-                src="/nchh-logo.webp"
+                src="/nchc-logo.webp"
                 alt="National Capital Hoops Circuit Logo"
                 width={56}
                 height={56}
@@ -122,7 +122,7 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="col-span-2">
+          <div className="col-span-2 hidden ">
             <h4 className="font-semibold text-gray-100">Stay up to date</h4>
             <form>
               <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:gap-3 bg-white rounded-lg p-2 dark:bg-neutral-900">

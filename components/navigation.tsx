@@ -23,19 +23,19 @@ export function Navigation() {
 
   return (
     <header className="flex flex-wrap lg:justify-start lg:flex-nowrap z-40 w-full py-7">
-      <nav className="absolute rounded-full top-0 p-4 md:relative max-w-7xl w-full flex flex-wrap md:grid md:grid-cols-[1fr_auto_1fr] basis-full items-center px-8 lg:px-8 md:mx-auto bg-background z-50  ">
+      <nav className="absolute rounded-full top-0 p-4 md:relative max-w-7xl w-full flex flex-wrap md:grid md:grid-cols-[1fr_auto_1fr] basis-full items-center px-4 lg:px-8 md:mx-auto bg-background z-50  ">
         <div className="flex items-center">
           <Link
             href="/"
             className="flex-none text-xl inline-block font-semibold focus:outline-none focus:opacity-80 "
-            aria-label="NCHH"
+            aria-label="nchc"
           >
             <Image
-              src="/nchh-logo.webp"
+              src="/nchc-logo.webp"
               alt="National Capital Hoops Circuit Logo"
-              width={32}
-              height={32}
-              className="w-14 h-14 md:w-16 md:h-16 "
+              width={24}
+              height={24}
+              className="w-10 h-10 md:w-16 md:h-16 "
             />
           </Link>
           <div className="ms-1 sm:ms-2"></div>

@@ -127,7 +127,7 @@ export function generateOrganizationSchema() {
     description:
       "Elite basketball league in Ottawa featuring competitive divisions, player development, and championship tournaments.",
     url: "https://natcaphoops.com",
-    logo: `${siteConfig.url}/nchh-logo.webp`,
+    logo: `${siteConfig.url}/nchc-logo.webp`,
     image: `${siteConfig.url}/og-image.jpg`,
     email: "natcaphoops@gmail.com",
     sport: "Basketball",
