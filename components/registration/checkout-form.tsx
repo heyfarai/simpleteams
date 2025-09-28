@@ -28,6 +28,12 @@ export function CheckoutForm() {
   const [signInModalEmail, setSignInModalEmail] = useState<string>("");
   const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
 
+  // Check for payment method in URL parameters
+  const searchParams = new URLSearchParams(
+    typeof window !== "undefined" ? window.location.search : ""
+  );
+  const paymentFromUrl = searchParams.get("payment");
+
   // Service status monitoring
   useServiceStatus();
 
@@ -52,10 +58,21 @@ export function CheckoutForm() {
     user?.id
   );
 
-  // Determine payment method based on preferences and availability
+  // Determine payment method based on URL parameter, preferences, and availability
   const installmentsAvailable = isInstallmentAvailable(packageForPreference);
-  const paymentMethod =
-    isInstallmentEnabled && installmentsAvailable ? "installments" : "full";
+
+  // Priority: URL parameter > saved preferences > default to installments if available
+  let paymentMethod: "full" | "installments" = "full";
+  if (paymentFromUrl === "installments" && installmentsAvailable) {
+    paymentMethod = "installments";
+  } else if (paymentFromUrl === "full") {
+    paymentMethod = "full";
+  } else if (isInstallmentEnabled && installmentsAvailable) {
+    paymentMethod = "installments";
+  } else if (installmentsAvailable) {
+    // Default to installments if available and no explicit preference is set
+    paymentMethod = "installments";
+  }
 
   // Janky MVP: Override the submit to include payment method
   const handleSubmit = async () => {
@@ -77,7 +94,8 @@ export function CheckoutForm() {
         city: formData.city,
         province: formData.province,
         selectedPackage: formData.selectedPackage,
-        selectedSessionIds: selectedSessionIds.length > 0 ? selectedSessionIds : undefined,
+        selectedSessionIds:
+          selectedSessionIds.length > 0 ? selectedSessionIds : undefined,
         paymentMethod: paymentMethod, // Use our local state
         userId: user?.id,
       };
@@ -115,7 +133,8 @@ export function CheckoutForm() {
         const toastModule = import("sonner");
         toastModule.then(({ toast }) => {
           toast.success("Email verified successfully!", {
-            description: "Your form is now unlocked. Please complete your registration.",
+            description:
+              "Your form is now unlocked. Please complete your registration.",
             duration: 3000,
           });
         });
@@ -137,7 +156,6 @@ export function CheckoutForm() {
       }
     };
   }, []);
-
 
   const handleShowSignIn = (email?: string) => {
     setSignInModalEmail(email || formData.contactEmail);
@@ -234,14 +252,21 @@ export function CheckoutForm() {
                   />
 
                   {/* Session Selection for session-based packages */}
-                  {formData.selectedPackage && ['two-session', 'pay-per-session'].includes(formData.selectedPackage) && (
-                    <SessionSelection
-                      packageType={formData.selectedPackage as 'two-session' | 'pay-per-session'}
-                      seasonId={currentSeasonId} // Dynamic active season from database
-                      selectedSessionIds={selectedSessionIds}
-                      onSelectionChange={setSelectedSessionIds}
-                    />
-                  )}
+                  {formData.selectedPackage &&
+                    ["two-session", "pay-per-session"].includes(
+                      formData.selectedPackage
+                    ) && (
+                      <SessionSelection
+                        packageType={
+                          formData.selectedPackage as
+                            | "two-session"
+                            | "pay-per-session"
+                        }
+                        seasonId={currentSeasonId} // Dynamic active season from database
+                        selectedSessionIds={selectedSessionIds}
+                        onSelectionChange={setSelectedSessionIds}
+                      />
+                    )}
 
                   <ContactInformationSection
                     formData={formData}

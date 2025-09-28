@@ -14,7 +14,10 @@ import {
 } from "lucide-react";
 import { useSelectedTeam } from "@/components/dashboard/team-selector";
 import { usePaymentsByTeam } from "@/lib/hooks/use-payments";
+import { useRegistrationByTeam } from "@/lib/hooks/use-registration";
 import { useAuth } from "@/hooks/use-auth";
+import { usePaymentSchedule } from "@/hooks/use-payment-schedule";
+import { getInstallmentDetails, type PackageType } from "@/lib/config/packages";
 import type { TeamPayment } from "@/lib/domain/models";
 
 export default function PaymentsPage() {
@@ -28,7 +31,25 @@ export default function PaymentsPage() {
     error
   } = usePaymentsByTeam(selectedTeamId || '');
 
+  // Get registration data to determine package type
+  const {
+    data: registrationData,
+    isLoading: registrationLoading
+  } = useRegistrationByTeam(selectedTeamId || '', user?.id || '');
+
   const payments = paymentsData?.payments || [];
+  const registration = registrationData?.registration;
+
+  // Get installment details based on the actual package selected
+  const packageType = registration?.selectedPackage as PackageType;
+  const installmentDetails = packageType ? getInstallmentDetails(packageType) : null;
+
+  // Get real payment dates from Stripe
+  const { nextPayment } = usePaymentSchedule({
+    packageType,
+    paymentMethod: "installments",
+    enabled: !!packageType && !!installmentDetails,
+  });
 
   const getStatusIcon = (status: TeamPayment["status"]) => {
     switch (status) {
@@ -142,7 +163,7 @@ export default function PaymentsPage() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || registrationLoading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-6">
@@ -181,7 +202,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Installment Status */}
-      {payments.some((p) => p.paymentType === "installment") && (
+      {payments.some((p) => p.paymentType === "installment") && installmentDetails && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Installment Plan Status</CardTitle>
@@ -191,11 +212,11 @@ export default function PaymentsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-blue-900">
-                    8-Month Payment Plan
+                    {installmentDetails.installments}-Payment Plan ({installmentDetails.description})
                   </h4>
                   <p className="text-sm text-blue-700">
-                    Payments of $437/month • Next payment:{" "}
-                    {new Date(
+                    Payments of ${installmentDetails.installmentAmount}/month • Next payment:{" "}
+                    {nextPayment || new Date(
                       Date.now() + 30 * 24 * 60 * 60 * 1000
                     ).toLocaleDateString()}
                   </p>
@@ -209,7 +230,7 @@ export default function PaymentsPage() {
                           p.status === "paid"
                       ).length
                     }
-                    /8
+                    /{installmentDetails.installments}
                   </div>
                   <div className="text-sm text-blue-700">payments made</div>
                 </div>

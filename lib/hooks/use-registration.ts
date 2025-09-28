@@ -366,6 +366,33 @@ export function useLinkStripeSession() {
   });
 }
 
+// Get registration data by team ID (for dashboard package display)
+export function useRegistrationByTeam(teamId: string, userId: string) {
+  return useQuery({
+    queryKey: ['registrations', 'team', teamId],
+    queryFn: async (): Promise<{ registration: { selectedPackage: string } | null }> => {
+      const response = await fetch(`/api/teams/user-teams?userId=${userId}&teamId=${teamId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch team registration');
+      }
+      const data = await response.json();
+
+      // Extract the registration data from the team data
+      if (data && data.length > 0) {
+        return {
+          registration: {
+            selectedPackage: data[0].selected_package
+          }
+        };
+      }
+
+      return { registration: null };
+    },
+    enabled: !!teamId && !!userId,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+}
+
 // Delete a registration (admin only)
 export function useDeleteRegistration() {
   const queryClient = useQueryClient();

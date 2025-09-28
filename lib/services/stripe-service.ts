@@ -244,10 +244,88 @@ export class StripeService {
   }
 
   /**
+   * Get upcoming payment dates for subscription or calculate for new subscription
+   */
+  async getUpcomingPaymentDates(options: {
+    subscriptionId?: string;
+    packageType?: string;
+    startDate?: Date;
+  }): Promise<{ dates: string[], nextPayment: string | null }> {
+    try {
+      if (options.subscriptionId) {
+        // Get real dates from existing subscription
+        const subscription = await this.getSubscription(options.subscriptionId);
+        return this.calculateDatesFromSubscription(subscription);
+      } else if (options.packageType) {
+        // Calculate preview dates for checkout
+        return this.calculatePreviewDates(options.packageType, options.startDate);
+      }
+
+      return { dates: [], nextPayment: null };
+    } catch (error) {
+      console.error('Error getting upcoming payment dates:', error);
+      return { dates: [], nextPayment: null };
+    }
+  }
+
+  /**
    * Extract metadata from webhook event
    */
   extractEventMetadata(event: Stripe.Event): Record<string, string> {
     const object = event.data.object as any;
     return object.metadata || {};
+  }
+
+  // Private helper methods for payment date calculation
+  private calculateDatesFromSubscription(subscription: Stripe.Subscription): { dates: string[], nextPayment: string | null } {
+    const currentPeriodEnd = subscription.current_period_end * 1000; // Convert to milliseconds
+    const dates: string[] = [];
+    const nextPaymentDate = new Date(currentPeriodEnd);
+
+    // Add next payment date
+    dates.push(this.formatPaymentDate(nextPaymentDate));
+
+    // Add subsequent monthly payments (up to 3 future payments for display)
+    for (let i = 1; i < 3; i++) {
+      const futureDate = new Date(nextPaymentDate);
+      futureDate.setMonth(futureDate.getMonth() + i);
+      dates.push(this.formatPaymentDate(futureDate));
+    }
+
+    return {
+      dates,
+      nextPayment: this.formatPaymentDate(nextPaymentDate)
+    };
+  }
+
+  private calculatePreviewDates(packageType: string, startDate?: Date): { dates: string[], nextPayment: string | null } {
+    const { getInstallmentDetails } = require('@/lib/config/packages');
+    const installmentDetails = getInstallmentDetails(packageType);
+
+    if (!installmentDetails) {
+      return { dates: [], nextPayment: null };
+    }
+
+    const dates: string[] = [];
+    const baseDate = startDate || new Date();
+
+    // Generate dates for each installment (skip first payment as it's "today")
+    for (let i = 1; i < installmentDetails.installments; i++) {
+      const paymentDate = new Date(baseDate);
+      paymentDate.setMonth(paymentDate.getMonth() + i);
+      dates.push(this.formatPaymentDate(paymentDate));
+    }
+
+    const nextPayment = dates.length > 0 ? dates[0] : null;
+
+    return { dates, nextPayment };
+  }
+
+  private formatPaymentDate(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   }
 }

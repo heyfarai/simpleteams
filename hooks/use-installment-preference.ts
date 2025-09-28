@@ -19,7 +19,14 @@ export function useInstallmentPreference(packageType: PackageType, userId?: stri
   // Load preference from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(storageKey);
+      let stored = localStorage.getItem(storageKey);
+
+      // If no preference found and we're using a user-specific key,
+      // try the generic key as fallback (for cross-auth-state compatibility)
+      if (!stored && userId) {
+        stored = localStorage.getItem(STORAGE_KEY);
+      }
+
       if (stored) {
         const preferences: InstallmentPreferences = JSON.parse(stored);
         setIsInstallmentEnabled(preferences[packageType] ?? false);
@@ -29,7 +36,7 @@ export function useInstallmentPreference(packageType: PackageType, userId?: stri
     } finally {
       setIsLoading(false);
     }
-  }, [storageKey, packageType]);
+  }, [storageKey, packageType, userId]);
 
   // Save preference to localStorage
   const setInstallmentPreference = (enabled: boolean) => {

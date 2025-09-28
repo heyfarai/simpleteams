@@ -66,7 +66,7 @@ export const getPackageConfig = (): Record<PackageType, PackageConfig> => {
       installments: {
         enabled: true,
         installments: 4,
-        installmentPriceId: 'price_1SAdMiIYuurzinGII9aloGAw', // $437 CAD monthly (4 payments)
+        installmentPriceId: 'price_1SC5UQIYuurzinGIN6XnD1as', // $948.75 CAD monthly (4 payments)
         description: '4 monthly payments'
       }
     },
@@ -78,7 +78,7 @@ export const getPackageConfig = (): Record<PackageType, PackageConfig> => {
       installments: {
         enabled: true,
         installments: 4,
-        installmentPriceId: 'price_TBD_4_MONTH', // To be created in Stripe
+        installmentPriceId: 'price_1SC5QKIYuurzinGIpsf8ANFG', // $449 CAD monthly (4 payments)
         description: '4 monthly payments'
       }
     },

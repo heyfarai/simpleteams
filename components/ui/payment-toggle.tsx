@@ -19,7 +19,7 @@ export function PaymentToggle({
   leftLabel,
   rightLabel,
   badgeText,
-  className
+  className,
 }: PaymentToggleProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!disabled) {
@@ -52,16 +52,20 @@ export function PaymentToggle({
           onChange={handleInputChange}
           disabled={disabled}
         />
-        <span className={cn(
-          "absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out",
-          "peer-checked:bg-blue-600 dark:bg-neutral-700 dark:peer-checked:bg-blue-500",
-          "peer-disabled:opacity-50 peer-disabled:pointer-events-none"
-        )}></span>
-        <span className={cn(
-          "absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs",
-          "transition-transform duration-200 ease-in-out peer-checked:translate-x-full",
-          "dark:bg-neutral-400 dark:peer-checked:bg-white"
-        )}></span>
+        <span
+          className={cn(
+            "absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out",
+            "peer-checked:bg-primary dark:bg-neutral-700 dark:peer-checked:bg-primary",
+            "peer-disabled:opacity-50 peer-disabled:pointer-events-none"
+          )}
+        ></span>
+        <span
+          className={cn(
+            "absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs",
+            "transition-transform duration-200 ease-in-out peer-checked:translate-x-full",
+            "dark:bg-neutral-400 dark:peer-checked:bg-white"
+          )}
+        ></span>
       </label>
 
       <label

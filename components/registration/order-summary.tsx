@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard } from "lucide-react";
-import { getInstallmentDetails } from "@/lib/config/packages";
+import { getInstallmentDetails, type PackageDetails } from "@/lib/config/packages";
+import { usePaymentSchedule } from "@/hooks/use-payment-schedule";
 import type { FormData } from "@/hooks/use-registration-form";
 import type { Division } from "@/lib/domain/models";
-import type { PackageDetails } from "../utils/packageDetails";
 
 interface OrderSummaryProps {
   formData: FormData;
@@ -14,7 +14,7 @@ interface OrderSummaryProps {
   isFormValid: boolean;
   isSubmitting: boolean;
   onSubmit: () => void;
-  paymentMethod?: 'full' | 'installments';
+  paymentMethod?: "full" | "installments";
 }
 
 export function OrderSummary({
@@ -24,22 +24,29 @@ export function OrderSummary({
   isFormValid,
   isSubmitting,
   onSubmit,
-  paymentMethod = 'full',
+  paymentMethod = "full",
 }: OrderSummaryProps) {
-  // Get installment details from config for full-season package
-  const installmentDetails = formData.selectedPackage === 'full-season'
-    ? getInstallmentDetails('full-season')
+  // Get installment details from config for any package that supports installments
+  const installmentDetails = formData.selectedPackage
+    ? getInstallmentDetails(formData.selectedPackage as any)
     : null;
+
+  // Get real payment dates from Stripe
+  const { paymentDates } = usePaymentSchedule({
+    packageType: formData.selectedPackage as any,
+    paymentMethod,
+  });
+
   return (
     <div className="sticky top-8">
-      <Card className="bg-black text-white">
+      <div className="p-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-0">
             <CreditCard className="h-5 w-5 mr-2" />
             Order Summary
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 md:space-y-6 px-6">
+        <CardContent className="space-y-2 md:space-y-4 px-6">
           {/* Package Details */}
           {formData.selectedPackage && (
             <div className="space-y-3">
@@ -106,39 +113,55 @@ export function OrderSummary({
           </div>
 
           {/* Installment Schedule */}
-          {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && installmentDetails && (
-            <div className="space-y-3 pt-4 border-t border-primary/20">
+          {paymentMethod === "installments" && installmentDetails && (
+            <div className="space-y-3 pt-4 border-t border-primary/10">
               <h4 className="font-medium">Payment Schedule</h4>
               <div className="text-sm space-y-2">
                 <div className="flex justify-between">
                   <span>Today</span>
-                  <span className="font-bold">${installmentDetails.installmentAmount.toLocaleString()}</span>
+                  <span className="font-bold">
+                    ${installmentDetails.installmentAmount.toLocaleString()}
+                  </span>
                 </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Months 2-{installmentDetails.installments}</span>
-                  <span>${installmentDetails.installmentAmount.toLocaleString()}/month</span>
-                </div>
+                {paymentDates.length > 0 ? (
+                  paymentDates.map((date, index) => (
+                    <div key={index} className="flex justify-between">
+                      <span>{date}</span>
+                      <span>
+                        ${installmentDetails.installmentAmount.toLocaleString()}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex justify-between ">
+                    <span>Months 2-{installmentDetails.installments}</span>
+                    <span>
+                      ${installmentDetails.installmentAmount.toLocaleString()}
+                      /month
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* Total */}
-          <div className="pt-6 border-t border-primary/20">
+          <div className="pt-6 border-t border-primary/10">
             <div className="flex justify-between items-center">
               <span className="font-medium">
-                {paymentMethod === 'installments' && formData.selectedPackage === 'full-season'
-                  ? 'Due Today'
-                  : 'Total'}
+                {paymentMethod === "installments" && installmentDetails
+                  ? "Due Today"
+                  : "Total"}
               </span>
               <span className="font-bold">
-                {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && installmentDetails
+                {paymentMethod === "installments" && installmentDetails
                   ? `$${installmentDetails.installmentAmount.toLocaleString()}`
                   : `$${packageDetails.amount.toLocaleString()}`}
               </span>
             </div>
-            {paymentMethod === 'installments' && formData.selectedPackage === 'full-season' && (
-              <div className="text-sm text-gray-300 text-right mt-1">
-                Total: ${packageDetails.amount.toLocaleString()}
+            {paymentMethod === "installments" && installmentDetails && (
+              <div className="text-sm text-right mt-1">
+                Total: ${installmentDetails.totalAmount.toLocaleString()}
               </div>
             )}
           </div>
@@ -152,9 +175,9 @@ export function OrderSummary({
           >
             {isSubmitting
               ? "Processing..."
-              : paymentMethod === 'installments' && formData.selectedPackage === 'full-season'
-                ? "Start Installment Plan"
-                : "Complete Registration & Pay"}
+              : paymentMethod === "installments" && installmentDetails
+              ? "Start Installment Plan"
+              : "Complete Registration & Pay"}
           </Button>
 
           <p className="text-xs text-gray-500 text-center">
@@ -162,7 +185,7 @@ export function OrderSummary({
             conditions.
           </p>
         </CardContent>
-      </Card>
+      </div>
     </div>
   );
 }

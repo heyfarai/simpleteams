@@ -205,7 +205,7 @@
 
   .heading-highlight::before {
     content: "";
-    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-secondary w-full h-[33%] -z-[1];
+    @apply hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-secondary w-full h-[33%] -z-[1];
   }
 
   .heading-highlight-container {
