@@ -174,16 +174,15 @@ Check off completed items in this doc as you make progress.
 
 - [ ] **Session-Based UI Components (PHASE 2)**
 
-  - [ ] Game filtering by session in game lists
+  - ✅ Game filtering by session in game lists
   - [ ] Team profile showing sessions and games per session
-  - [ ] Admin game scheduling with session-based team eligibility
+  - ✅ Admin game scheduling with session-based team eligibility
   - [ ] Session management interface for league ops
 
 - [ ] **Advanced Session Features (PHASE 2)**
 
   - [ ] Session capacity limits and waitlist management
   - [ ] Game limits per team per session (12 max enforcement)
-  - [ ] Package upgrade/downgrade mid-season
   - [ ] Complex eligibility rules based on division/skill level
   - [ ] Session-specific venue preferences and scheduling algorithms
 
@@ -196,7 +195,7 @@ Check off completed items in this doc as you make progress.
 
 - [ ] **General Infrastructure (ONGOING)**
   - ✅ Wire up and migrate Games to supabase
-  - [ ] Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
+  - ✅ Create Data Hooks (`use-payments.ts`, `use-registration.ts`)
   - [ ] Update Components (remove direct Supabase calls)
   - [ ] In dashboard expose url for selected team /dashboard/[team]/[roster]
   - [ ] On checkout success screen, link to the newly created team /dashboard/[team]/[roster]
