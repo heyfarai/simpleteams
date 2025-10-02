@@ -3,7 +3,7 @@
 import { TeamFilterState } from "@/lib/types/teams";
 import { SeasonTabs } from "@/components/filters/season-tabs";
 
-import { SanitySeason } from '@/lib/sanity/types';
+import { SanitySeason } from '@simpleteams/types';
 
 type TeamSeason = SanitySeason;
 

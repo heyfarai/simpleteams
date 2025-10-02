@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { healthCheck } from '@/lib/health-check';
+import { healthCheck } from '@simpleteams/database';
 
 export async function GET() {
   const health = await healthCheck();

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { league } from '@/lib/services/league';
+import { league } from '@simpleteams/services'; // was: @simpleteams/services/league';
 import type { Season } from '../domain/models';
 
 // React Query hook for current season using league service

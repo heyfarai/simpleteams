@@ -25,8 +25,8 @@ import {
   Shield
 } from 'lucide-react'
 import { useSelectedTeam } from '@/components/dashboard/team-selector'
-import { supabase } from '@/lib/supabase/client-safe'
-import type { Database } from '@/lib/supabase/database.types'
+import { supabase } from '@simpleteams/database'
+import type { Database } from '@simpleteams/database'
 import { TeamLogoUpload } from '@/components/team-logo-upload'
 
 type Team = Database['public']['Tables']['teams']['Row']

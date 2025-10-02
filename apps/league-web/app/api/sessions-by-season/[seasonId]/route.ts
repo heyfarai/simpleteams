@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sessionService } from '@/lib/services/session-service';
+import { sessionService } from '@simpleteams/services'; // was: @simpleteams/services/session-service';
 
 export async function GET(
   request: NextRequest,

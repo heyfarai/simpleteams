@@ -1,5 +1,5 @@
 {
-  "extends": "@simpleteams/config/tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"

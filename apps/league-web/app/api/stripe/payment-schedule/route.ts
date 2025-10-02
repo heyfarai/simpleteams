@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { StripeService } from '@/lib/services/stripe-service';
+import { StripeService } from '@simpleteams/services'; // was: @simpleteams/services/stripe-service';
 
 export async function GET(request: NextRequest) {
   try {

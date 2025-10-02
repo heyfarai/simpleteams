@@ -1,4 +1,4 @@
-import { SanitySeason } from '@/lib/sanity/types';
+import { SanitySeason } from '@simpleteams/types';
 
 export interface Season {
   id: string; // maps to _id

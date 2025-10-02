@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { paymentRepository } from '@/lib/repositories/factory';
-import { PaymentService } from '@/lib/services/payment-service';
-import type { PaymentStatus, PaymentType } from '@/lib/domain/models';
+import { paymentRepository } from '@simpleteams/database';
+import { PaymentService } from '@simpleteams/services'; // was: @simpleteams/services/payment-service';
+import type { PaymentStatus, PaymentType } from '@simpleteams/types';
 
 const paymentService = new PaymentService(paymentRepository);
 

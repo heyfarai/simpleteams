@@ -1,6 +1,6 @@
 // Stripe service - handles all Stripe-related business logic
 import Stripe from 'stripe';
-import { getPackageConfig, isInstallmentAvailable, type PackageType } from '@/lib/config/packages';
+import { getPackageConfig, isInstallmentAvailable, type PackageType } from '@simpleteams/config';
 
 export interface StripeCheckoutOptions {
   packageType: PackageType;

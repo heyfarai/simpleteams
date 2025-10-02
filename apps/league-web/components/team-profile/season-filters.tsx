@@ -2,7 +2,7 @@
 
 import { SeasonSelect } from "@/components/filters/season-select";
 
-import { Season } from '@/lib/utils/season-filters';
+import { Season } from '@simpleteams/config';
 
 interface SeasonFiltersProps {
   selectedSeason: string;

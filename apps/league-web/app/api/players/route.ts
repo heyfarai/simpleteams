@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@sanity/client'
-import { getCurrentUser } from '@/lib/supabase/auth'
+import { getCurrentUser } from '@simpleteams/database'
 
 // Server-side Sanity client with write permissions
 const sanity = createClient({

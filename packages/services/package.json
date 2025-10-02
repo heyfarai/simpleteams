@@ -10,11 +10,10 @@
   "dependencies": {
     "@simpleteams/database": "workspace:*",
     "@simpleteams/types": "workspace:*",
-    "stripe": "^18.5.0",
-    "postmark": "^4.0.5"
+    "@supabase/supabase-js": "^2.45.4",
+    "stripe": "^17.3.1"
   },
   "devDependencies": {
-    "@types/node": "^22",
     "typescript": "^5"
   }
 }

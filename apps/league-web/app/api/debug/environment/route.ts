@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUrlDebugInfo } from '@/lib/utils/url-utils';
+import { getUrlDebugInfo } from '@simpleteams/config';
 
 export async function GET() {
   const debugInfo = getUrlDebugInfo();

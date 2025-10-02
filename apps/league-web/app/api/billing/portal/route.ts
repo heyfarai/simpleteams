@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BillingService } from "@/lib/services/billing-service";
-import { PaymentService } from "@/lib/services/payment-service";
-import { StripeService } from "@/lib/services/stripe-service";
-import { paymentRepository } from "@/lib/repositories/factory";
+import { BillingService, PaymentService, StripeService } from "@simpleteams/services";
+import { paymentRepository } from "@simpleteams/database";
 
 // Create service instances
 const paymentService = new PaymentService(paymentRepository);

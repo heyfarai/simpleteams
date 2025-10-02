@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut } from '@/lib/supabase/auth';
+import { signOut } from '@simpleteams/database';
 
 export default function SignOutPage() {
   const router = useRouter();

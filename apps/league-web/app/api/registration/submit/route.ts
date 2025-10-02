@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase/client-safe";
-import { getReturnUrl } from '@/lib/utils/url-utils';
-import { getPackageConfig, isInstallmentAvailable, type PackageType } from '@/lib/config/packages';
-import { registrationService } from '@/lib/services';
-import { StripeService } from '@/lib/services/stripe-service';
+import { getReturnUrl } from '@simpleteams/config';
+import { getPackageConfig, isInstallmentAvailable, type PackageType } from '@simpleteams/config';
+import { registrationService } from '@simpleteams/services';
+import { StripeService } from '@simpleteams/services'; // was: @simpleteams/services/stripe-service';
 
 // Initialize Stripe service
 const stripeService = new StripeService(process.env.STRIPE_SECRET_KEY!);

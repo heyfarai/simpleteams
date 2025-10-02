@@ -1,7 +1,7 @@
 // Updated services to use Supabase repositories
-import { SupabaseTeamRepository } from '@/lib/repositories/supabase-team-repository';
-import { SupabaseSeasonRepository } from '@/lib/repositories/supabase-season-repository';
-import { SupabaseGameRepository } from '@/lib/repositories/supabase-game-repository';
+import { SupabaseTeamRepository } from '@simpleteams/database';
+import { SupabaseSeasonRepository } from '@simpleteams/database';
+import { SupabaseGameRepository } from '@simpleteams/database';
 import type {
   Team,
   Season,
@@ -10,7 +10,7 @@ import type {
   Division,
   Player,
   PlayerStats
-} from '@/lib/domain/models';
+} from '@simpleteams/types';
 
 // Team Service using Supabase
 export class SupabaseTeamService {

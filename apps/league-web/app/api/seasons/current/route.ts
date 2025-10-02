@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { league } from '@/lib/services/league';
+import { league } from '@simpleteams/services'; // was: @simpleteams/services/league';
 
 export async function GET() {
   try {
