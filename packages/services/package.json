@@ -1,0 +1,20 @@
+{
+  "name": "@simpleteams/services",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@simpleteams/database": "workspace:*",
+    "@simpleteams/types": "workspace:*",
+    "stripe": "^18.5.0",
+    "postmark": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5"
+  }
+}
