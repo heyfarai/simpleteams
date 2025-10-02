@@ -18,6 +18,13 @@ export interface TeamRegistrationData {
   dashboardUrl: string;
   supportEmail: string;
   selectedSessions?: GameSession[];
+  paymentType?: 'full' | 'installment';
+  installmentDetails?: {
+    installments: number;
+    installmentAmount: number;
+    description: string;
+    nextPaymentDate?: string;
+  };
 }
 
 export interface CoachWelcomeData {
@@ -87,10 +94,25 @@ export function getTeamRegistrationConfirmationHtml(data: TeamRegistrationData):
       <ul style="margin: 0; padding-left: 20px;">
         <li><strong>Team Name:</strong> ${data.teamName}</li>
         <li><strong>Package:</strong> ${data.packageName}</li>
-        <li><strong>Amount Paid:</strong> $${data.paymentAmount.toLocaleString()}</li>
+        <li><strong>${data.paymentType === 'installment' ? 'First Payment' : 'Amount Paid'}:</strong> $${data.paymentAmount.toLocaleString()}</li>
         <li><strong>Registration ID:</strong> ${data.registrationId}</li>
       </ul>
     </div>
+
+    ${data.paymentType === 'installment' && data.installmentDetails ? `
+    <div style="background: #eff6ff; padding: 20px; border-radius: 6px; border-left: 4px solid #2563eb; margin: 25px 0;">
+      <h3 style="margin-top: 0; color: #1d4ed8;">💳 Monthly Installment Plan</h3>
+      <p style="margin: 5px 0; color: #374151;"><strong>Plan:</strong> ${data.installmentDetails.installments}-Payment Plan (${data.installmentDetails.description})</p>
+      <p style="margin: 5px 0; color: #374151;"><strong>Package Total:</strong> ${data.packagePrice}</p>
+      <p style="margin: 5px 0; color: #374151;"><strong>Monthly Payment:</strong> $${data.installmentDetails.installmentAmount.toFixed(2)}</p>
+      ${data.installmentDetails.nextPaymentDate ? `
+      <p style="margin: 5px 0; color: #374151;"><strong>Next Payment:</strong> ${data.installmentDetails.nextPaymentDate}</p>
+      ` : ''}
+      <p style="margin: 15px 0 0 0; padding: 12px; background: #dbeafe; border-radius: 4px; font-size: 14px; color: #1e40af;">
+        ℹ️ You can manage your subscription anytime from your team dashboard.
+      </p>
+    </div>
+    ` : ''}
 
     ${data.selectedSessions && data.selectedSessions.length > 0 ? `
     <div style="background: #eff6ff; padding: 20px; border-radius: 6px; border-left: 4px solid #2563eb; margin: 25px 0;">

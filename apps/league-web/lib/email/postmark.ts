@@ -1,11 +1,14 @@
 import { ServerClient } from "postmark";
 import * as nodemailer from "nodemailer";
-
+// TODO: Extract to shared library
 const POSTMARK_API_TOKEN = process.env.POSTMARK_API_TOKEN;
-const FROM_EMAIL = process.env.EMAIL_FROM || process.env.POSTMARK_FROM_EMAIL || "noreply@yourleague.com";
+const FROM_EMAIL =
+  process.env.EMAIL_FROM ||
+  process.env.POSTMARK_FROM_EMAIL ||
+  "noreply@yourleague.com";
 const FROM_NAME = "Basketball League Registration";
 
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NODE_ENV === "development";
 
 // Postmark client for production
 let postmarkClient: ServerClient | null = null;
@@ -17,8 +20,8 @@ if (POSTMARK_API_TOKEN) {
 
 // Mailpit SMTP client for development
 const mailpitTransporter = nodemailer.createTransport({
-  host: process.env.MAILPIT_SMTP_HOST || 'localhost',
-  port: parseInt(process.env.MAILPIT_SMTP_PORT || '1025'),
+  host: process.env.MAILPIT_SMTP_HOST || "localhost",
+  port: parseInt(process.env.MAILPIT_SMTP_PORT || "1025"),
   secure: false,
   tls: {
     rejectUnauthorized: false,
@@ -83,9 +86,13 @@ export async function sendBulkEmails(emails: SendEmailOptions[]) {
     if (isDevelopment) {
       // Send emails individually through Mailpit
       const results = await Promise.all(
-        emails.map(email => sendEmail(email))
+        emails.map((email) => sendEmail(email))
       );
-      console.log(`[Mailpit] Batch email sent successfully:`, results.length, 'emails');
+      console.log(
+        `[Mailpit] Batch email sent successfully:`,
+        results.length,
+        "emails"
+      );
       return results;
     } else {
       // Use Postmark batch API in production
@@ -93,21 +100,23 @@ export async function sendBulkEmails(emails: SendEmailOptions[]) {
         throw new Error("Postmark client not initialized");
       }
 
-      const emailBatch = emails.map(({ to, subject, html, text, messageStream = "outbound" }) => ({
-        From: `${FROM_NAME} <${FROM_EMAIL}>`,
-        To: to,
-        Subject: subject,
-        HtmlBody: html,
-        TextBody: text,
-        MessageStream: messageStream,
-      }));
+      const emailBatch = emails.map(
+        ({ to, subject, html, text, messageStream = "outbound" }) => ({
+          From: `${FROM_NAME} <${FROM_EMAIL}>`,
+          To: to,
+          Subject: subject,
+          HtmlBody: html,
+          TextBody: text,
+          MessageStream: messageStream,
+        })
+      );
 
       const results = await postmarkClient.sendEmailBatch(emailBatch);
-      console.log(`Batch email sent successfully:`, results.length, 'emails');
+      console.log(`Batch email sent successfully:`, results.length, "emails");
       return results;
     }
   } catch (error) {
-    console.error('Failed to send bulk emails:', error);
+    console.error("Failed to send bulk emails:", error);
     throw error;
   }
 }

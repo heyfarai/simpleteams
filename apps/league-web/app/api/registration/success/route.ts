@@ -169,6 +169,20 @@ export async function GET(request: Request) {
       }
     }
 
+    // Determine payment type based on subscription or payment intent
+    const paymentType = session.mode === 'subscription' ? 'installment' : 'full';
+
+    // Get subscription details if available
+    let subscriptionInfo = null;
+    if (session.subscription && typeof session.subscription === 'object') {
+      const subscription = session.subscription as Stripe.Subscription;
+      subscriptionInfo = {
+        id: subscription.id,
+        current_period_end: subscription.current_period_end,
+        status: subscription.status,
+      };
+    }
+
     // Return the registration data
     const registrationData = {
       team: {
@@ -187,11 +201,13 @@ export async function GET(request: Request) {
         description: payment?.description || session.metadata?.packageName || "Registration",
         status: paymentStatus,
         verified: paymentVerified,
+        payment_type: paymentType,
       },
       stripe_session: {
         id: sessionId,
         payment_status: session.payment_status,
         status: session.status,
+        subscription: subscriptionInfo,
       },
       selected_sessions: selectedSessions
     };

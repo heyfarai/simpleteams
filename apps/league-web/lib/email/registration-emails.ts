@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { sendEmail } from "./postmark";
-import { getPackageInfo } from "@/lib/config/packages";
+import { getPackageInfo, getInstallmentDetails, type PackageType } from "@/lib/config/packages";
 import {
   getTeamRegistrationConfirmationHtml,
   getCoachWelcomeHtml,
@@ -73,6 +73,19 @@ function buildEmailData(
   const dashboardUrl = `${process.env.NEXT_PUBLIC_URL}/dashboard`;
   const paymentAmount = (session.amount_total || 0) / 100;
 
+  // Determine payment type and get installment details
+  const paymentType = session.mode === 'subscription' ? 'installment' : 'full';
+  const installmentDetails = paymentType === 'installment'
+    ? getInstallmentDetails(session.metadata?.selectedPackage as PackageType)
+    : undefined;
+
+  // Get next payment date from subscription if available
+  let nextPaymentDate: string | undefined;
+  if (session.subscription && typeof session.subscription === 'object') {
+    const subscription = session.subscription as Stripe.Subscription;
+    nextPaymentDate = new Date(subscription.current_period_end * 1000).toLocaleDateString();
+  }
+
   return {
     primaryContact: {
       to: team.primary_contact_email,
@@ -93,6 +106,11 @@ function buildEmailData(
         dashboardUrl,
         supportEmail: process.env.SUPPORT_EMAIL || "support@yourleague.com",
         selectedSessions: selectedSessions || undefined,
+        paymentType,
+        installmentDetails: installmentDetails ? {
+          ...installmentDetails,
+          nextPaymentDate,
+        } : undefined,
       } as TeamRegistrationData,
     },
 

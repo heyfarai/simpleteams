@@ -14,6 +14,8 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { PaymentSummary } from "@/components/payments/payment-summary";
+import { getInstallmentDetails, type PackageType } from "@/lib/config/packages";
 
 interface GameSession {
   id: string;
@@ -41,11 +43,17 @@ interface RegistrationData {
     description: string;
     status: string;
     verified: boolean;
+    payment_type?: 'full' | 'installment';
   };
   stripe_session: {
     id: string;
     payment_status: string;
     status: string;
+    subscription?: {
+      id: string;
+      current_period_end: number;
+      status: string;
+    };
   };
   selected_sessions: GameSession[];
 }
@@ -201,7 +209,7 @@ function CheckoutSuccessContent() {
 
   return (
     <div className="min-h-screen ">
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             {isPaymentVerified ? (
@@ -311,7 +319,7 @@ function CheckoutSuccessContent() {
                         {registrationData.team.contact_email}
                       </span>
                     </div>
-                    {packageDetails && (
+                    {packageDetails && registrationData && (
                       <>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Package:</span>
@@ -319,62 +327,79 @@ function CheckoutSuccessContent() {
                             {packageDetails.name}
                           </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Amount Paid:</span>
-                          <span className="font-medium text-green-600">
-                            {packageDetails.amount}
-                          </span>
-                        </div>
+                        <PaymentSummary
+                          amount={registrationData.payment.amount}
+                          packageTotal={packageDetails.amount}
+                          paymentType={registrationData.payment.payment_type || 'full'}
+                          nextPaymentDate={
+                            registrationData.stripe_session.subscription
+                              ? new Date(registrationData.stripe_session.subscription.current_period_end * 1000).toLocaleDateString()
+                              : null
+                          }
+                          installmentDetails={getInstallmentDetails(registrationData.team.selected_package as PackageType) || undefined}
+                        />
                       </>
                     )}
 
                     {/* Selected Sessions */}
                     {registrationData.selected_sessions &&
-                     registrationData.selected_sessions.length > 0 && (
-                      <div className="mt-4 pt-4 border-t">
-                        <div className="mb-3">
-                          <span className="text-gray-600 font-medium">
-                            Your Selected Sessions ({registrationData.selected_sessions.length}):
-                          </span>
-                        </div>
-                        <div className="space-y-3">
-                          {registrationData.selected_sessions
-                            .sort((a, b) => a.sequence - b.sequence)
-                            .map((session) => (
-                            <div key={session.id} className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-3">
-                                  <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full text-sm font-medium">
-                                    {session.sequence}
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-gray-900 mb-1">
-                                      {session.name}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <Calendar className="w-4 h-4" />
-                                      <span>{formatDateRange(session.start_date, session.end_date)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                                      <Trophy className="w-3 h-3" />
-                                      <span className="capitalize">{session.type} session</span>
+                      registrationData.selected_sessions.length > 0 && (
+                        <div className="mt-4 pt-4 border-t">
+                          <div className="mb-3">
+                            <span className="text-gray-600 font-medium">
+                              Your Selected Sessions (
+                              {registrationData.selected_sessions.length}):
+                            </span>
+                          </div>
+                          <div className="space-y-3">
+                            {registrationData.selected_sessions
+                              .sort((a, b) => a.sequence - b.sequence)
+                              .map((session) => (
+                                <div
+                                  key={session.id}
+                                  className="bg-blue-50 rounded-lg p-3 border border-blue-200"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex items-start gap-3">
+                                      <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full text-sm font-medium">
+                                        {session.sequence}
+                                      </div>
+                                      <div>
+                                        <div className="font-medium text-gray-900 mb-1">
+                                          {session.name}
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                          <Calendar className="w-4 h-4" />
+                                          <span>
+                                            {formatDateRange(
+                                              session.start_date,
+                                              session.end_date
+                                            )}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                          <Trophy className="w-3 h-3" />
+                                          <span className="capitalize">
+                                            {session.type} session
+                                          </span>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              ))}
+                          </div>
+                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div className="flex items-center gap-2 text-sm text-green-700">
+                              <CheckCircle className="w-4 h-4" />
+                              <span className="font-medium">
+                                You're automatically enrolled in games for these
+                                sessions
+                              </span>
                             </div>
-                          ))}
-                        </div>
-                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                          <div className="flex items-center gap-2 text-sm text-green-700">
-                            <CheckCircle className="w-4 h-4" />
-                            <span className="font-medium">
-                              You're automatically enrolled in games for these sessions
-                            </span>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </>
                 )}
               </CardContent>

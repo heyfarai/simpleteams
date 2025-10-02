@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { sendConfirmationEmails } from "@/lib/email/registration-emails";
 import { supabase } from "../clients";
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
 export async function handleCheckoutCompleted(event: Stripe.Event) {
   const session = event.data.object as Stripe.Checkout.Session;
   const registrationId = session.metadata?.registrationId;
@@ -19,7 +21,12 @@ export async function handleCheckoutCompleted(event: Stripe.Event) {
     );
   }
 
-  return await handleRegistrationPayment(session, registrationId);
+  // Retrieve full session with subscription expanded for email details
+  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+    expand: ['subscription'],
+  });
+
+  return await handleRegistrationPayment(fullSession, registrationId);
 }
 
 async function handleRegistrationPayment(
