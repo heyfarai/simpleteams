@@ -9,7 +9,7 @@ export default function WatchPage() {
             Watch
           </h1>
           <p className="text-muted-foreground">
-            Relive the best moments from our basketball league
+            The best moments from our basketball league
           </p>
         </div>
         <MediaWatchSection />
