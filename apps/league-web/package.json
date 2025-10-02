@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "dotenv -e ../../.env.local -- next build",
+    "build": "next build",
     "dev": "dotenv -e ../../.env.local -- next dev",
     "lint": "next lint",
     "start": "next start"
