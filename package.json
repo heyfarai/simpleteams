@@ -10,24 +10,11 @@
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
-    "@types/glidejs__glide": "^3.6.6",
-    "@types/node": "^22",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "dotenv": "^17.2.2",
-    "dotenv-cli": "^10.0.0",
-    "eslint": "^9.35.0",
     "turbo": "^2.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "@tailwindcss/postcss": "^4.1.9",
-    "postcss": "^8.5",
-    "tailwindcss": "^4.1.9",
-    "tw-animate-css": "1.3.3"
   }
 }
