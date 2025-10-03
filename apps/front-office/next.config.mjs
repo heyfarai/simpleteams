@@ -6,6 +6,7 @@ const __dirname = path.dirname(__filename)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: '/front-office',
   output: 'standalone',
   outputFileTracingRoot: path.join(__dirname, '../../'),
   eslint: {
