@@ -24,17 +24,19 @@ const nextConfig = {
     }
     return config
   },
-  async rewrites() {
+  async redirects() {
     const frontOfficeUrl = process.env.FRONT_OFFICE_URL || 'http://localhost:3001'
 
     return [
       {
         source: '/front-office',
-        destination: `${frontOfficeUrl}/`,
+        destination: frontOfficeUrl,
+        permanent: false,
       },
       {
         source: '/front-office/:path*',
         destination: `${frontOfficeUrl}/:path*`,
+        permanent: false,
       },
     ]
   },
