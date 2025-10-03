@@ -71,6 +71,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.57.4
         version: 2.58.0
+      '@vercel/analytics':
+        specifier: latest
+        version: 1.5.0(next@15.5.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -108,6 +111,12 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.0(@types/react@19.2.0)
+      dotenv:
+        specifier: ^17.2.2
+        version: 17.2.3
+      dotenv-cli:
+        specifier: ^10.0.0
+        version: 10.0.0
       eslint:
         specifier: ^9
         version: 9.36.0(jiti@2.6.1)
@@ -12757,6 +12766,11 @@ snapshots:
     optionalDependencies:
       next: 15.5.4(@babel/core@7.28.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
+
+  '@vercel/analytics@1.5.0(next@15.5.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
+    optionalDependencies:
+      next: 15.5.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
 
   '@vercel/edge@1.2.2': {}
 
