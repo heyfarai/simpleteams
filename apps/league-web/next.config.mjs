@@ -24,6 +24,18 @@ const nextConfig = {
     }
     return config
   },
+  async rewrites() {
+    return [
+      {
+        source: '/front-office',
+        destination: 'http://localhost:3001/front-office',
+      },
+      {
+        source: '/front-office/:path*',
+        destination: 'http://localhost:3001/front-office/:path*',
+      },
+    ]
+  },
 }
 
 export default nextConfig
