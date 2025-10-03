@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 3001",
-    "build": "next build --turbopack",
-    "start": "next start --port 3001",
-    "lint": "eslint"
+    "build": "next build",
+    "build:local": "dotenv -e ../../.env.local -- next build",
+    "dev": "dotenv -e ../../.env.local -- next dev --port 3001",
+    "lint": "next lint",
+    "start": "next start"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
@@ -27,6 +28,7 @@
     "@simpleteams/ui": "workspace:*",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
+    "@vercel/analytics": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.544.0",
@@ -41,6 +43,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.2",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "tailwindcss": "^4",
